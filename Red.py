@@ -5,6 +5,9 @@ import numpy as np
 from scipy.fftpack import fft
 import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
+from matplotlib.patches import Ellipse
+
+from sklearn import mixture
 
 class RedClass():
 
@@ -94,7 +97,7 @@ class RedClass():
   def residuals(self,phi, A, f, y, t):
       return y - self.model(t, A, f, phi)
 
-  def findPhi(self,X,Xf):
+  def findDomFFTFeatures(self,X,Xf):
       #x, flag = leastsq(residuals, x0, args=(waveform_1, t))
       chan = X.shape[2]
       timeslots = X.shape[1]
@@ -157,6 +160,105 @@ class RedClass():
       plt.plot(xf, 2.0/N * np.abs(yf[0:N//2]))
       plt.grid()
       plt.show()
+
+  def constructDensitiesAndPlot(self,features,boundary = 592,fourier=False):
+      chan = features.shape[2]
+      pixels = features.shape[0]
+      
+      for c in range(chan):
+
+          X_veg = features[:boundary,:2,c]
+          X_bwt = features[boundary:,:2,c]
+     
+          gmm1 = mixture.GaussianMixture(n_components=1, covariance_type='full').fit(X_veg)
+          gmm2 = mixture.GaussianMixture(n_components=1, covariance_type='full').fit(X_bwt)
+
+          self.plot_results(X_veg,X_bwt,gmm1.means_[0],gmm2.means_[0],gmm1.covariances_[0],gmm2.covariances_[0],c1="red",c2="blue",fourier=fourier,chan=c) 
+ 
+  def eigsorted(self,cov):
+      vals, vecs = np.linalg.eigh(cov)
+      order = vals.argsort()[::-1]
+      return vals[order], vecs[:,order]
+        
+  def plot_results(self,X_veg,X_bwt,mean1,mean2,cov1,cov2,c1="red",c2="blue",fourier=False,chan=0):
+      plt.clf()
+      ax = plt.gca()
+      nstd = 2.0
+      
+      ##ELLIPSE 1
+      vals, vecs = self.eigsorted(cov1[:,:])
+      theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+      w, h = 2 * nstd * np.sqrt(vals)
+      ell1 = Ellipse(xy=(mean1[0], mean1[1]),
+              width=w, height=h,
+              angle=theta, edgecolor=c1,facecolor='white',fill=True,linewidth=3,zorder=1)
+      ell1.set_facecolor('none')
+      ax.add_artist(ell1)
+
+      ##ELLIPSE 2
+      vals, vecs = self.eigsorted(cov2[:,:])
+      theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+      w, h = 2 * nstd * np.sqrt(vals)
+      ell2 = Ellipse(xy=(mean2[0], mean2[1]),
+              width=w, height=h,
+              angle=theta, edgecolor=c2,facecolor='white',fill=True,linewidth=3,zorder=1)
+      ell2.set_facecolor('none')
+      ax.add_artist(ell2)
+
+      for i in range(X_veg.shape[0]):
+         #col = c1[0]
+         ax.scatter(X_veg[i,0],X_veg[i,1],c=c1,zorder=3,alpha=0.2)
+
+      for i in range(X_bwt.shape[0]):
+         #col = c2[0]
+         ax.scatter(X_bwt[i,0],X_bwt[i,1],c=c2,zorder=3,alpha=0.2)
+
+      if fourier:
+         ax.set_xlabel("$f_1$")
+         ax.set_ylabel("$f_1$")
+         if chan <> 7:
+            ax.set_title("FFT: Band "+str(chan+1))
+            plt.savefig("FFT_Band_"+str(chan+1))
+         else:
+            ax.set_title("FFT: NDVI")
+            plt.savefig("FFT_NDVI")
+      else:
+         ax.set_xlabel("PC 1")
+         ax.set_ylabel("PC 2")
+         if chan <> 7:
+            ax.set_title("PCA: Band "+str(chan+1))
+            plt.savefig("PCA_Band_"+str(chan+1))
+         else:
+            ax.set_title("PCA: NDVI")
+            plt.savefig("PCA_NDVI")
+
+  '''
+  def plot_results(X, Y_, means, covariances, index, title):
+      splot = plt.subplot(2, 1, 1 + index)
+      for i, (mean, covar, color) in enumerate(zip(means, covariances, color_iter)):
+          v, w = linalg.eigh(covar)
+          v = 2. * np.sqrt(2.) * np.sqrt(v)
+          u = w[0] / linalg.norm(w[0])
+          # as the DP will not use every component it has access to
+          # unless it needs it, we shouldn't plot the redundant
+          # components.
+          if not np.any(Y_ == i):
+             continue
+          plt.scatter(X[Y_ == i, 0], X[Y_ == i, 1], .8, color=color)
+
+          # Plot an ellipse to show the Gaussian component
+          angle = np.arctan(u[1] / u[0])
+          angle = 180. * angle / np.pi  # convert to degrees
+          ell = mpl.patches.Ellipse(mean, v[0], v[1], 180. + angle, color=color)
+          ell.set_clip_box(splot.bbox)
+          ell.set_alpha(0.5)
+          splot.add_artist(ell)
+   gmm = mixture.GaussianMixture(n_components=5, covariance_type='full').fit(X)
+   plot_results(X, gmm.predict(X), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
+   '''   
+
+      
+      
       
        
 if __name__ == "__main__":
@@ -170,22 +272,31 @@ if __name__ == "__main__":
       X,y = red_object.concatDataSets(veg,bwt)
       print(X.shape)
 
+
+      X_PCA,var_ratio = red_object.PCATransform(X)
+      print(X_PCA.shape)
+      
+      red_object.constructDensitiesAndPlot(X_PCA)
+
       '''
       XT,var_ratio = red_object.PCATransform(X)
       print(XT.shape)
       '''
-
+       
       Xf,x_f = red_object.FFTTransform(X)
 
-      Par = red_object.findPhi(X,Xf)
+      X_FFT = red_object.findDomFFTFeatures(X,Xf)
+      
+      red_object.constructDensitiesAndPlot(X_FFT,fourier=True)
 
+      '''
       ratio = red_object.FourierInfo(Xf)
       for k in range(ratio.shape[1]):
           plt.plot(np.cumsum(np.ones((ratio.shape[0],))),ratio[:,k])
 
       plt.show()
-      
-
+      '''
+       
       #red_object.FFTExample()
 
       #for k in range(var_ratio.shape[1]):
