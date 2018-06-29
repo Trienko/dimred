@@ -70,6 +70,7 @@ class RedClass():
       return X_T,var_ratio
 
   def FFTTransform(self,X):
+      #print("Performing FFT...")
       #(pixels,time,band) - X
       chan = X.shape[2]
       timeslots = X.shape[1]
@@ -83,9 +84,10 @@ class RedClass():
       #plt.grid()
       #plt.show()
 
-      for p in range(pixels):
+      for c in range(chan):
           #print("p = "+str(p))
-          for c in range(chan):
+          print("Performing FFT on channel: "+str(c))
+          for p in range(pixels):
               t_series_test = X[p,:,c]
       	      X_T[p,:,c] = fft(t_series_test)
 
@@ -98,6 +100,7 @@ class RedClass():
       return y - self.model(t, A, f, phi)
 
   def findDomFFTFeatures(self,X,Xf):
+      print("Making FFT feature Cube...")
       #x, flag = leastsq(residuals, x0, args=(waveform_1, t))
       chan = X.shape[2]
       timeslots = X.shape[1]
@@ -162,6 +165,7 @@ class RedClass():
       plt.show()
 
   def constructDensitiesAndPlot(self,features,boundary = 592,fourier=False):
+      print("Constructing densities...")
       chan = features.shape[2]
       pixels = features.shape[0]
 
@@ -323,11 +327,11 @@ if __name__ == "__main__":
 
       #CONCAT_DATASETS
       X,y = red_object.concatDataSets(veg,bwt)
-      print(X.shape)
+      #print(X.shape)
 
 
       X_PCA,var_ratio = red_object.PCATransform(X)
-      print(X_PCA.shape)
+      #print(X_PCA.shape)
       
       mean1,mean2,Sigma1,Sigma2 = red_object.constructDensitiesAndPlot(X_PCA)
 
@@ -335,7 +339,7 @@ if __name__ == "__main__":
 
       for c in xrange(X.shape[2]):
           H_PCA[c] = red_object.HD(mean1[:,c],Sigma1[:,:,c],mean2[:,c],Sigma2[:,:,c])
-      print("H_PCA = "+str(H_PCA))
+      #print("H_PCA = "+str(H_PCA))
 
       '''
       XT,var_ratio = red_object.PCATransform(X)
@@ -348,11 +352,12 @@ if __name__ == "__main__":
       
       mean1,mean2,Sigma1,Sigma2 = red_object.constructDensitiesAndPlot(X_FFT,fourier=True)
       
+      print("Computing HD ...")
       H_FFT = np.zeros((X.shape[2],),dtype=float)
 
       for c in xrange(X.shape[2]):
           H_FFT[c] = red_object.HD(mean1[:,c],Sigma1[:,:,c],mean2[:,c],Sigma2[:,:,c])
-      print("H_FFT = "+str(H_FFT))
+      #print("H_FFT = "+str(H_FFT))
 
       red_object.plotBar(H_FFT,H_PCA)
 
