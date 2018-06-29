@@ -84,7 +84,7 @@ class RedClass():
       #plt.show()
 
       for p in range(pixels):
-          print("p = "+str(p))
+          #print("p = "+str(p))
           for c in range(chan):
               t_series_test = X[p,:,c]
       	      X_T[p,:,c] = fft(t_series_test)
@@ -109,7 +109,7 @@ class RedClass():
 
       for p in range(pixels):
           for c in range(chan):
-              print("p = ",p)
+              #print("p = ",p)
               test = X[p,:,c]
               testf = np.absolute(Xf[p,:,c])*(2.0/timeslots)
               testf = np.sort(testf)
@@ -154,7 +154,7 @@ class RedClass():
       #plt.plot(x,y)
       #plt.show()
       yf = fft(y)
-      print(N//2)
+      #print(N//2)
       xf = np.linspace(0.0, 1.0/(2.0*T), N//2)
       
       plt.plot(xf, 2.0/N * np.abs(yf[0:N//2]))
@@ -164,6 +164,12 @@ class RedClass():
   def constructDensitiesAndPlot(self,features,boundary = 592,fourier=False):
       chan = features.shape[2]
       pixels = features.shape[0]
+
+      meanFinal1 = np.zeros((2,chan),dtype=float)
+      covFinal1 = np.zeros((2,2,chan),dtype=float)
+
+      meanFinal2 = np.zeros((2,chan),dtype=float)
+      covFinal2 = np.zeros((2,2,chan),dtype=float)
       
       for c in range(chan):
 
@@ -174,7 +180,38 @@ class RedClass():
           gmm2 = mixture.GaussianMixture(n_components=1, covariance_type='full').fit(X_bwt)
 
           self.plot_results(X_veg,X_bwt,gmm1.means_[0],gmm2.means_[0],gmm1.covariances_[0],gmm2.covariances_[0],c1="red",c2="blue",fourier=fourier,chan=c) 
- 
+          meanFinal1[:,c] = gmm1.means_[0]
+          meanFinal2[:,c] = gmm2.means_[0]
+          covFinal1[:,:,c] = gmm1.covariances_[0]
+          covFinal2[:,:,c] = gmm2.covariances_[0]
+      return meanFinal1,meanFinal2,covFinal1,covFinal2 
+          
+  def HD(self,mean1,Sigma1,mean2,Sigma2):
+      #print(mean1)
+      mean1 = mean1.reshape((2,1))
+      mean2 = mean2.reshape((2,1))
+      #print(mean1)
+      #print(mean1.shape)
+      #print(Sigma1.shape)
+      
+      M = (Sigma1+Sigma2)/2.0
+      u = mean1-mean2
+      
+      Minv = np.linalg.inv(M)
+      x = np.dot(np.dot(u.T,Minv),u)[0,0]*(-1)*(1.0/8.0)
+
+      detM = np.linalg.det(M)
+      det1 = np.linalg.det(Sigma1)
+      det2 = np.linalg.det(Sigma2)
+
+      num = (det1**(1.0/4.0))*(det2**(1.0/4.0))
+      den = detM**(1.0/2.0)
+      y = num/den
+
+      H = 1-y*np.exp(x)
+      return np.sqrt(H)
+
+      
   def eigsorted(self,cov):
       vals, vecs = np.linalg.eigh(cov)
       order = vals.argsort()[::-1]
@@ -256,7 +293,23 @@ class RedClass():
    gmm = mixture.GaussianMixture(n_components=5, covariance_type='full').fit(X)
    plot_results(X, gmm.predict(X), gmm.means_, gmm.covariances_, 0,'Gaussian Mixture')
    '''   
+  def plotBar(self,x1,x2):
+       plt.clf()
+       N = len(x1)
+       ind = np.arange(N)    # the x locations for the groups
+       width = 0.35       # the width of the bars: can also be len(x) sequence
 
+       p1 = plt.bar(ind, x1, width)
+       p2 = plt.bar(ind, x2, width, bottom=x1)
+
+       plt.ylabel('HD (Cumulative)')
+       plt.title('Hellinger Distance Plot')
+       plt.xticks(ind, ('1', '2', '3', '4', '5', '6', '7', 'NDVI'))
+       plt.xlabel("MODIS Bands")
+       #plt.yticks(np.arange(0, 81, 10))
+       plt.legend((p1[0], p2[0]), ('FFT', 'PCA'))
+       plt.savefig('HD.png')
+       plt.show()
       
       
       
@@ -276,7 +329,13 @@ if __name__ == "__main__":
       X_PCA,var_ratio = red_object.PCATransform(X)
       print(X_PCA.shape)
       
-      red_object.constructDensitiesAndPlot(X_PCA)
+      mean1,mean2,Sigma1,Sigma2 = red_object.constructDensitiesAndPlot(X_PCA)
+
+      H_PCA = np.zeros((X.shape[2],),dtype=float)
+
+      for c in xrange(X.shape[2]):
+          H_PCA[c] = red_object.HD(mean1[:,c],Sigma1[:,:,c],mean2[:,c],Sigma2[:,:,c])
+      print("H_PCA = "+str(H_PCA))
 
       '''
       XT,var_ratio = red_object.PCATransform(X)
@@ -287,7 +346,15 @@ if __name__ == "__main__":
 
       X_FFT = red_object.findDomFFTFeatures(X,Xf)
       
-      red_object.constructDensitiesAndPlot(X_FFT,fourier=True)
+      mean1,mean2,Sigma1,Sigma2 = red_object.constructDensitiesAndPlot(X_FFT,fourier=True)
+      
+      H_FFT = np.zeros((X.shape[2],),dtype=float)
+
+      for c in xrange(X.shape[2]):
+          H_FFT[c] = red_object.HD(mean1[:,c],Sigma1[:,:,c],mean2[:,c],Sigma2[:,:,c])
+      print("H_FFT = "+str(H_FFT))
+
+      red_object.plotBar(H_FFT,H_PCA)
 
       '''
       ratio = red_object.FourierInfo(Xf)
