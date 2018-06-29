@@ -6,6 +6,7 @@ from scipy.fftpack import fft
 import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 from matplotlib.patches import Ellipse
+from termcolor import colored
 
 from sklearn import mixture
 
@@ -62,7 +63,8 @@ class RedClass():
       var_ratio = np.zeros((timeslots,chan),dtype=float)
 
       for c in range(chan):
-          print("Running PCA on channel: "+str(c))
+          #print("Running PCA on channel: "+str(c))
+          print colored("Running PCA on channel: "+str(c),'red')
           pca = PCA(n_components=timeslots,whiten=False)
           X_T[:,:,c] = pca.fit(X[:,:,c]).transform(X[:,:,c])
           var_ratio[:,c] = np.array(pca.explained_variance_ratio_)
@@ -86,7 +88,8 @@ class RedClass():
 
       for c in range(chan):
           #print("p = "+str(p))
-          print("Performing FFT on channel: "+str(c))
+          #print("Performing FFT on channel: "+str(c))
+          print colored("Performing FFT on channel: "+str(c),'blue') 
           for p in range(pixels):
               t_series_test = X[p,:,c]
       	      X_T[p,:,c] = fft(t_series_test)
@@ -313,12 +316,13 @@ class RedClass():
        #plt.yticks(np.arange(0, 81, 10))
        plt.legend((p1[0], p2[0]), ('FFT', 'PCA'))
        plt.savefig('HD.png')
-       plt.show()
-      
-      
-      
+       plt.show()      
        
 if __name__ == "__main__":
+      
+
+      #print colored('hello', 'red'), colored('world', 'green') 
+     
       red_object = RedClass() 
      
       #LOADING DATASET
@@ -329,6 +333,7 @@ if __name__ == "__main__":
       X,y = red_object.concatDataSets(veg,bwt)
       #print(X.shape)
 
+      print colored('FIRST METHOD: PCA','red')
 
       X_PCA,var_ratio = red_object.PCATransform(X)
       #print(X_PCA.shape)
@@ -345,7 +350,7 @@ if __name__ == "__main__":
       XT,var_ratio = red_object.PCATransform(X)
       print(XT.shape)
       '''
-       
+      print colored('SECOND METHOD: FFT','blue') 
       Xf,x_f = red_object.FFTTransform(X)
 
       X_FFT = red_object.findDomFFTFeatures(X,Xf)
