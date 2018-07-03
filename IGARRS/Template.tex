@@ -77,8 +77,22 @@ via $\mathbf{Y} = \mathbf{X}\mathbf{V}$ (the dimensions of $\mathbf{Y}$ is the s
 data we simply need to remove some of the columns of $\mathbf{V}$. If we keep only the first two columns of $\mathbf{V}$ (denoted as $\mathbf{V}_2$), and we then project the data onto these two 
 principal axes we obtain $\mathbf{Y}_2 = \mathbf{X}\mathbf{V}_2$ (i.e. the dimension of $\mathbf{Y}_2$ is $n\times 2$ and the dimension of $\mathbf{V}_2$ is $t\times 2$). 
 
-\subsection{Harmonic Components}
-The two largest harmonic components associated with the time-series of each MODIS pixel were extraced for each band the MODIS time-series 
+\subsection{Harmonic Features}
+The two largest harmonic components associated with the time-series of each MODIS pixel were extraced for each band via the Fast Fourier Transform and stored 
+in the feature matrix $\mathbf{Y}_2$ (the dimension of $\mathbf{Y}_2$ is $n\times 2$). The above is realized via:
+\begin{equation}
+[\mathbf{Y}_2]_{ij} =
+\begin{cases}
+|\mathcal{F}[x_i(t)][0]|&~\textrm{if}~j=1\\
+2|\mathcal{F}[x_i(t)][f_s]|&~\textrm{if}~j=2\\
+\end{cases}
+\end{equation}
+
+\begin{equation}
+H(P,Q) = 1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\frac{1}{4}}}{|\frac{1}{2}(\mathbf{\Sigma}_1+\mathbf{\Sigma}_2)|^{\frac{1}{2}}}\exp \{-\frac{1}{8}(\mathbf{u}_1-\mathbf{u}_2)^T()^{-1}((\mathbf{u}_1-\mathbf{u}_2))\} 
+\end{equation}
+
+
 
 \section{Introduction}
 \label{sec:intro}
