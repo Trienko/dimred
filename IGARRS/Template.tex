@@ -89,9 +89,12 @@ in the feature matrix $\mathbf{Y}_2$ (the dimension of $\mathbf{Y}_2$ is $n\time
 \end{equation}
 
 \begin{equation}
-H(P,Q) = 1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\frac{1}{4}}}{|\frac{1}{2}(\mathbf{\Sigma}_1+\mathbf{\Sigma}_2)|^{\frac{1}{2}}}\exp \{-\frac{1}{8}(\mathbf{u}_1-\mathbf{u}_2)^T()^{-1}((\mathbf{u}_1-\mathbf{u}_2))\} 
+H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\frac{1}{4}}}{|\mathbf{M})|^{\frac{1}{2}}}\exp \{-\frac{1}{8}\mathbf{u}^T\mathbf{M}^{-1}\mathbf{u}\}}
 \end{equation}
 
+\begin{equation}
+\mathbf{u} = (\mathbf{u}_1-\mathbf{u_2}),~~~~\mathbf{M} = \frac{\mathbf{\Sigma}_1 + \mathbf{\Sigma}_2}{2} 
+\end{equation}
 
 
 \section{Introduction}
