@@ -12,7 +12,7 @@
 
 % Title.
 % ------
-\title{AUTHOR GUIDELINES FOR IGARSS 2018 MANUSCRIPTS}
+\title{Empirically comparing two dimensionality reduction techniques -- PCA and FFT: A settlement detection case study in the Gauteng province of South Africa}
 %
 % Single address.
 % ---------------
@@ -58,170 +58,63 @@ One, two, three, four, five
 \end{keywords}
 %
 
-\section{Preliminaries}
-\subsection{Principal Component Analysis (PCA)}
-%Let us assume that it is centered, i.e. column means have been subtracted and are now equal to zero.
-Assume that $\mathbf{X}_b$ is an $n\times t$ centered matrix (i.e. column means have been subtracted and are now equal to zero) which contains MODIS band $b$ data (to reduce clutter we will omitt the $b$ subscript in the rest of the paper), where $n$ denotes a MODIS pixel index and $t$ a time-step index. The $t\times t$ 
-covariance matrix $\mathbf{C}$ is constructed as follows
-\begin{equation}
-\mathbf{C} = \frac{\mathbf{X}^T\mathbf{X}}{n-1}. 
-\end{equation}
-We can now diagonalize $\mathbf{C}$ to obtain 
-\begin{equation}
-\mathbf{V}\mathbf{L}\mathbf{V}^T,
-\end{equation}
-where $\mathbf{L}$ is a $t\times t$ diagonal matrix containing the eigenvalues of $\mathbf{C}$, in descending order, on its diagonal and $\mathbf{V}$ is a $t\times t$ matrix 
-containing the eigenvectors associated with the eigenvalues found in $\mathbf{L}$ (each column of $\mathbf{V}$ contains an eigenvector). The eigenvectors contained in 
-$\mathbf{V}$ are also known as the prinicipal axes or directions of the data. The principal components are computed by projecting the data onto the principal axes. This is achieved 
-via $\mathbf{Y} = \mathbf{X}\mathbf{V}$ (the dimensions of $\mathbf{Y}$ is the same as $\mathbf{X}$). The $j$th principal component is located in the $j$th column of $\mathbf{Y}$. To reduce the dimensionality of our 
-data we simply need to remove some of the columns of $\mathbf{V}$. If we keep only the first two columns of $\mathbf{V}$ (denoted as $\mathbf{V}_2$), and we then project the data onto these two 
-principal axes we obtain $\mathbf{Y}_2 = \mathbf{X}\mathbf{V}_2$ (i.e. the dimension of $\mathbf{Y}_2$ is $n\times 2$ and the dimension of $\mathbf{V}_2$ is $t\times 2$). 
-
-\subsection{Harmonic Features}
-The two largest harmonic components associated with the time-series of each MODIS pixel were extraced for each band via the Fast Fourier Transform and stored 
-in the feature matrix $\mathbf{Y}_2$ (the dimension of $\mathbf{Y}_2$ is $n\times 2$). The above is realized via:
-\begin{equation}
-[\mathbf{Y}_2]_{ij} =
-\begin{cases}
-|\mathcal{F}[x_i(t)][0]|&~\textrm{if}~j=1\\
-2|\mathcal{F}[x_i(t)][f_s]|&~\textrm{if}~j=2\\
-\end{cases}
-\end{equation}
-
-\begin{equation}
-H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\frac{1}{4}}}{|\mathbf{M})|^{\frac{1}{2}}}\exp \{-\frac{1}{8}\mathbf{u}^T\mathbf{M}^{-1}\mathbf{u}\}}
-\end{equation}
-
-\begin{equation}
-\mathbf{u} = (\mathbf{u}_1-\mathbf{u_2}),~~~~\mathbf{M} = \frac{\mathbf{\Sigma}_1 + \mathbf{\Sigma}_2}{2} 
-\end{equation}
-
-
 \section{Introduction}
 \label{sec:intro}
 
-These guidelines include complete descriptions of the fonts, spacing, and
-related information for producing your proceedings manuscripts. Please follow
-them and if you have any questions, direct them to Conference Management
-Services, Inc.: Phone +1-979-846-6800 or Fax +1-979-846-6900 or email
-to \verb+papers@igarss2018.org+.
+Many dimensionality reduction techniques have been proposed in the remote sensing literature. However, there are few empirical comparison studies between the different methods
+in the literature (especially in the case of hypertemporal remote sensing data). In this paper we present a basic comparison framework which if it is extended can provide 
+a meaningful way of empirically comparing different dimensionality reduction techniques. To illustrate how this framework functions, we empirically compare two hypertemporal 
+dimensionality reduction techniques, namely PCA (Principal Component Analysis) and the Fast Fourier Transform (FFT).
 
-\section{Formatting your paper}
-\label{sec:format}
+We apply the aforementioned techniques to a hypertemporal Moderate Resolution Imaging Spectroradiometer (MODIS) dataset containing both vegetation and settlement pixels. For 
+our study area we concentrate on pixels in the Gauteng province of South Africa. Settlemet expansion is one of the most pervasive forms of landcover change in southern Africa. It is therefore of the utmost importance to be able to discern 
+between these two land cover types, especially in the case of South Africa. 
 
-All printed material, including text, illustrations, and charts, must be kept
-within a print area of 7 inches (178 mm) wide by 9 inches (229 mm) high. Do
-not write or print anything outside the print area. The top margin must be 1
-inch (25 mm), except for the title page, and the left margin must be 0.75 inch
-(19 mm).  All {\it text} must be in a two-column format. Columns are to be 3.39
-inches (86 mm) wide, with a 0.24 inch (6 mm) space between them. Text must be
-fully justified.
+PCA has been applied extensively to remote sensing data \cite{byrne1980,crist1984} and in particular to remote sensing time-series \cite{townshend1985,eastman1993,hall2003}. PCA remains a popular dimensionality reduction technique. It was recently used to analyze the spatio-temporal variability of 
+the Pantanal vegetation cover (which is the largest tropical wetland in the world) \cite{almeida2015}.  %and to determine spatio-temporal patterns between multiple time-series
 
-\section{PAGE TITLE SECTION}
-\label{sec:pagestyle}
+Harmonic features (i.e. the FFT) have also been used extensively for landcover classifiation and change detection \cite{juarez2001,jakubauskas2002}. It was recently used in a tree/grass fractional cover case study conducted in 
+the Kruger national park (South Africa) \cite{ibrahim2018}.
 
-The paper title (on the first page) should begin 1.38 inches (35 mm) from the
-top edge of the page, centered, completely capitalized, and in Times 14-point,
-boldface type.  The authors' name(s) and affiliation(s) appear below the title
-in capital and lower case letters.  Papers with multiple authors and
-affiliations may require two or more lines for this information.
+%We start the paper by discussing the dataset we used in a bit more detail. We then present the feature comparison framework. Lastly we present our results and conlcusions.
 
-\section{TYPE-STYLE AND FONTS}
-\label{sec:typestyle}
+\section{Classes, Study Area and Data Description}
+\textbf{NB:: REWRITE TO AVOID PLAGIARISM}
+The ground truth time series data is extracted from the 8
+day composite MODIS MCD43A4 BRDF (Bidirectional Re-
+flectance Distribution Function) corrected 500 m land surface
+reflectance product corresponding to a total area of approx-
+imately 230 km 2 of the Gauteng province of South Africa. 1
+The temporal acquisition rate of MODIS MCD43A4 roughly
+translates to 45 observations per year. The study area is
+illustrated in Fig. 1 [4].
 
-To achieve the best rendering in the proceedings, we
-strongly encourage you to use Times-Roman font.  In addition, this will give
-the proceedings a more uniform look.  Use a font that is no smaller than nine
-point type throughout the paper, including figure captions.
+The most prevailing form of land cover change in South
+Africa is settlement expansion. Two classes of land cover
+type are thus considered: natural vegetation and settlements,
+denoted by v and s. The focus of this paper will be on the
+classification of settlement and vegetation pixels, since settle-
+ment expansion is a relevant problem in South Africa. In this
+study the settlements class contains pixels consisting of about
+50% buildings, and 50% vegetation, whereas the vegetation
+class contains pixels with more than 90% vegetation.
 
-In nine point type font, capital letters are 2 mm high.  If you use the
-smallest point size, there should be no more than 3.2 lines/cm (8 lines/inch)
-vertically.  This is a minimum spacing; 2.75 lines/cm (7 lines/inch) will make
-the paper much more readable.  Larger type sizes require correspondingly larger
-vertical spacing.  Please do not double-space your paper.  True-Type 1 fonts
-are preferred.
+The ground truth dataset denoted by R, consists of 925
+MODIS pixels and was picked by means of (human) vi-
+sual interpretation of two high resolution Système Probatoire
+d’Observation de la Terre (SPOT) images from the year 2000
+and 2008 respectively. We selected MODIS pixels that ac-
+cording to the SPOT images did not change and had the
+appropriate percentage land cover type in a MODIS pixel
+at SPOT resolution. Each MODIS pixel contains eight time
+series (seven MODIS land bands, and Normalized Differ-
+ence Vegetation Index) with I = 368 observations (extracted
+between 2000 and 2008). The NDVI time series was com-
+puted using the first two spectral land bands. The dataset R
+is divided into the two classes: settlements (333 pixels) and
+natural vegetation (592 pixels).
 
-The first paragraph in each section should not be indented, but all the
-following paragraphs within the section should be indented as these paragraphs
-demonstrate.
-
-\section{MAJOR HEADINGS}
-\label{sec:majhead}
-
-Major headings, for example, "1. Introduction", should appear in all capital
-letters, bold face if possible, centered in the column, with one blank line
-before, and one blank line after. Use a period (".") after the heading number,
-not a colon.
-
-\subsection{Subheadings}
-\label{ssec:subhead}
-
-Subheadings should appear in lower case (initial word capitalized) in
-boldface.  They should start at the left margin on a separate line.
- 
-\subsubsection{Sub-subheadings}
-\label{sssec:subsubhead}
-
-Sub-subheadings, as in this paragraph, are discouraged. However, if you
-must use them, they should appear in lower case (initial word
-capitalized) and start at the left margin on a separate line, with paragraph
-text beginning on the following line.  They should be in italics.
-
-\section{PRINTING YOUR PAPER}
-\label{sec:print}
-
-Print your properly formatted text on high-quality, 8.5 x 11-inch white printer
-paper. A4 paper is also acceptable, but please leave the extra 0.5 inch (12 mm)
-empty at the BOTTOM of the page and follow the top and left margins as
-specified.  If the last page of your paper is only partially filled, arrange
-the columns so that they are evenly balanced if possible, rather than having
-one long column.
-
-In LaTeX, to start a new column (but not a new page) and help balance the
-last-page column lengths, you can use the command ``$\backslash$pagebreak'' as
-demonstrated on this page (see the LaTeX source below).
-
-\section{PAGE NUMBERING}
-\label{sec:page}
-
-Please do {\bf not} paginate your paper.  Page numbers, session numbers, and
-conference identification will be inserted when the paper is included in the
-proceedings.
-
-\section{ILLUSTRATIONS, GRAPHS, AND PHOTOGRAPHS}
-\label{sec:illust}
-
-% \begin{figure*}
-%   \begin{minipage}[b]{.48\linewidth}
-%   \centering
-%   \centerline{\includegraphics[width=0.45\linewidth]{./FFT1.pdf}}}
-%   \vspace{1.5cm}
-%   \centerline{(b) Results 3}\medskip
-% \end{minipage}
-% \hfill
-% \begin{minipage}[b]{0.48\linewidth}
-%   \centering
-%   \centerline{\includegraphics[width=0.45\linewidth]{./FFT1.pdf}}}
-%   \vspace{1.5cm}
-%   \centerline{(c) Result 4}\medskip
-% \end{minipage}
-% \end{figure*}
-
-Illustrations must appear within the designated margins.  They may span the two
-columns.  If possible, position illustrations at the top of columns, rather
-than in the middle or at the bottom.  Caption and number every illustration.
-All illustrations should be clear wwhen printed on a black-only printer. Color
-may be used.
-
-Since there are many ways, often incompatible, of including images (e.g., with
-experimental results) in a LaTeX document, below is an example of how to do
-this \cite{Lamp86}.
-
-% Below is an example of how to insert images. Delete the ``\vspace'' line,
-% uncomment the preceding line ``\centerline...'' and replace ``imageX.ps''
-% with a suitable PostScript file name.
-% -------------------------------------------------------------------------
-\begin{figure}[t]
+\begin{figure}[h!]
 
 % \begin{minipage}[b]{1.0\linewidth}
 %   \centering
@@ -235,65 +128,71 @@ this \cite{Lamp86}.
   \centering 
   \centerline{\epsfig{figure=PCA_Band_1-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
+  \centerline{Band 1}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=PCA_Band_2-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
+  \centerline{Band 2}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=PCA_Band_3-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
+  \centerline{Band 3}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=PCA_Band_4-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
+  \centerline{Band 4}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=PCA_Band_5-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
+  \centerline{Band 5}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=PCA_Band_6-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
+  \centerline{Band 6}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=PCA_Band_7-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
+  \centerline{Band 7}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=PCA_NDVI-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
+  \centerline{NDVI}\medskip
 \end{minipage}
 
 %
-\caption{Example of placing a figure with experimental results.}
-\label{fig:res}
+\caption{The reduced feature space obtained after running PCA on the Gauteng dataset (i.e. we plot the feature matrix $\mathbf{Y}_2$ for each MODIS band). The first
+pricinpal component is associated with the $x$-axis, while the second principal component is associated with the $y$-axis. We plotted the features using their correct labels (red for vegetation 
+and blue for settlements). The ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each landcover class. The Hellinger 
+distance between the different densities in each band were computed using Eq~. and is presented in Fig.~}
+\label{fig:density_PCA}
 %
 \end{figure}
 
-\begin{figure}[t]
+\vfill
+\pagebreak
+
+\begin{figure}[h!]
 
 % \begin{minipage}[b]{1.0\linewidth}
 %   \centering
@@ -360,39 +259,270 @@ this \cite{Lamp86}.
 \end{minipage}
 
 %
-\caption{Example of placing a figure with experimental results.}
-\label{fig:res}
+\caption{The reduced feature space obtained after running the FFT on the Gauteng dataset (i.e. we plot the feature matrix $\mathbf{Y}_2$ for each MODIS band). The mean of each pixel is associated with the $x$-axis, while the sesonal amplitude of each pixel is associated with the $y$-axis. We plotted the features using their correct labels (red for vegetation 
+and blue for settlements). The ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each landcover class. The Hellinger 
+distance between the different densities in each band were computed using Eq~. and is presented in Fig.~}
+\label{fig:density_FFT}
 %
 \end{figure}
 
+\vfill
+\pagebreak
 
-% To start a new column (but not a new page) and help balance the last-page
-% column length use \vfill\pagebreak.
-% -------------------------------------------------------------------------
-%\vfill
-%\pagebreak
+\section{Methodology}
+\label{sec:met}
+In this section we describe the proposed comparison framework in Section~\ref{}. We then discuss the two dimensionality reduction techniques we use in Section~\ref{} and Section~\ref{}. 
+We end the secction by discussing the distance metric we used the determine the seperability between the reduced feature space of the landcover classes.
 
+\subsection{Comparison Framework}
+The proposed comparison framework:
 
-\section{FOOTNOTES}
-\label{sec:foot}
+\begin{description}
+ \item[Feature Reduction] Apply the different feature reduction approaches to a hypertemporal data set (repeat for each spectral band).
+ \begin{itemize}
+  \item In this paper, we used the \textsc{scikit-learn}\footnote{http://scikit-learn.org/stable/index.html} library to run PCA on each MODIS band. We then stored the two largest principal components for each band in a feature matrix (Section~\ref{sec:PCA}). 
+  \item In this paper, we used the \textsc{numpy}\footnote{http://www.numpy.org} library to extract the mean and seasonal component out of each MODIS pixel for each band and stored the result in a feature matrix (Section~\ref{sec:fft}). 
+ \end{itemize}
+ \item[Density Estimation] Estimate the densities associated with the reduced feature space for each feature reduction method and landcover type. 
+ \begin{itemize}
+  \item In this paper, We made use of \textsc{scikit-learn} to fit Gaussian densities to the feature space of each method for each band and land cover type (considered a maximum of two features). 
+ \end{itemize}
+ \item[Hellinger Distance] Compute the Hellinger distance between the different densities fitted on the reduced feature space of each landcover type and compare to 
+ find the best dimensionality reduction technique (Section~\ref{sec:HD}). 
+\end{description}
 
-Use footnotes sparingly (or not at all!) and place them at the bottom of the
-column on the page on which they are referenced. Use Times 9-point type,
-single-spaced. To help your readers, avoid using footnotes altogether and
-include necessary peripheral observations in the text (within parentheses, if
-you prefer, as in this sentence).
+\subsection{Principal Component Analysis (PCA)}
+\label{sec:PCA}
+%Let us assume that it is centered, i.e. column means have been subtracted and are now equal to zero.
+The two largest principal components associated with the time-series of each MODIS pixel were extraced and stored in a feature matrix for each band. The above is realized
+via:
+\begin{itemize}
+ \item Let $\mathbf{X}_b$ denote an $n\times t$ centered matrix (i.e. column means have been subtracted and are now equal to zero) containing MODIS band $b$ hypertemporal data (to reduce clutter we will omitt the $b$ subscript in the rest of the paper). Moreover, assume that $n$ denotes a MODIS pixel index and that $t$ denotes a time-step index. 
+ \item Form the $t\times t$ covariance matrix $\mathbf{C}$ as follows:
+\begin{equation}
+\mathbf{C} = \frac{\mathbf{X}^T\mathbf{X}}{n-1}. 
+\end{equation}
+\item Diagnonalizing $\mathbf{C}$ results in:
+\begin{equation}
+\mathbf{V}\mathbf{L}\mathbf{V}^T,
+\end{equation}
+where $\mathbf{L}$ is a $t\times t$ diagonal matrix containing the eigenvalues of $\mathbf{C}$, in descending order, on its diagonal and $\mathbf{V}$ is a $t\times t$ matrix 
+containing the eigenvectors associated with the eigenvalues found in $\mathbf{L}$ (each column of $\mathbf{V}$ contains an eigenvector). 
+\begin{itemize}
+\item The eigenvectors contained in 
+$\mathbf{V}$ are also known as the prinicipal axes or directions of the data.
+\item The principal components are computed by projecting the data onto the principal axes.
+\end{itemize}
+\item Compute the principal components via $\mathbf{Y} = \mathbf{X}\mathbf{V}$ (the dimensions of $\mathbf{Y}$ is the same as $\mathbf{X}$). 
+\begin{itemize}
+\item The $j$th principal component is located in the $j$th column of $\mathbf{Y}$. 
+\end{itemize}
+\item Perform dimensionality reduction using $\mathbf{Y}_2 = \mathbf{X}\mathbf{V}_2$, where $\mathbf{V}_2$ denotes the matrix obtained by keeping only the first two columns of 
+$\mathbf{V}$. $\mathbf{Y}_2$ denotes the reduced $n\times 2$ feature matrix containing the first two principal components of $\mathbf{X}$.
+\end{itemize}
 
+\subsection{Harmonic Features}
+\label{sec:fft}
+The two largest harmonic components associated with the time-series of each MODIS pixel were extraced for each band via the Fast Fourier Transform and stored 
+in the feature matrix $\mathbf{Y}_2$ (the dimension of $\mathbf{Y}_2$ is $n\times 2$). The above is realized via:
+\begin{equation}
+[\mathbf{Y}_2]_{ij} =
+\begin{cases}
+|\mathcal{F}[x_i(t)][0]|&~\textrm{if}~j=1\\
+2|\mathcal{F}[x_i(t)][f_s]|&~\textrm{if}~j=2\\
+\end{cases}.
+\end{equation}
+In the above equation $x_i(t)$ denotes the time series of MODIS pixel $i$ in band $b$, $\mathcal{F}\{\}$ denotes the Fourier Transform and $fs = \frac{1}{45}$ Hz.
 
-\section{COPYRIGHT FORMS}
-\label{sec:copyright}
+\subsection{Hellinger Distance}
+\label{sec:HD}
+The Hellinger distance between $P\sim\mathcal{N}(\mathbf{u}_1,\mathbf{\Sigma}_1)$ and $Q\sim\mathcal{N}(\mathbf{u}_2,\mathbf{\Sigma}_2)$ is defined as:
+\begin{equation}
+H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\frac{1}{4}}}{|\mathbf{M}|^{\frac{1}{2}}}\exp \{-\frac{1}{8}\mathbf{u}^T\mathbf{M}^{-1}\mathbf{u}\}},
+\end{equation}
 
-You must also electronically sign the IEEE copyright transfer
-form when you submit your paper. We {\bf must} have this form
-before your paper can be sent to the reviewers or published in
-the proceedings. The copyright form is provided through the IEEE
-website for electronic signature. A link is provided upon
-submission of the manuscript to enter the IEEE Electronic
-Copyright Form system.
+\begin{equation}
+\mathbf{u} = (\mathbf{u}_1-\mathbf{u_2}),~~~~\mathbf{M} = \frac{\mathbf{\Sigma}_1 + \mathbf{\Sigma}_2}{2}. 
+\end{equation}
+
+\section{Results}
+
+We plot the reduced feature space obtained using the procedure described in Section~\ref{sec:met} in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT}. The graphs in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT} suggest that PCA outperforms the FFT method, i.e. the two 
+classes are more seperable in the reduced feature space when PCA is employed as a dimensionality reduction technique if compared to when the FFT techniques is used. This observation is confirmed 
+by Fig.~\ref{fig:HD}, which indicates that PCA performs about 1.3 times better (on average) than the FFT method. Fig.~\ref{fig:HD} also shows us that:
+\begin{itemize}
+ \item The two landcover classes are the most seperable in MODIS band 7 and NDVI. The two reduction methods, PCA and FFT, perform similarly for these two bands.
+ \item The two landcover classes are the least seperable in MODIS band 5 and 6. PCA performs significantly better than the FFT method in these two bands.
+ \item The landcover classes are somewhat seperable in MODIS bands 1, 2, 3, and 4. PCA perfroms slightly better than the FFT approach in these bands. 
+\end{itemize}
+
+...
+
+% \section{Introduction}
+% \label{sec:intro}
+% 
+% These guidelines include complete descriptions of the fonts, spacing, and
+% related information for producing your proceedings manuscripts. Please follow
+% them and if you have any questions, direct them to Conference Management
+% Services, Inc.: Phone +1-979-846-6800 or Fax +1-979-846-6900 or email
+% to \verb+papers@igarss2018.org+.
+% 
+% \section{Formatting your paper}
+% \label{sec:format}
+% 
+% All printed material, including text, illustrations, and charts, must be kept
+% within a print area of 7 inches (178 mm) wide by 9 inches (229 mm) high. Do
+% not write or print anything outside the print area. The top margin must be 1
+% inch (25 mm), except for the title page, and the left margin must be 0.75 inch
+% (19 mm).  All {\it text} must be in a two-column format. Columns are to be 3.39
+% inches (86 mm) wide, with a 0.24 inch (6 mm) space between them. Text must be
+% fully justified.
+% 
+% \section{PAGE TITLE SECTION}
+% \label{sec:pagestyle}
+% 
+% The paper title (on the first page) should begin 1.38 inches (35 mm) from the
+% top edge of the page, centered, completely capitalized, and in Times 14-point,
+% boldface type.  The authors' name(s) and affiliation(s) appear below the title
+% in capital and lower case letters.  Papers with multiple authors and
+% affiliations may require two or more lines for this information.
+% 
+% \section{TYPE-STYLE AND FONTS}
+% \label{sec:typestyle}
+% 
+% To achieve the best rendering in the proceedings, we
+% strongly encourage you to use Times-Roman font.  In addition, this will give
+% the proceedings a more uniform look.  Use a font that is no smaller than nine
+% point type throughout the paper, including figure captions.
+% 
+% In nine point type font, capital letters are 2 mm high.  If you use the
+% smallest point size, there should be no more than 3.2 lines/cm (8 lines/inch)
+% vertically.  This is a minimum spacing; 2.75 lines/cm (7 lines/inch) will make
+% the paper much more readable.  Larger type sizes require correspondingly larger
+% vertical spacing.  Please do not double-space your paper.  True-Type 1 fonts
+% are preferred.
+% 
+% The first paragraph in each section should not be indented, but all the
+% following paragraphs within the section should be indented as these paragraphs
+% demonstrate.
+% 
+% \section{MAJOR HEADINGS}
+% \label{sec:majhead}
+% 
+% Major headings, for example, "1. Introduction", should appear in all capital
+% letters, bold face if possible, centered in the column, with one blank line
+% before, and one blank line after. Use a period (".") after the heading number,
+% not a colon.
+% 
+% \subsection{Subheadings}
+% \label{ssec:subhead}
+% 
+% Subheadings should appear in lower case (initial word capitalized) in
+% boldface.  They should start at the left margin on a separate line.
+%  
+% \subsubsection{Sub-subheadings}
+% \label{sssec:subsubhead}
+% 
+% Sub-subheadings, as in this paragraph, are discouraged. However, if you
+% must use them, they should appear in lower case (initial word
+% capitalized) and start at the left margin on a separate line, with paragraph
+% text beginning on the following line.  They should be in italics.
+% 
+% \section{PRINTING YOUR PAPER}
+% \label{sec:print}
+% 
+% Print your properly formatted text on high-quality, 8.5 x 11-inch white printer
+% paper. A4 paper is also acceptable, but please leave the extra 0.5 inch (12 mm)
+% empty at the BOTTOM of the page and follow the top and left margins as
+% specified.  If the last page of your paper is only partially filled, arrange
+% the columns so that they are evenly balanced if possible, rather than having
+% one long column.
+% 
+% In LaTeX, to start a new column (but not a new page) and help balance the
+% last-page column lengths, you can use the command ``$\backslash$pagebreak'' as
+% demonstrated on this page (see the LaTeX source below).
+% 
+% \section{PAGE NUMBERING}
+% \label{sec:page}
+% 
+% Please do {\bf not} paginate your paper.  Page numbers, session numbers, and
+% conference identification will be inserted when the paper is included in the
+% proceedings.
+% 
+% \section{ILLUSTRATIONS, GRAPHS, AND PHOTOGRAPHS}
+% \label{sec:illust}
+% 
+% % \begin{figure*}
+% %   \begin{minipage}[b]{.48\linewidth}
+% %   \centering
+% %   \centerline{\includegraphics[width=0.45\linewidth]{./FFT1.pdf}}}
+% %   \vspace{1.5cm}
+% %   \centerline{(b) Results 3}\medskip
+% % \end{minipage}
+% % \hfill
+% % \begin{minipage}[b]{0.48\linewidth}
+% %   \centering
+% %   \centerline{\includegraphics[width=0.45\linewidth]{./FFT1.pdf}}}
+% %   \vspace{1.5cm}
+% %   \centerline{(c) Result 4}\medskip
+% % \end{minipage}
+% % \end{figure*}
+% 
+% Illustrations must appear within the designated margins.  They may span the two
+% columns.  If possible, position illustrations at the top of columns, rather
+% than in the middle or at the bottom.  Caption and number every illustration.
+% All illustrations should be clear wwhen printed on a black-only printer. Color
+% may be used.
+% 
+% Since there are many ways, often incompatible, of including images (e.g., with
+% experimental results) in a LaTeX document, below is an example of how to do
+% this \cite{Lamp86}.
+% 
+% % Below is an example of how to insert images. Delete the ``\vspace'' line,
+% % uncomment the preceding line ``\centerline...'' and replace ``imageX.ps''
+% % with a suitable PostScript file name.
+% % -------------------------------------------------------------------------
+% 
+% 
+% % To start a new column (but not a new page) and help balance the last-page
+% % column length use \vfill\pagebreak.
+% % -------------------------------------------------------------------------
+% %\vfill
+% %\pagebreak
+% 
+% 
+% \section{FOOTNOTES}
+% \label{sec:foot}
+% 
+% Use footnotes sparingly (or not at all!) and place them at the bottom of the
+% column on the page on which they are referenced. Use Times 9-point type,
+% single-spaced. To help your readers, avoid using footnotes altogether and
+% include necessary peripheral observations in the text (within parentheses, if
+% you prefer, as in this sentence).
+% 
+% 
+% \section{COPYRIGHT FORMS}
+% \label{sec:copyright}
+% 
+% You must also electronically sign the IEEE copyright transfer
+% form when you submit your paper. We {\bf must} have this form
+% before your paper can be sent to the reviewers or published in
+% the proceedings. The copyright form is provided through the IEEE
+% website for electronic signature. A link is provided upon
+% submission of the manuscript to enter the IEEE Electronic
+% Copyright Form system.
+
+\begin{figure}[h]
+\begin{minipage}[b]{1.0\linewidth}
+   \centering
+   \centerline{\epsfig{figure=HD-crop.pdf,width=8.5cm}}
+%   %\vspace{2.0cm}
+   %\centerline{(a) Result 1}\medskip
+ \end{minipage}
+ \caption{The Hellinger distance between the densities in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT} for the two feature reduction methods we investigated, namely PCA (orange) and FFT (blue). We also plot the difference between the two methods in green (PCA-FFT). 
+ PCA performs on average 1.3 times better than the FFT method for the Gauteng dataset.}
+\label{fig:HD}
+\end{figure}
 
 \section{REFERENCES}
 \label{sec:ref}
