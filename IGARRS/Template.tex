@@ -16,8 +16,9 @@
 %
 % Single address.
 % ---------------
-\name{Author(s) Name(s)\thanks{Thanks to XYZ agency for funding.}}
-\address{Author Affiliation(s)}
+\name{T.L. Grobler$^{\dagger}$ and W. Kleynhans$^{\star}$}
+\address{$\dagger$Dept of Mathematical Sciences, Computer Science Division, Stellenbosch University,\\ Private Bag X1, 7602 Matieland, South Africa\\
+$\star$XXX}
 %
 % For example:
 % ------------
@@ -66,13 +67,13 @@ dimensionality reduction techniques, namely PCA (Principal Component Analysis) a
 For our case study we consider a hypertemporal Moderate Resolution Imaging Spectroradiometer (MODIS) dataset containing both vegetation and settlement pixels. Our study area is located in the Gauteng province of South Africa. Settlemet expansion is one of the most pervasive forms of landcover change in southern Africa. It is therefore of the utmost importance to be able to discern 
 between these two land cover types, especially in the case of South Africa \cite{grobler2012}. 
 
-PCA has been applied extensively to remote sensing data \cite{byrne1980,crist1984} and in particular to remote sensing time-series \cite{townshend1985,eastman1993,hall2003}. PCA remains a popular dimensionality reduction technique. It was recently used to analyze the spatio-temporal variability of 
+PCA has been applied extensively to remote sensing data \cite{byrne1980,crist1984} and in particular to remote sensing time-series \cite{eastman1993,hall2003}. PCA remains a popular dimensionality reduction technique. It was recently used to analyze the spatio-temporal variability of 
 the Pantanal vegetation cover (which is the largest tropical wetland in the world) \cite{almeida2015}.  %and to determine spatio-temporal patterns between multiple time-series
 
-Harmonic features (i.e. the FFT) have also been used extensively for landcover classifiation and change detection \cite{juarez2001,jakubauskas2002}. It was recently used in a tree/grass fractional cover case study conducted in 
+Harmonic features (i.e. the FFT) have also been used extensively for landcover classification and change detection \cite{jakubauskas2002}. It was recently used in a tree/grass fractional cover case study conducted in 
 the Kruger national park (South Africa) \cite{ibrahim2018}.
 
-We start the paper by discussing the dataset we use in a bit more detail. We then present the feature extraction comparison framework. Lastly we present our results and conlcusions.
+We start the paper by discussing the dataset we considered in a bit more detail. We then present the feature extraction comparison framework. Lastly we present our results and conclusions.
 
 \section{Classes, Study Area and Data Description}
 The hypertemporal dataset that we made use of in this paper is composed of 8 day (45 obervations per year) composite MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
@@ -120,63 +121,64 @@ We selected MODIS pixels that according to the SPOT images had the appropriate p
   \centering 
   \centerline{\epsfig{figure=PCA_Band_1-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{Band 1}\medskip
+  \centerline{(a) Band 1}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=PCA_Band_2-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{Band 2}\medskip
+  \centerline{(b) Band 2}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=PCA_Band_3-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{Band 3}\medskip
+  \centerline{(c) Band 3}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=PCA_Band_4-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{Band 4}\medskip
+  \centerline{(d) Band 4}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=PCA_Band_5-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{Band 5}\medskip
+  \centerline{(e) Band 5}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=PCA_Band_6-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{Band 6}\medskip
+  \centerline{(f) Band 6}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=PCA_Band_7-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{Band 7}\medskip
+  \centerline{(g) Band 7}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=PCA_NDVI-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{NDVI}\medskip
+  \centerline{(h) NDVI}\medskip
 \end{minipage}
 
 %
 \caption{The reduced feature space obtained after running PCA on the Gauteng dataset (i.e. we plot the feature matrix $\mathbf{Y}_2$ for each MODIS band). The first
-pricinpal component is associated with the $x$-axis, while the second principal component is associated with the $y$-axis. We plotted the features using their correct labels (red for vegetation 
+principal component is associated with the $x$-axis, while the second principal component is associated with the $y$-axis. We plotted the features using their correct labels (red for vegetation 
 and blue for settlements). The ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each landcover class. The Hellinger 
-distance between the different densities in each band were computed using Eq~. and is presented in Fig.~}
+distance between the different densities in each band were computed using Eq~\ref{eq:HD} and is presented in Fig.~\ref{fig:HD}. The raw MCD43A4 data are
+digital numbers (16-bit unsigned integer values).}
 \label{fig:density_PCA}
 %
 \end{figure}
@@ -198,62 +200,63 @@ distance between the different densities in each band were computed using Eq~. a
   \centering 
   \centerline{\epsfig{figure=FFT_Band_1-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
+  \centerline{(a) Band 1}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=FFT_Band_2-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
+  \centerline{(b) Band 2}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=FFT_Band_3-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
+  \centerline{(c) Band 3}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=FFT_Band_4-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
+  \centerline{(d) Band 4}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=FFT_Band_5-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
+  \centerline{(e) Band 5}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=FFT_Band_6-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
+  \centerline{(f) Band 6}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.48\linewidth}
   \centering 
   \centerline{\epsfig{figure=FFT_Band_7-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
+  \centerline{(g) Band 7}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.48\linewidth}
   \centering
   \centerline{\epsfig{figure=FFT_NDVI-crop.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
+  \centerline{(h) NDVI}\medskip
 \end{minipage}
 
 %
-\caption{The reduced feature space obtained after running the FFT on the Gauteng dataset (i.e. we plot the feature matrix $\mathbf{Y}_2$ for each MODIS band). The mean of each pixel is associated with the $x$-axis, while the sesonal amplitude of each pixel is associated with the $y$-axis. We plotted the features using their correct labels (red for vegetation 
+\caption{The reduced feature space obtained after running the FFT on the Gauteng dataset (i.e. we plot the feature matrix $\mathbf{Y}_2$ for each MODIS band). The mean of each pixel is associated with the $x$-axis, while the seasonal amplitude of each pixel is associated with the $y$-axis. We plotted the features using their correct labels (red for vegetation 
 and blue for settlements). The ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each landcover class. The Hellinger 
-distance between the different densities in each band were computed using Eq~. and is presented in Fig.~}
+distance between the different densities in each band were computed using Eq~\ref{eq:HD} and is presented in Fig.~\ref{fig:HD}. The raw MCD43A4 data are
+digital numbers (16-bit unsigned integer values).}
 \label{fig:density_FFT}
 %
 \end{figure}
@@ -263,8 +266,8 @@ distance between the different densities in each band were computed using Eq~. a
 
 \section{Methodology}
 \label{sec:met}
-In this section we describe the proposed comparison framework in Section~\ref{sec:comp}. We then discuss the two dimensionality reduction techniques we considered in Section~\ref{sec:PCA} and Section~\ref{sec:fft}. 
-We end the section by discussing the distance metric we used to quantify the seperability between the reduced feature space of the two landcover classes.
+We describe the proposed comparison framework in Section~\ref{sec:comp}. We then discuss the two dimensionality reduction techniques we considered in Section~\ref{sec:PCA} and Section~\ref{sec:fft}. 
+We end the section by discussing the distance metric we used to quantify the separability between the two landcover classes (after feature extraction). 
 
 \subsection{Comparison Framework}
 \label{sec:comp}
@@ -287,10 +290,10 @@ The proposed comparison framework:
 \subsection{Principal Component Analysis (PCA)}
 \label{sec:PCA}
 %Let us assume that it is centered, i.e. column means have been subtracted and are now equal to zero.
-The two largest principal components associated with the time-series of each MODIS pixel were extraced and stored in a feature matrix for each band. The above is realized
+The two largest principal components associated with the time-series of each MODIS pixel were extracted and stored in a feature matrix for each band. The above is realized
 via:
 \begin{itemize}
- \item Let $\mathbf{X}_b$ denote an $n\times t$ centered matrix (i.e. column means have been subtracted and are now equal to zero) containing MODIS band $b$ hypertemporal data (to reduce clutter we will omitt the $b$ subscript in the rest of the paper). Moreover, assume that $n$ denotes a MODIS pixel index and that $t$ denotes a time-step index. 
+ \item Let $\mathbf{X}_b$ denote an $n\times t$ centered matrix (i.e. column means have been subtracted and are now equal to zero) containing MODIS band $b$ hypertemporal data (to reduce clutter we will omit the $b$ subscript in the rest of the paper). Moreover, assume that $n$ denotes a MODIS pixel index and that $t$ denotes a time-step index. 
  \item Form the $t\times t$ covariance matrix $\mathbf{C}$ as follows:
 \begin{equation}
 \mathbf{C} = \frac{\mathbf{X}^T\mathbf{X}}{n-1}. 
@@ -303,7 +306,7 @@ where $\mathbf{L}$ is a $t\times t$ diagonal matrix containing the eigenvalues o
 containing the eigenvectors associated with the eigenvalues found in $\mathbf{L}$ (each column of $\mathbf{V}$ contains an eigenvector). 
 \begin{itemize}
 \item The eigenvectors contained in 
-$\mathbf{V}$ are also known as the prinicipal axes or directions of the data.
+$\mathbf{V}$ are also known as the principal axes or directions of the data.
 \item The principal components are computed by projecting the data onto the principal axes.
 \end{itemize}
 \item Compute the principal components via $\mathbf{Y} = \mathbf{X}\mathbf{V}$ (the dimensions of $\mathbf{Y}$ is the same as $\mathbf{X}$). 
@@ -316,7 +319,7 @@ $\mathbf{V}$. $\mathbf{Y}_2$ denotes the reduced $n\times 2$ feature matrix cont
 
 \subsection{Harmonic Features}
 \label{sec:fft}
-The two largest harmonic components associated with the time-series of each MODIS pixel were extraced for each band via the Fast Fourier Transform and stored 
+The two largest harmonic components associated with the time-series of each MODIS pixel were extracted for each band via the Fast Fourier Transform and stored 
 in the feature matrix $\mathbf{Y}_2$ (the dimension of $\mathbf{Y}_2$ is $n\times 2$). The above is realized via:
 \begin{equation}
 [\mathbf{Y}_2]_{ij} =
@@ -331,6 +334,7 @@ In the above equation $x_i(t)$ denotes the time series of MODIS pixel $i$ in ban
 \label{sec:HD}
 The Hellinger distance between $P\sim\mathcal{N}(\mathbf{u}_1,\mathbf{\Sigma}_1)$ and $Q\sim\mathcal{N}(\mathbf{u}_2,\mathbf{\Sigma}_2)$ is defined as:
 \begin{equation}
+\label{eq:HD}
 H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\frac{1}{4}}}{|\mathbf{M}|^{\frac{1}{2}}}\exp \{-\frac{1}{8}\mathbf{u}^T\mathbf{M}^{-1}\mathbf{u}\}},
 \end{equation}
 
@@ -341,12 +345,12 @@ H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\
 \section{Results}
 
 We plot the reduced feature space obtained using the procedure described in Section~\ref{sec:met} in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT}. The graphs in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT} suggest that PCA outperforms the FFT method, i.e. the two 
-classes are more seperable in the reduced feature space when PCA is employed as a dimensionality reduction technique if compared to when the FFT techniques is used. This observation is confirmed 
+classes are more separable in the reduced feature space when PCA is employed as a dimensionality reduction technique if compared to when the FFT techniques is used. This observation is confirmed 
 by Fig.~\ref{fig:HD}, which indicates that PCA performs about 1.3 times better (on average) than the FFT method. Fig.~\ref{fig:HD} also shows us that:
 \begin{itemize}
- \item The two landcover classes are the most seperable in MODIS band 7 and NDVI. The two reduction methods, PCA and FFT, perform similarly for these two bands.
- \item The two landcover classes are the least seperable in MODIS band 5 and 6. PCA performs significantly better than the FFT method in these two bands.
- \item The landcover classes are somewhat seperable in MODIS bands 1, 2, 3, and 4. PCA perfroms slightly better than the FFT approach in these bands. 
+ \item The two landcover classes are the most separable in MODIS band 7 and NDVI. The two reduction methods, PCA and FFT, perform similarly for these two bands.
+ \item The two landcover classes are the least separable in MODIS band 5 and 6. PCA performs significantly better than the FFT method in these two bands.
+ \item The landcover classes are somewhat separable in MODIS bands 1, 2, 3, and 4. PCA performs slightly better than the FFT approach in these bands. 
 \end{itemize}
 
 ...
