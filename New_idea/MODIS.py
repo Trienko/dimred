@@ -9,6 +9,8 @@ from matplotlib.patches import Ellipse
 from termcolor import colored
 from sklearn import mixture
 
+M_LENGTH = 45
+
 class MODIS():
 
   def __init__(self):
@@ -51,15 +53,54 @@ class MODIS():
       y = np.vstack((yv,yb))[:,0]
  
       return X_concat,y
-  
-       
+
+  def createDictionary(self,X,num_veg_pixels=592,num_set_pixels=333):
+
+      #print(X.shape)
+
+      #X_temp = np.reshape(X,(X.shape[1],X.shape[0],X.shape[2]))
+
+      #print(X_temp.shape)
+
+      X_45 = np.array([])
+
+      start = 0
+      stop = M_LENGTH  
+   
+      while stop < 368:
+            if len(X_45) == 0:
+               X_45 = X[:,start:stop,:]
+            else:
+               X_45 = np.concatenate((X_45,X[:,start:stop,:]))
+            
+            start += M_LENGTH 
+            stop += M_LENGTH 
+            #print(stop)
+            print(start)
+
+      Y_model = {}
+
+      start = 360
+
+      for i in range(M_LENGTH):
+          temp_model = np.squeeze(X_45[:,i,:])
+          if i <= 7:
+             temp_model = np.concatenate((temp_model,np.squeeze(X[:,start+i,:])))
+          Y_model[i] = temp_model
+
+      for key in Y_model.keys():
+          print(key)
+          print(Y_model[key].shape)
+        
+      
 if __name__ == "__main__":
    m = MODIS()
    veg,bwt = m.loadDataSet(name="Gauteng_nochange.mat",province="Gauteng")
    X,y = m.concatDataSets(veg,bwt)
-   print(X.shape)
-   print(y.shape)
-
+   #print(X.shape)
+   #print(y.shape)
+   
+   m.createDictionary(X)
    
    
       
