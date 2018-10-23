@@ -56,6 +56,8 @@ class MODIS():
 
   def createDictionary(self,X,num_veg_pixels=592,num_set_pixels=333):
 
+      EXTRA_TIME = 8
+
       #print(X.shape)
 
       #X_temp = np.reshape(X,(X.shape[1],X.shape[0],X.shape[2]))
@@ -67,7 +69,7 @@ class MODIS():
       start = 0
       stop = M_LENGTH  
    
-      while stop < 368:
+      while stop < X.shape[1]:
             if len(X_45) == 0:
                X_45 = X[:,start:stop,:]
             else:
@@ -80,11 +82,11 @@ class MODIS():
 
       Y_model = {}
 
-      start = 360
+      start = X.shape[1]-EXTRA_TIME
 
       for i in range(M_LENGTH):
           temp_model = np.squeeze(X_45[:,i,:])
-          if i <= 7:
+          if i <= EXTRA_TIME-1:
              temp_model = np.concatenate((temp_model,np.squeeze(X[:,start+i,:])))
           Y_model[i] = temp_model
 
