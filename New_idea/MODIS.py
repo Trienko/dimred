@@ -54,7 +54,7 @@ class MODIS():
  
       return X_concat,y
 
-  def createDictionary(self,X,num_veg_pixels=592,num_set_pixels=333):
+  def createDictionary(self,X,y):
 
       EXTRA_TIME = 8
 
@@ -65,6 +65,7 @@ class MODIS():
       #print(X_temp.shape)
 
       X_45 = np.array([])
+      y_45 = np.array([])
 
       start = 0
       stop = M_LENGTH  
@@ -72,27 +73,37 @@ class MODIS():
       while stop < X.shape[1]:
             if len(X_45) == 0:
                X_45 = X[:,start:stop,:]
+               y_45 = np.copy(y)
             else:
                X_45 = np.concatenate((X_45,X[:,start:stop,:]))
+               y_45 = np.concatenate((y_45,y))
             
             start += M_LENGTH 
             stop += M_LENGTH 
             #print(stop)
             print(start)
 
-      Y_model = {}
+      X_model = {}
+      y_model = {}
 
       start = X.shape[1]-EXTRA_TIME
 
       for i in range(M_LENGTH):
           temp_model = np.squeeze(X_45[:,i,:])
+          temp_y = np.copy(y_45)
           if i <= EXTRA_TIME-1:
              temp_model = np.concatenate((temp_model,np.squeeze(X[:,start+i,:])))
-          Y_model[i] = temp_model
+             temp_y = np.concatenate((temp_y,y))
+          X_model[i] = temp_model
+          y_model[i] = np.copy(temp_y)
 
-      for key in Y_model.keys():
+      for key in X_model.keys():
           print(key)
-          print(Y_model[key].shape)
+          print(X_model[key].shape)
+          print(y_model[key].shape)
+
+      plt.plot(y_model[0])
+      plt.show()
         
       
 if __name__ == "__main__":
@@ -102,7 +113,7 @@ if __name__ == "__main__":
    #print(X.shape)
    #print(y.shape)
    
-   m.createDictionary(X)
+   m.createDictionary(X,y)
    
    
       
