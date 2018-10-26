@@ -1,0 +1,17 @@
+split dataset into k-folds (pixel-wise).
+
+create yearly data dictionary for each train-validation set for each fold.
+
+do a grid search for each time-step to find best hyperparameter (on each train-validation set).
+
+re-train using the entire train-vaidation set.
+
+use this model to determine the effectiveness of each fold
+
+here we can select a different model for each time-step as well. 
+
+choose model which performs best.
+
+
+
+
