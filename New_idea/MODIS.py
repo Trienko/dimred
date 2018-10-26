@@ -272,7 +272,7 @@ class MODIS():
           #   plt.show()
 
   def sequential_k_means(self,Xdict,ydict,X,y):
-      band = 7
+      band = 4
 
       temp_mean = np.zeros((2,45))
       #temp_mean[0,:] = np.mean(X[y==0,0:45,band],axis=0)
@@ -325,13 +325,31 @@ class MODIS():
       d4=0
 
       for k in range(45):
-          d1 += (yearly_mean[first_model_label[k],k]-temp_mean[0,:])**2
-          d2 += (yearly_mean[second_model_label[k],k]-temp_mean[1,:])**2
+          d1 += (yearly_mean[first_model_label[k],k]-temp_mean[0,k])**2
+          d2 += (yearly_mean[second_model_label[k],k]-temp_mean[1,k])**2
 
-          d3 += (yearly_mean[first_model_label[k],k]-temp_mean[1,:])**2
-          d4 += (yearly_mean[second_model_label[k],k]-temp_mean[0,:])**2
+          d3 += (yearly_mean[first_model_label[k],k]-temp_mean[1,k])**2
+          d4 += (yearly_mean[second_model_label[k],k]-temp_mean[0,k])**2
 
-      if d
+      if (d1+d2) <= (d3+d4):
+         overall_label_1 = 0
+         overall_label_2 = 1
+      else:
+         overall_label_1 = 1
+         overall_label_2 = 0
+
+      c = ["r","b"]
+
+      plt.plot(temp_mean[0,:],"r")
+      plt.plot(temp_mean[1,:],"b")
+      for k in range(45):
+          plt.plot(k,yearly_mean[first_model_label[k],k],c[overall_label_1]+"x")
+          plt.plot(k,yearly_mean[second_model_label[k],k],c[overall_label_2]+"o")
+      plt.show()
+      
+       
+         
+          
 
 
       
