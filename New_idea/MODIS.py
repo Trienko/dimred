@@ -156,14 +156,38 @@ class MODIS():
       X = X[:,0:45,:]
       print("K-MEANS")
       model = []
+
+      true_mean_model = []
+
       for b in range(X.shape[2]):
           model.append(KMeans(n_clusters=2, random_state=0).fit(X[:,:,b]))
-          cm = confusion_matrix(y,model[b].labels_)
-          self.plot_confusion_matrix(cm,["v","s"])
-          
+          temp_mean = np.zeros((2,X.shape[1]))
+          temp_mean[0,:] = np.mean(X[y==0,:,b],axis=0)
+          temp_mean[1,:] = np.mean(X[y==1,:,b],axis=0)
+          true_mean_model.append(temp_mean)  
+                    
           #plt.plot(model[b].cluster_centers_[0,:],"rx")
           #plt.plot(model[b].cluster_centers_[1,:],"bo")
+          #plt.plot(temp_mean[0,:],"rs")
+          #plt.plot(temp_mean[1,:],"bp")
           #plt.show()
+          
+          mod1 = np.sum(model[b].cluster_centers_[0,:] - temp_mean[0,:])**2
+          mod2 = np.sum(model[b].cluster_centers_[1,:] - temp_mean[1,:])**2 
+          
+          mod3 = np.sum(model[b].cluster_centers_[0,:] - temp_mean[1,:])**2
+          mod4 = np.sum(model[b].cluster_centers_[1,:] - temp_mean[0,:])**2
+
+          if (mod1+mod2) <= (mod3+mod4):
+             print("CORRECT LABELS")
+             cm = confusion_matrix(y,model[b].labels_)
+          else:
+             #print(str(mod1+mod2))
+             #print(str(mod3+mod4))
+             print("SWOP LABELS")
+             cm = confusion_matrix(y,np.absolute(model[b].labels_-1))
+             
+          self.plot_confusion_matrix(cm,["s","v"])
          
           #if b == 7:
           #   plt.show() 
@@ -171,20 +195,50 @@ class MODIS():
           #   #plt.plot(y,"bo",alpha=0.1)
           #   plt.show()    
 
-
   def gmm45(self,X,y):
       X = X[:,0:45,:]
       print("GMM")
       model = []
+      true_mean_model = []
+
       for b in range(X.shape[2]):
-          model.append(mixture.GaussianMixture(n_components=2,covariance_type='diag').fit(X[:,:,b]))
-          cm = confusion_matrix(y,np.absolute(model[b].predict(X[:,:,b])-1))
-          self.plot_confusion_matrix(cm,["v","s"])
+          model.append(mixture.GaussianMixture(n_components=2,covariance_type='full').fit(X[:,:,b]))
+          temp_mean = np.zeros((2,X.shape[1]))
+          temp_mean[0,:] = np.mean(X[y==0,:,b],axis=0)
+          temp_mean[1,:] = np.mean(X[y==1,:,b],axis=0)
+          true_mean_model.append(temp_mean)  
+          
+          mod1 = np.sum(model[b].means_[0,:] - temp_mean[0,:])**2
+          mod2 = np.sum(model[b].means_[1,:] - temp_mean[1,:])**2 
+          
+          mod3 = np.sum(model[b].means_[0,:] - temp_mean[1,:])**2
+          mod4 = np.sum(model[b].means_[1,:] - temp_mean[0,:])**2
+
+          print(model[b].predict(X[:,:,b]))
+
+          if (mod1+mod2) >= (mod3+mod4):
+             print("CORRECT LABELS")
+             cm = confusion_matrix(y,model[b].predict(X[:,:,b]))
+          else:
+             #print(str(mod1+mod2))
+             #print(str(mod3+mod4))
+             print("SWOP LABELS")
+             cm = confusion_matrix(y,np.absolute(model[b].predict(X[:,:,b]-1)))
+             
+          self.plot_confusion_matrix(cm,["s","v"])
+          plt.show()
+         
+
+          #cm = confusion_matrix(y,np.absolute(model[b].predict(X[:,:,b])-1))
+          #self.plot_confusion_matrix(cm,["v","s"])
           #plt.show()
 
-          #plt.plot(model[b].means_[0,:],"rx")
-          #plt.plot(model[b].means_[1,:],"bo")
-          #plt.show()
+          plt.plot(model[b].means_[0,:],"r")
+          plt.plot(model[b].means_[1,:],"b")
+          plt.plot(temp_mean[0,:],"rs")
+          plt.plot(temp_mean[1,:],"bp")
+          
+          plt.show()
          
           #if b == 7:
           #   plt.show() 
