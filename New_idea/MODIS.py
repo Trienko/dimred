@@ -11,16 +11,55 @@ from sklearn import mixture
 from sklearn.datasets import load_digits
 from sklearn.svm import SVC
 from sklearn.model_selection import validation_curve
+from sklearn.cluster import KMeans
+from sklearn.metrics import confusion_matrix
+import itertools
+from matplotlib.colors import ListedColormap
+from sklearn.mixture import GaussianMixture
 
-
-
-
+# Create color maps
+cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
+cmap_bold = ListedColormap(['#FF0000', '#00FF00', '#0000FF'])
 M_LENGTH = 45
 
 class MODIS():
 
   def __init__(self):
       pass
+
+  def plot_confusion_matrix(self,cm, classes,
+                          normalize=True,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
 
   def loadDataSet(self,name="Gauteng_nochange.mat",province="Gauteng"):
       print("Loading Dataset")
@@ -113,6 +152,47 @@ class MODIS():
 
       return X_model,y_model
 
+  def kmeans45(self,X,y):
+      X = X[:,0:45,:]
+      print("K-MEANS")
+      model = []
+      for b in range(X.shape[2]):
+          model.append(KMeans(n_clusters=2, random_state=0).fit(X[:,:,b]))
+          cm = confusion_matrix(y,model[b].labels_)
+          self.plot_confusion_matrix(cm,["v","s"])
+          
+          #plt.plot(model[b].cluster_centers_[0,:],"rx")
+          #plt.plot(model[b].cluster_centers_[1,:],"bo")
+          #plt.show()
+         
+          #if b == 7:
+          #   plt.show() 
+          #   plt.plot(model[b].labels_,"rx",alpha=0.1)
+          #   #plt.plot(y,"bo",alpha=0.1)
+          #   plt.show()    
+
+
+  def gmm45(self,X,y):
+      X = X[:,0:45,:]
+      print("GMM")
+      model = []
+      for b in range(X.shape[2]):
+          model.append(mixture.GaussianMixture(n_components=2,covariance_type='diag').fit(X[:,:,b]))
+          cm = confusion_matrix(y,np.absolute(model[b].predict(X[:,:,b])-1))
+          self.plot_confusion_matrix(cm,["v","s"])
+          #plt.show()
+
+          #plt.plot(model[b].means_[0,:],"rx")
+          #plt.plot(model[b].means_[1,:],"bo")
+          #plt.show()
+         
+          #if b == 7:
+          #   plt.show() 
+          #   plt.plot(model[b].labels_,"rx",alpha=0.1)
+          #   #plt.plot(y,"bo",alpha=0.1)
+          #   plt.show()    
+      
+
   def validtionCurveTest(self,X_model,y_model,X_old,y_old):
        from sklearn.linear_model import LogisticRegression
        '''
@@ -165,16 +245,22 @@ class MODIS():
        plt.legend(loc="best")
        plt.show()
 
+
+
 if __name__ == "__main__":
    m = MODIS()
    veg,bwt = m.loadDataSet(name="Gauteng_nochange.mat",province="Gauteng")
    X,y = m.concatDataSets(veg,bwt)
+
+   m.kmeans45(X,y)
+   m.gmm45(X,y)
+
    #print(X.shape)
    #print(y.shape)
    
-   Xdic,ydic = m.createDictionary(X,y)
+   #Xdic,ydic = m.createDictionary(X,y)
 
-   m.validtionCurveTest(Xdic,ydic,X,y)
+   #m.validtionCurveTest(Xdic,ydic,X,y)
 
    
    
