@@ -269,7 +269,74 @@ class MODIS():
           #   plt.show() 
           #   plt.plot(model[b].labels_,"rx",alpha=0.1)
           #   #plt.plot(y,"bo",alpha=0.1)
-          #   plt.show()    
+          #   plt.show()
+
+  def sequential_k_means(self,Xdict,ydict,X,y):
+      band = 7
+
+      temp_mean = np.zeros((2,45))
+      #temp_mean[0,:] = np.mean(X[y==0,0:45,band],axis=0)
+      #temp_mean[1,:] = np.mean(X[y==1,0:45,band],axis=0)
+
+      yearly_k_means = []
+
+      first_model_label = []
+      second_model_label = []
+
+      yearly_mean = np.zeros((2,45))
+
+      for key in Xdict.keys():
+          Xnew = Xdict[key]
+          ynew = ydict[key]
+          temp_mean[0,key] = np.mean(Xnew[ynew==0,band]) 
+          temp_mean[1,key] = np.mean(Xnew[ynew==1,band])
+          yearly_k_means.append(KMeans(n_clusters=2, random_state=0).fit(Xnew[:,band].reshape(-1, 1))) 
+          yearly_mean[0,key] = yearly_k_means[key].cluster_centers_[0]
+          yearly_mean[1,key] = yearly_k_means[key].cluster_centers_[1]
+
+          if key == 0:
+             first_model_label.append(0)
+             second_model_label.append(1)
+          else:
+             c1 = (yearly_mean[first_model_label[key-1],key-1]-yearly_mean[0,key])**2
+             c2 = (yearly_mean[second_model_label[key-1],key-1]-yearly_mean[0,key])**2
+             if (c1 <= c2):
+                first_model_label.append(0)
+                second_model_label.append(1)
+             else:
+                first_model_label.append(1)
+                second_model_label.append(0)
+               
+
+      
+      plt.plot(temp_mean[0,:],"r")
+      plt.plot(temp_mean[1,:],"b")
+      for k in range(45):
+          plt.plot(k,yearly_mean[first_model_label[k],k],"rx")
+          plt.plot(k,yearly_mean[second_model_label[k],k],"bo")
+      plt.show()
+
+      overall_label_1 = 0
+      overall_label_2 = 1
+
+      d1=0
+      d2=0
+      d3=0
+      d4=0
+
+      for k in range(45):
+          d1 += (yearly_mean[first_model_label[k],k]-temp_mean[0,:])**2
+          d2 += (yearly_mean[second_model_label[k],k]-temp_mean[1,:])**2
+
+          d3 += (yearly_mean[first_model_label[k],k]-temp_mean[1,:])**2
+          d4 += (yearly_mean[second_model_label[k],k]-temp_mean[0,:])**2
+
+      if d
+
+
+      
+      
+  
       
 
   def validtionCurveTest(self,X_model,y_model,X_old,y_old):
@@ -331,8 +398,11 @@ if __name__ == "__main__":
    veg,bwt = m.loadDataSet(name="Gauteng_nochange.mat",province="Gauteng")
    X,y = m.concatDataSets(veg,bwt)
 
-   m.kmeans45(X,y)
-   m.gmm45(X,y)
+   #m.kmeans45(X,y)
+   #m.gmm45(X,y)
+   
+   Xdic,ydic = m.createDictionary(X,y)
+   m.sequential_k_means(Xdic,ydic,X,y)
 
    #print(X.shape)
    #print(y.shape)
