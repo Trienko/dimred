@@ -103,7 +103,7 @@ class MODIS():
   #X - [observations,time (0-44),bands]
   #y - [observations]
   #vegetation -- 1 and settlement --- 0
-  def yearModel(self,X,y,bands=[0,1]):
+  def yearModel(self,X,y,bands=[0,1],algo="GMM"):
       
       
       X = X[:,:,bands]
@@ -115,10 +115,16 @@ class MODIS():
 
       #X_reshaped --- (observations,bands*45)
       
-      kmeans = KMeans(n_clusters=2, random_state=0)
-      kmeans.fit(X_reshaped)
-      model0 = kmeans.cluster_centers_[0,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 0 LABEL
-      model1 = kmeans.cluster_centers_[1,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 1 LABEL
+      if algo == "GMM":
+         kmeans = mixture.GaussianMixture(n_components=2)
+         kmeans.fit(X_reshaped)
+         model0 = kmeans.means_[0,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 0 LABEL
+         model1 = kmeans.means_[1,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 1 LABEL
+      else:
+         kmeans = KMeans(n_clusters=2, random_state=0)
+         kmeans.fit(X_reshaped)
+         model0 = kmeans.cluster_centers_[0,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 0 LABEL
+         model1 = kmeans.cluster_centers_[1,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 1 LABEL
 
       #--- need to align the two models ---
       #COMPUTE TRUE MEAN MODEL
@@ -135,12 +141,20 @@ class MODIS():
       if (e1+e2) < (e3+e4):
          #model 0 is settlement
          #model 1 is vegetation
-         cm = confusion_matrix(y,k_means.labels_)
+         if algo == "KMEANS":
+            cm = confusion_matrix(y,kmeans.labels_)
+         else:
+            cm = confusion_matrix(y,kmeans.predict(X_reshaped))
          return set_model,model0,veg_model,model1,cm
       else:
          #model 1 is settlement
          #model 0 is vegetation
-         cm = confusion_matrix(y,np.absolute(k_means.labels_-1)) 
+         if algo == "KMEANS":
+            cm = confusion_matrix(y,np.absolute(kmeans.labels_-1))
+         else:
+            cm = confusion_matrix(y,np.absolute(kmeans.predict(X_reshaped)-1))
+
+          
          return set_model,model1,veg_model,model0,cm
 
 
@@ -568,9 +582,31 @@ if __name__ == "__main__":
    #print(X45.shape)
    #print(y45.shape)
    #m.multi_kmeans_45(X45,y45)
+   counter = 0
+   a = 0
+   for j in range(7):
+           x1,x2,x3,x4,c = m.yearModel(X45,y45,bands=[j])
+           m.plot_confusion_matrix(c,["s","v"])
+           a += 1.0*(c[0,0]+c[1,1])/np.sum(c)
+           counter += 1
+   print("AVERAGE")
+   print(a/counter)   
 
-   x1,x2,x3,x4,c = m.yearModel(X45,y45)
-   print(c)
+   counter = 0
+   a = 0
+
+   for j in range(7):
+       for k in range((j+1),7):
+           print(str(j)+" "+str(k))
+           x1,x2,x3,x4,c = m.yearModel(X45,y45,bands=[j,k])
+           m.plot_confusion_matrix(c,["s","v"])
+           a += 1.0*(c[0,0]+c[1,1])/np.sum(c)
+           counter += 1
+
+   print("AVERAGE")
+   print(a/counter)  
+      
+   #print((c/(1.0*np.sum(c)))*100)
 
    #m.sequential_k_means(Xdic,ydic,X,y)
    
