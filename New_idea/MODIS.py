@@ -150,7 +150,117 @@ class MODIS():
       #plt.plot(y_model[0])
       #plt.show()
 
-      return X_model,y_model
+      return X_model,y_model,X_45,y_45
+
+  def multi_kmeans_45(self,X,y,bands=np.array([1,6])):
+      X = X[:,:,bands]
+
+      X_reshaped = np.squeeze(X[:,:,0])
+
+      for b in range(1,len(bands)):
+          X_reshaped = np.concatenate((X_reshaped,np.squeeze(X[:,:,b])),axis=1)
+
+      print(X_reshaped.shape)
+
+      kmeans = KMeans(n_clusters=2, random_state=0)
+      kmeans.fit(X_reshaped)
+      model1 = kmeans.cluster_centers_[0,:]
+      model2 = kmeans.cluster_centers_[1,:]
+
+      veg_model = np.mean(X_reshaped[y==1,:],axis=0)
+      set_model = np.mean(X_reshaped[y==0,:],axis=0)
+
+      print("HALLO")
+      print(veg_model.shape)
+
+      plt.plot(veg_model[:45],veg_model[45:],"b") 
+      plt.plot(set_model[:45],set_model[45:],"r") 
+ 
+      plt.plot(model1[:45],model1[45:],"rx")
+      plt.plot(model2[:45],model2[45:],"bx")
+
+      model1_reshaped = np.zeros((45,2))
+      model2_reshaped = np.zeros((45,2))     
+
+      model1_reshaped[:,0] = model1[:45]
+      model1_reshaped[:,1] = model1[45:]
+      model2_reshaped[:,0] = model2[:45]
+      model2_reshaped[:,1] = model2[45:]
+      
+      #plt.show() 
+
+      ##TEST CODE --- JUST TO ILLUSTRATE THE IDEA ---
+
+      model = []
+
+      for k in range(45):
+          model.append(KMeans(n_clusters=2, random_state=0).fit(np.squeeze(X[:,k,:])))
+          #model.append(mixture.GaussianMixture(n_components=2, random_state=0).fit(np.squeeze(X[:,k,:])))
+
+      #determine best labels
+      model1_label = np.zeros((45,),dtype=int)   
+      model2_label = np.ones((45,),dtype=int)
+
+      for k in range(45):
+          e1 = (model[k].cluster_centers_[0,0]-model1_reshaped[k,0])**2+(model[k].cluster_centers_[0,1]-model1_reshaped[k,1])**2
+          e2 = (model[k].cluster_centers_[1,0]-model2_reshaped[k,0])**2+(model[k].cluster_centers_[1,1]-model2_reshaped[k,1])**2
+
+          e3 = (model[k].cluster_centers_[1,0]-model1_reshaped[k,0])**2+(model[k].cluster_centers_[1,1]-model1_reshaped[k,1])**2
+          e4 = (model[k].cluster_centers_[0,0]-model2_reshaped[k,0])**2+(model[k].cluster_centers_[0,1]-model2_reshaped[k,1])**2
+
+          if (e1+e2) >= (e3+e4):
+             model1_label[k] = 1
+             model2_label[k] = 0
+ 
+
+      #c = ["ro","bo"]
+
+      for k in range(45):
+          plt.plot(model[k].cluster_centers_[model1_label[k],0],model[k].cluster_centers_[model1_label[k],1],"ro") 
+          plt.plot(model[k].cluster_centers_[model2_label[k],0],model[k].cluster_centers_[model2_label[k],1],"bo")
+          
+          #plt.plot(model[k].means_[0,0],model[k].means_[0,1],"gx")
+          #plt.plot(model[k].means_[1,0],model[k].means_[1,1],"mo")
+
+      #plt.show() 
+
+      model = []
+
+      for k in range(45):
+          #model.append(KMeans(n_clusters=2, random_state=0).fit(np.squeeze(X[:,k,:])))
+          model.append(mixture.GaussianMixture(n_components=2).fit(np.squeeze(X[:,k,:])))
+
+      #determine best labels
+      model1_label = np.zeros((45,),dtype=int)   
+      model2_label = np.ones((45,),dtype=int)
+
+      for k in range(45):
+          e1 = (model[k].means_[0,0]-model1_reshaped[k,0])**2+(model[k].means_[0,1]-model1_reshaped[k,1])**2
+          e2 = (model[k].means_[1,0]-model2_reshaped[k,0])**2+(model[k].means_[1,1]-model2_reshaped[k,1])**2
+
+          e3 = (model[k].means_[1,0]-model1_reshaped[k,0])**2+(model[k].means_[1,1]-model1_reshaped[k,1])**2
+          e4 = (model[k].means_[0,0]-model2_reshaped[k,0])**2+(model[k].means_[0,1]-model2_reshaped[k,1])**2
+
+          if (e1+e2) >= (e3+e4):
+             model1_label[k] = 1
+             model2_label[k] = 0
+ 
+
+      #c = ["ro","bo"]
+
+      for k in range(45):
+          #plt.plot(model[k].cluster_centers_[model1_label[k],0],model[k].cluster_centers_[model1_label[k],1],"ro") 
+          #plt.plot(model[k].cluster_centers_[model2_label[k],0],model[k].cluster_centers_[model2_label[k],1],"bo")
+          
+          plt.plot(model[k].means_[model1_label[k],0],model[k].means_[model1_label[k],1],"rs")
+          plt.plot(model[k].means_[model2_label[k],0],model[k].means_[model2_label[k],1],"bs")
+
+      plt.show()   
+
+
+
+      
+
 
   def kmeans45(self,X,y):
       X = X[:,0:45,:]
@@ -346,16 +456,6 @@ class MODIS():
           plt.plot(k,yearly_mean[first_model_label[k],k],c[overall_label_1]+"x")
           plt.plot(k,yearly_mean[second_model_label[k],k],c[overall_label_2]+"o")
       plt.show()
-      
-       
-         
-          
-
-
-      
-      
-  
-      
 
   def validtionCurveTest(self,X_model,y_model,X_old,y_old):
        from sklearn.linear_model import LogisticRegression
@@ -419,9 +519,13 @@ if __name__ == "__main__":
    #m.kmeans45(X,y)
    #m.gmm45(X,y)
    
-   Xdic,ydic = m.createDictionary(X,y)
-   m.sequential_k_means(Xdic,ydic,X,y)
+   Xdic,ydic,X45,y45 = m.createDictionary(X,y)
+   print(X45.shape)
+   print(y45.shape)
+   m.multi_kmeans_45(X45,y45)
 
+   #m.sequential_k_means(Xdic,ydic,X,y)
+   
    #print(X.shape)
    #print(y.shape)
    
