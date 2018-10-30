@@ -99,6 +99,47 @@ class MODIS():
  
       return X_concat,y
 
+  
+  #X - [observations,time (0-44),bands]
+  #y - [observations]
+  #vegetation -- 1 and settlement --- 0
+  def yearModel(self,X,y,bands=[0,1]):
+      
+      
+      X = X[:,:,bands]
+
+      X_reshaped = np.squeeze(X[:,:,0])
+
+      for b in range(1,len(bands)):
+          X_reshaped = np.concatenate((X_reshaped,np.squeeze(X[:,:,b])),axis=1)
+
+      #X_reshaped --- (observations,bands*45)
+      
+      kmeans = KMeans(n_clusters=2, random_state=0)
+      kmeans.fit(X_reshaped)
+      model0 = kmeans.cluster_centers_[0,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 0 LABEL
+      model1 = kmeans.cluster_centers_[1,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 1 LABEL
+
+      #--- need to align the two models ---
+      #COMPUTE TRUE MEAN MODEL
+      veg_model = np.mean(X_reshaped[y==1,:],axis=0).reshape((45,len(bands)))
+      set_model = np.mean(X_reshaped[y==0,:],axis=0).reshape((45,len(bands)))
+
+      #--- need to determine the label of model-0 and model-1 ---
+      e1 = np.sum(model0-set_model)**2
+      e2 = np.sum(model1-veg_model)**2
+      
+      e3 = np.sum(model1-set_model)**2
+      e4 = np.sum(model0-veg_model)**2
+      
+      if (e1+e2) < (e3+e4):
+         #model 0 is settlement
+         #model 1 is vegetation
+      else:
+         #model 1 is settlement
+         #model 0 is vegetation
+
+
   def createDictionary(self,X,y):
 
       EXTRA_TIME = 8
