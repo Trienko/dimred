@@ -135,9 +135,13 @@ class MODIS():
       if (e1+e2) < (e3+e4):
          #model 0 is settlement
          #model 1 is vegetation
+         cm = confusion_matrix(y,k_means.labels_)
+         return set_model,model0,veg_model,model1,cm
       else:
          #model 1 is settlement
          #model 0 is vegetation
+         cm = confusion_matrix(y,np.absolute(k_means.labels_-1)) 
+         return set_model,model1,veg_model,model0,cm
 
 
   def createDictionary(self,X,y):
@@ -561,9 +565,12 @@ if __name__ == "__main__":
    #m.gmm45(X,y)
    
    Xdic,ydic,X45,y45 = m.createDictionary(X,y)
-   print(X45.shape)
-   print(y45.shape)
-   m.multi_kmeans_45(X45,y45)
+   #print(X45.shape)
+   #print(y45.shape)
+   #m.multi_kmeans_45(X45,y45)
+
+   x1,x2,x3,x4,c = m.yearModel(X45,y45)
+   print(c)
 
    #m.sequential_k_means(Xdic,ydic,X,y)
    
