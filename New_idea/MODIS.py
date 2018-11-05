@@ -153,8 +153,8 @@ class MODIS():
    
 
       if len(bands) == 2:
-         plt.plot(veg_model[:,0],veg_model[:,1],"bx")
-         plt.plot(set_model[:,0],set_model[:,1],"rx")   
+         plt.plot(veg_model[:,0],veg_model[:,1],"b")
+         plt.plot(set_model[:,0],set_model[:,1],"r")   
          c = ["ro","bo"]
          for k in range(45):
              
@@ -166,8 +166,28 @@ class MODIS():
                 plt.plot(model[k].means_[1,0],model[k].means_[1,1],c[model1_label[k]])
 
 
-      plt.show()
-     
+         plt.show()
+
+      
+      #COMPUTE STD (A FIRST ATTEMPT)
+      if algo == "KMEANS":
+         d = np.zeros((45,X.shape[0]))
+         for k in range(45):
+             for p in range(X.shape[0]):
+                 d[k,p] = X[p,k,bands] - model[k].cluster_centers_[model[k].labels_[p],:] 
+         d = np.std(d,axis=0) 
+      else:
+         d = -1   
+
+      print("d = "+str(d))     
+      
+      return model, model0_label, model1_label, d  
+  
+  #1 is vegetation
+  #0 is settlement
+  ################
+  def SPRT_classifier(X,y,model,model0_label,model1_label):
+      pass
 
   #X - [observations,time (0-44),bands]
   #y - [observations]
@@ -187,8 +207,8 @@ class MODIS():
       if algo == "GMM":
          kmeans = mixture.GaussianMixture(n_components=2, random_state=0)
          kmeans.fit(X_reshaped)
-         model0 = kmeans.means_[0,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 0 LABEL
-         model1 = kmeans.means_[1,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 1 LABEL
+         model0 = kmeans.means_[0,:].reshape((len(bands),45)).T #ASSOCIATED WITH THE 0 LABEL
+         model1 = kmeans.means_[1,:].reshape((len(bands),45)).T #ASSOCIATED WITH THE 1 LABEL
       else:
          kmeans = KMeans(n_clusters=2, random_state=0)
          kmeans.fit(X_reshaped)
@@ -215,11 +235,11 @@ class MODIS():
          else:
             cm = confusion_matrix(y,kmeans.predict(X_reshaped))
 
-         plt.plot(set_model[:,0],set_model[:,1],"rx")
-         plt.plot(model0[:,0],model0[:,1],"ro")
-         plt.plot(veg_model[:,0],veg_model[:,1],"bx")
-         plt.plot(model1[:,0],model1[:,1],"bo")
-         plt.show()
+         #plt.plot(set_model[:,0],set_model[:,1],"rx")
+         #plt.plot(model0[:,0],model0[:,1],"ro")
+         #plt.plot(veg_model[:,0],veg_model[:,1],"bx")
+         #plt.plot(model1[:,0],model1[:,1],"bo")
+         #plt.show()
          return set_model,model0,veg_model,model1,cm
       else:
          #model 1 is settlement
@@ -229,11 +249,11 @@ class MODIS():
          else:
             cm = confusion_matrix(y,np.absolute(kmeans.predict(X_reshaped)-1))
 
-         plt.plot(set_model[:,0],set_model[:,1],"rx")
-         plt.plot(model1[:,0],model1[:,1],"ro")
-         plt.plot(veg_model[:,0],veg_model[:,1],"bx")
-         plt.plot(model0[:,0],model0[:,1],"bo")
-         plt.show() 
+         #plt.plot(set_model[:,0],set_model[:,1],"rx")
+         #plt.plot(model1[:,0],model1[:,1],"ro")
+         #plt.plot(veg_model[:,0],veg_model[:,1],"bx")
+         #plt.plot(model0[:,0],model0[:,1],"bo")
+         #plt.show() 
          return set_model,model1,veg_model,model0,cm
 
 
@@ -662,7 +682,7 @@ if __name__ == "__main__":
    #print(y45.shape)
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
-   m.timeVaryingModel(X45,y45,bands=[0,1])
+   m.timeVaryingModel(X45,y45,bands=[1,6],algo="KMEANS")
 
    '''
    counter = 0
