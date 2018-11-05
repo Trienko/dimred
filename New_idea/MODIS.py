@@ -100,10 +100,79 @@ class MODIS():
       return X_concat,y
 
   
+  def timeVaryingModel(self,X,y,bands=[1,6],algo="KMEANS"):
+      true_set_model,set_model,true_veg_model,veg_model,cm_year = self.yearModel(np.copy(X),np.copy(y),bands=bands,algo="KMEANS")
+      #model -> [time(45),bands]
+     
+
+      X = X[:,:,bands]
+      model = []
+
+      for k in range(45):
+          if algo=="KMEANS":    
+             model.append(KMeans(n_clusters=2, random_state=0).fit(np.squeeze(X[:,k,:])))
+          else:
+             model.append(mixture.GaussianMixture(n_components=2, random_state=0).fit(np.squeeze(X[:,k,:])))
+
+       
+      #DETERMINE BEST LABELS:
+      #**********************
+
+      model0_label = np.zeros((45,),dtype=int)   
+      model1_label = np.ones((45,),dtype=int)
+
+      for k in range(45):
+          
+          if algo=="KMEANS":
+             model_0_values_k = model[k].cluster_centers_[0,:] 
+             model_1_values_k = model[k].cluster_centers_[1,:]
+          else:
+             model_0_values_k = model[k].means_[0,:] 
+             model_1_values_k = model[k].means_[1,:]
+
+          e1 = np.sum((set_model[k,:]-model_0_values_k)**2)  
+          e2 = np.sum((veg_model[k,:]-model_1_values_k)**2)  
+
+          e3 = np.sum((set_model[k,:]-model_1_values_k)**2)  
+          e4 = np.sum((veg_model[k,:]-model_0_values_k)**2)  
+  
+          if (e1+e2) >= (e3+e4):
+             model0_label[k] = 1 #MODEL 0 is VEGETATION
+             model1_label[k] = 0 #MODEL 1 is SETTLEMENT
+ 
+
+          #e1 = (model[k].cluster_centers_[0,0]-model1_reshaped[k,0])**2+(model[k].cluster_centers_[0,1]-model1_reshaped[k,1])**2
+          #e2 = (model[k].cluster_centers_[1,0]-model2_reshaped[k,0])**2+(model[k].cluster_centers_[1,1]-model2_reshaped[k,1])**2
+
+          #e3 = (model[k].cluster_centers_[1,0]-model1_reshaped[k,0])**2+(model[k].cluster_centers_[1,1]-model1_reshaped[k,1])**2
+          #e4 = (model[k].cluster_centers_[0,0]-model2_reshaped[k,0])**2+(model[k].cluster_centers_[0,1]-model2_reshaped[k,1])**2
+
+          #if (e1+e2) >= (e3+e4):
+          #   model1_label[k] = 1
+          #   model2_label[k] = 0
+   
+
+      if len(bands) == 2:
+         plt.plot(veg_model[:,0],veg_model[:,1],"bx")
+         plt.plot(set_model[:,0],set_model[:,1],"rx")   
+         c = ["ro","bo"]
+         for k in range(45):
+             
+           if algo=="KMEANS":
+                plt.plot(model[k].cluster_centers_[0,0],model[k].cluster_centers_[0,1],c[model0_label[k]])     
+                plt.plot(model[k].cluster_centers_[1,0],model[k].cluster_centers_[1,1],c[model1_label[k]])
+           else:
+                plt.plot(model[k].means_[0,0],model[k].means_[0,1],c[model0_label[k]])     
+                plt.plot(model[k].means_[1,0],model[k].means_[1,1],c[model1_label[k]])
+
+
+      plt.show()
+     
+
   #X - [observations,time (0-44),bands]
   #y - [observations]
   #vegetation -- 1 and settlement --- 0
-  def yearModel(self,X,y,bands=[0,1],algo="GMM"):
+  def yearModel(self,X,y,bands=[0,1],algo="KMEANS"):
       
       
       X = X[:,:,bands]
@@ -116,20 +185,20 @@ class MODIS():
       #X_reshaped --- (observations,bands*45)
       
       if algo == "GMM":
-         kmeans = mixture.GaussianMixture(n_components=2)
+         kmeans = mixture.GaussianMixture(n_components=2, random_state=0)
          kmeans.fit(X_reshaped)
          model0 = kmeans.means_[0,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 0 LABEL
          model1 = kmeans.means_[1,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 1 LABEL
       else:
          kmeans = KMeans(n_clusters=2, random_state=0)
          kmeans.fit(X_reshaped)
-         model0 = kmeans.cluster_centers_[0,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 0 LABEL
-         model1 = kmeans.cluster_centers_[1,:].reshape((45,len(bands))) #ASSOCIATED WITH THE 1 LABEL
+         model0 = kmeans.cluster_centers_[0,:].reshape((len(bands),45)).T #ASSOCIATED WITH THE 0 LABEL
+         model1 = kmeans.cluster_centers_[1,:].reshape((len(bands),45)).T #ASSOCIATED WITH THE 1 LABEL
 
       #--- need to align the two models ---
       #COMPUTE TRUE MEAN MODEL
-      veg_model = np.mean(X_reshaped[y==1,:],axis=0).reshape((45,len(bands)))
-      set_model = np.mean(X_reshaped[y==0,:],axis=0).reshape((45,len(bands)))
+      veg_model = np.mean(X_reshaped[y==1,:],axis=0).reshape((len(bands),45)).T
+      set_model = np.mean(X_reshaped[y==0,:],axis=0).reshape((len(bands),45)).T
 
       #--- need to determine the label of model-0 and model-1 ---
       e1 = np.sum(model0-set_model)**2
@@ -145,6 +214,12 @@ class MODIS():
             cm = confusion_matrix(y,kmeans.labels_)
          else:
             cm = confusion_matrix(y,kmeans.predict(X_reshaped))
+
+         plt.plot(set_model[:,0],set_model[:,1],"rx")
+         plt.plot(model0[:,0],model0[:,1],"ro")
+         plt.plot(veg_model[:,0],veg_model[:,1],"bx")
+         plt.plot(model1[:,0],model1[:,1],"bo")
+         plt.show()
          return set_model,model0,veg_model,model1,cm
       else:
          #model 1 is settlement
@@ -154,7 +229,11 @@ class MODIS():
          else:
             cm = confusion_matrix(y,np.absolute(kmeans.predict(X_reshaped)-1))
 
-          
+         plt.plot(set_model[:,0],set_model[:,1],"rx")
+         plt.plot(model1[:,0],model1[:,1],"ro")
+         plt.plot(veg_model[:,0],veg_model[:,1],"bx")
+         plt.plot(model0[:,0],model0[:,1],"bo")
+         plt.show() 
          return set_model,model1,veg_model,model0,cm
 
 
@@ -582,6 +661,10 @@ if __name__ == "__main__":
    #print(X45.shape)
    #print(y45.shape)
    #m.multi_kmeans_45(X45,y45)
+   #m.yearModel(X45,y45,bands=[0,1])
+   m.timeVaryingModel(X45,y45,bands=[0,1])
+
+   '''
    counter = 0
    a = 0
    for j in range(7):
@@ -616,7 +699,7 @@ if __name__ == "__main__":
    #Xdic,ydic = m.createDictionary(X,y)
 
    #m.validtionCurveTest(Xdic,ydic,X,y)
-
+   '''
    
    
       
