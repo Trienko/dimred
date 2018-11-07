@@ -16,6 +16,8 @@ from sklearn.metrics import confusion_matrix
 import itertools
 from matplotlib.colors import ListedColormap
 from sklearn.mixture import GaussianMixture
+from scipy.stats import multivariate_normal
+
 
 # Create color maps
 cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
@@ -137,8 +139,8 @@ class MODIS():
           e4 = np.sum((veg_model[k,:]-model_0_values_k)**2)  
   
           if (e1+e2) >= (e3+e4):
-             model0_label[k] = 1 #MODEL 0 is VEGETATION
-             model1_label[k] = 0 #MODEL 1 is SETTLEMENT
+             model0_label[k] = 1 #SETTLEMENT
+             model1_label[k] = 0 #VEGETATION
  
 
           #e1 = (model[k].cluster_centers_[0,0]-model1_reshaped[k,0])**2+(model[k].cluster_centers_[0,1]-model1_reshaped[k,1])**2
@@ -174,7 +176,11 @@ class MODIS():
          d = np.zeros((45,X.shape[0]))
          for k in range(45):
              for p in range(X.shape[0]):
-                 d[k,p] = X[p,k,bands] - model[k].cluster_centers_[model[k].labels_[p],:] 
+                 #X[p,k,bands]
+                 #model[k].labels_[p]
+                 #d[k,p]
+                 d[k,p] = np.sqrt(np.sum((X[p,k,:] - model[k].cluster_centers_[model[k].labels_[p],:])**2))
+                 
          d = np.std(d,axis=0) 
       else:
          d = -1   
@@ -186,8 +192,36 @@ class MODIS():
   #1 is vegetation
   #0 is settlement
   ################
-  def SPRT_classifier(X,y,model,model0_label,model1_label):
-      pass
+  def SPRT_classifier(self,X,y,model,model0_label,model1_label, d, bands=[1,6]):
+      #rv = multivariate_normal([0.5, -0.2], [[2.0, 0.3], [0.3, 0.5]])  
+      X = X[:,:,bands]
+      
+      vegetation = []
+      settlement = []
+      
+      for k in range(45):
+          d_mat = (d[k]**2)*np.diag(np.ones((len(bands),))
+          settlement.append(multivariate_normal(model[k].cluster_center_[model_0label[k],:],d_mat))
+          vegetation.append(multivariate_normal(model[k].cluster_center_[model_1label[k],:],d_mat))
+              
+      sprt_value = np.zeros((X.shape[0],X.shape[1]))   
+   
+      for p in range(X.shape[0]):
+          for t in range(X.shape[1]):
+              num = vegetation[t].pdf(X[p,t,:])
+              den = settlement[t].pdf(X[p,t,:])
+              if t == 0:
+                 sprt_value[p,0] = np.log(num/den)
+              else:
+                 sprt_value[p,t] = sprt_value[p,t-1] + np.log(num/den) 
+      y_pred = np.zeros(y.shape)
+      y_pred[sprt_value[:,-1]>0] = 1
+
+      cm = confusion_matrix(y,y_pred)
+      plt.show() 
+
+             
+          
 
   #X - [observations,time (0-44),bands]
   #y - [observations]
@@ -682,7 +716,9 @@ if __name__ == "__main__":
    #print(y45.shape)
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
-   m.timeVaryingModel(X45,y45,bands=[1,6],algo="KMEANS")
+   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,6],algo="KMEANS")
+   m.SPRT_classifier(X,y,model,model0_label,model1_label, d, bands=[1,6]) 
+
 
    '''
    counter = 0
