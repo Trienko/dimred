@@ -200,25 +200,31 @@ class MODIS():
       settlement = []
       
       for k in range(45):
-          d_mat = (d[k]**2)*np.diag(np.ones((len(bands),))
-          settlement.append(multivariate_normal(model[k].cluster_center_[model_0label[k],:],d_mat))
-          vegetation.append(multivariate_normal(model[k].cluster_center_[model_1label[k],:],d_mat))
+          d_mat = (d[k]**2)*np.diag(np.ones((len(bands),)))
+          settlement.append(multivariate_normal(model[k].cluster_centers_[model0_label[k],:],d_mat))
+          vegetation.append(multivariate_normal(model[k].cluster_centers_[model1_label[k],:],d_mat))
               
       sprt_value = np.zeros((X.shape[0],X.shape[1]))   
    
       for p in range(X.shape[0]):
+          print(p)
           for t in range(X.shape[1]):
-              num = vegetation[t].pdf(X[p,t,:])
-              den = settlement[t].pdf(X[p,t,:])
+              num = vegetation[t%45].pdf(X[p,t,:])
+              den = settlement[t%45].pdf(X[p,t,:])
               if t == 0:
                  sprt_value[p,0] = np.log(num/den)
               else:
                  sprt_value[p,t] = sprt_value[p,t-1] + np.log(num/den) 
       y_pred = np.zeros(y.shape)
       y_pred[sprt_value[:,-1]>0] = 1
+      
+      c = ["r","b"]
+      for p in range(X.shape[0]):
+          plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
+      plt.show()
 
       cm = confusion_matrix(y,y_pred)
-      plt.show() 
+      self.plot_confusion_matrix(cm,["s","v"])
 
              
           
