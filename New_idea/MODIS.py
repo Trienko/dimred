@@ -394,6 +394,16 @@ class MODIS():
 
       return X_model,y_model,X_45,y_45
 
+  def createSupervisedYearModel(self,X,y,bands=[0,1]):
+      X = X[:,:,bands]
+      vegetation_model = []
+      settlement_model = []
+
+      for k in range(45):
+          vegetation_model.append(mixture.GaussianMixture(n_components=1).fit(np.squeeze(X[y==1,k,:])))
+          settlement_model.append(mixture.GaussianMixture(n_components=1).fit(np.squeeze(X[y==0,k,:])))
+      return vegetation_model,settlement_model
+
   def multi_kmeans_45(self,X,y,bands=np.array([1,6])):
       X = X[:,:,bands]
 
