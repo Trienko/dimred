@@ -17,7 +17,7 @@ import itertools
 from matplotlib.colors import ListedColormap
 from sklearn.mixture import GaussianMixture
 from scipy.stats import multivariate_normal
-
+import os
 
 # Create color maps
 cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
@@ -28,6 +28,12 @@ class MODIS():
 
   def __init__(self):
       pass
+
+  #Function to help with plotting confidence interval
+  def eigsorted(self,cov):
+      vals, vecs = np.linalg.eigh(cov)
+      order = vals.argsort()[::-1]
+      return vals[order], vecs[:,order]
 
   def plot_confusion_matrix(self,cm, classes,
                           normalize=True,
@@ -394,6 +400,34 @@ class MODIS():
 
       return X_model,y_model,X_45,y_45
 
+      #ax = plt.gca()
+      #nstd = 2.0
+      ##ELLIPSE 1
+      #vals, vecs = eigsorted(cov[0,:,:])
+      #theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+      #w, h = 2 * nstd * np.sqrt(vals)
+      #ell1 = Ellipse(xy=(mean[0,0], mean[1,0]),width=w, height=h, angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1)
+      #ell1.set_facecolor('none')
+      #ax.add_artist(ell1)
+
+      ##ELLIPSE 2
+      #vals, vecs = eigsorted(cov[1,:,:])
+      #theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+      #w, h = 2 * nstd * np.sqrt(vals)
+      #ell2 = Ellipse(xy=(mean[0,1], mean[1,1]),width=w, height=h,angle=theta, edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=1)
+      #ell2.set_facecolor('none')
+      #ax.add_artist(ell2)
+
+
+      #for i in range(X.shape[1]):
+      #   col = [[resp[i,1],resp[i,0],0]]
+      #   ax.scatter(X[0,i],X[1,i],c=col,zorder=3,alpha=0.2)
+      #   ax.set_xlabel("$x_1$")
+      #   ax.set_ylabel("$x_2$")
+      #   plt.xlim([-6,6])
+      #   plt.ylim([-6,6])
+      #plt.show()
+
   def createSupervisedYearModel(self,X,y,bands=[0,1]):
       X = X[:,:,bands]
       vegetation_model = []
@@ -402,6 +436,49 @@ class MODIS():
       for k in range(45):
           vegetation_model.append(mixture.GaussianMixture(n_components=1).fit(np.squeeze(X[y==1,k,:])))
           settlement_model.append(mixture.GaussianMixture(n_components=1).fit(np.squeeze(X[y==0,k,:])))
+
+      ##PLOT SUPERVISED MODEL AS AN EXCERCISE
+      os.system("mkdir BAND"+str(bands[0])+str(bands[1]))
+      cmd = "cd BAND"+str(bands[0])+str(bands[1])
+      #print(cmd)
+
+      os.chdir("./BAND"+str(bands[0])+str(bands[1]))
+          
+      for k in range(45):
+          print(k)
+          ax = plt.gca()
+          nstd = 2.0
+
+          ##PLOTTING ELLIPSES
+          for t in range(2):
+              if t == 0:
+                 vals, vecs = self.eigsorted(vegetation_model[k].covariances_[0,:,:])
+              else:
+                 vals, vecs = self.eigsorted(settlement_model[k].covariances_[0,:,:])
+              theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+              w, h = 2 * nstd * np.sqrt(vals)
+              if t==0:
+                 ell1 = Ellipse(xy=(vegetation_model[k].means_[0,0], vegetation_model[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1)
+              else:
+                 ell1 = Ellipse(xy=(settlement_model[k].means_[0,0], settlement_model[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=1)
+
+              ell1.set_facecolor('none')
+              ax.add_artist(ell1)
+              col = ["r","b"]
+
+          ax.plot(X[y==0,k,0],X[y==0,k,1],"ro",zorder=3,alpha=0.05)
+          ax.plot(X[y==1,k,0],X[y==1,k,1],"go",zorder=3,alpha=0.05)
+
+          #for i in range(X.shape[0]):
+              #col = [[resp[i,1],resp[i,0],0]]
+              
+          #    ax.plot(X[i,k,0],X[i,k,1],col[y[i]],zorder=3,alpha=0.2)
+          #    ax.set_xlabel("$x_1$")
+          #    ax.set_ylabel("$x_2$")
+              
+          plt.savefig(str(k)+".png")
+          ax.cla()
+      os.chdir("..")
       return vegetation_model,settlement_model
 
   def multi_kmeans_45(self,X,y,bands=np.array([1,6])):
@@ -776,14 +853,15 @@ if __name__ == "__main__":
    #print(y45.shape)
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
+   m.createSupervisedYearModel(X45,y45,bands=[0,7])
 
-   x1,x2,x3,x4,c = m.yearModel(X45,y45,bands=[0,1,2,3],algo="GMM")
-   m.plot_confusion_matrix(c,["s","v"])
-   plt.show()
-   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[0,1,2,3],algo="KMEANS")
-   m.SPRT_classifier(X,y,model,model0_label,model1_label, d, bands=[0,1,2,3])
-   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[0,1,2,3],algo="GMM")
-   m.SPRT_classifierGMM(X,y,model,model0_label,model1_label, d, bands=[0,1,2,3])
+   #x1,x2,x3,x4,c = m.yearModel(X45,y45,bands=[0,1,2,3],algo="GMM")
+   #m.plot_confusion_matrix(c,["s","v"])
+   #plt.show()
+   #model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[0,1,2,3],algo="KMEANS")
+   #m.SPRT_classifier(X,y,model,model0_label,model1_label, d, bands=[0,1,2,3])
+   #model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[0,1,2,3],algo="GMM")
+   #m.SPRT_classifierGMM(X,y,model,model0_label,model1_label, d, bands=[0,1,2,3])
 
    '''
    counter = 0
