@@ -204,6 +204,61 @@ class MODIS():
   #1 is vegetation
   #0 is settlement
   ################
+  def SPRT_supervised(self,X,y,vegmodel,setmodel,bands=[0,1]):
+      #rv = multivariate_normal([0.5, -0.2], [[2.0, 0.3], [0.3, 0.5]])  
+      X = X[:,:,bands]
+
+      
+      
+      #vegetation = []
+      #settlement = []
+      
+      #for k in range(45):
+      #    d_mat = (d[k]**2)*np.diag(np.ones((len(bands),)))
+      #    settlement.append(multivariate_normal(model[k].cluster_centers_[model0_label[k],:],d_mat))
+      #    vegetation.append(multivariate_normal(model[k].cluster_centers_[model1_label[k],:],d_mat))
+       
+      
+       
+      sprt_value = np.zeros((X.shape[0],X.shape[1]))   
+
+      for t in range(X.shape[1]):
+          print(t)
+          veg_prob = vegmodel[t%45].predict_proba(np.squeeze(X[:,t,:]))
+          set_prob = setmodel[t%45].predict_proba(np.squeeze(X[:,t,:]))
+
+          for p in range(X.shape[0]):
+              num = veg_prob[p,0]
+              den = set_prob[p,0]
+              #print(num)
+              #print(den)
+              if t == 0:
+                 print(num)
+                 print(den)
+                 print(X[p,t,:].reshape(1, -1))
+                 print(vegmodel[0].means_[0,0]) 
+                 print(setmodel[0].means_[0,0]) 
+                 sprt_value[p,0] = np.log(num)-np.log(den)
+              else:
+                 sprt_value[p,t] = sprt_value[p,t-1] + (np.log(num)-np.log(den)) 
+      
+      y_pred = np.zeros(y.shape)
+      y_pred[sprt_value[:,-1]>0] = 1
+      
+      c = ["r","b"]
+      for p in range(X.shape[0]):
+          plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
+      plt.show()
+
+      cm = confusion_matrix(y,y_pred)
+      self.plot_confusion_matrix(cm,["s","v"])
+      plt.show()  
+      
+
+  
+  #1 is vegetation
+  #0 is settlement
+  ################
   def SPRT_classifier(self,X,y,model,model0_label,model1_label, d, bands=[1,6]):
       #rv = multivariate_normal([0.5, -0.2], [[2.0, 0.3], [0.3, 0.5]])  
       X = X[:,:,bands]
@@ -853,7 +908,10 @@ if __name__ == "__main__":
    #print(y45.shape)
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
-   m.createSupervisedYearModel(X45,y45,bands=[0,7])
+
+   vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[0,1])
+   m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[0,1])
+   
 
    #x1,x2,x3,x4,c = m.yearModel(X45,y45,bands=[0,1,2,3],algo="GMM")
    #m.plot_confusion_matrix(c,["s","v"])
