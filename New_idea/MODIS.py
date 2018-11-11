@@ -210,34 +210,26 @@ class MODIS():
 
       
       
-      #vegetation = []
-      #settlement = []
+      vegetation = []
+      settlement = []
       
-      #for k in range(45):
-      #    d_mat = (d[k]**2)*np.diag(np.ones((len(bands),)))
-      #    settlement.append(multivariate_normal(model[k].cluster_centers_[model0_label[k],:],d_mat))
-      #    vegetation.append(multivariate_normal(model[k].cluster_centers_[model1_label[k],:],d_mat))
-       
-      
+      for k in range(45):
+          vegetation.append(multivariate_normal(vegmodel[k].means_[0,:],vegmodel[k].covariances_[0,:,:]))
+          settlement.append(multivariate_normal(setmodel[k].means_[0,:],setmodel[k].covariances_[0,:,:]))
        
       sprt_value = np.zeros((X.shape[0],X.shape[1]))   
 
       for t in range(X.shape[1]):
           print(t)
-          veg_prob = vegmodel[t%45].predict_proba(np.squeeze(X[:,t,:]))
-          set_prob = setmodel[t%45].predict_proba(np.squeeze(X[:,t,:]))
-
+          
           for p in range(X.shape[0]):
-              num = veg_prob[p,0]
-              den = set_prob[p,0]
+              num = vegetation[t%45].pdf(np.squeeze(X[p,t,:]))
+              den = settlement[t%45].pdf(np.squeeze(X[p,t,:]))
               #print(num)
               #print(den)
               if t == 0:
                  print(num)
                  print(den)
-                 print(X[p,t,:].reshape(1, -1))
-                 print(vegmodel[0].means_[0,0]) 
-                 print(setmodel[0].means_[0,0]) 
                  sprt_value[p,0] = np.log(num)-np.log(den)
               else:
                  sprt_value[p,t] = sprt_value[p,t-1] + (np.log(num)-np.log(den)) 
@@ -483,6 +475,38 @@ class MODIS():
       #   plt.ylim([-6,6])
       #plt.show()
 
+  def plotEllipsesAllModels(self,X,y,bands=[0,1],sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg):
+      pass
+
+  def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
+          
+      veg_cov = []
+      set_cov = []
+      vegetation = []
+      settlement = []
+      
+      for k in range(45):
+          set_cov.append(model[k].covariances_[model0_label[k],:,:])
+          veg_cov.append(model[k].covariances_[model1_label[k],:,:])
+
+          settlement.append(model[k].means_[model0_label[k],:])
+          vegetation.append(model[k].means_[model1_label[k],:])
+
+      return veg_cov, set_cov, vegetation,settlement
+ 
+  def convertKmeansmodel(self,model,model0_label,model1_label, d, bands=[1,6]):
+            
+      k_cov = []
+      vegetation = []
+      settlement = []
+      
+      for k in range(45):
+          k_cov.append((d[k]**2)*np.diag(np.ones((len(bands),))))
+          settlement.append(model[k].cluster_centers_[model0_label[k],:])
+          vegetation.append(model[k].cluster_centers_[model1_label[k],:])
+
+      return k_cov,vegetation,settlement
+          
   def createSupervisedYearModel(self,X,y,bands=[0,1]):
       X = X[:,:,bands]
       vegetation_model = []
@@ -909,8 +933,8 @@ if __name__ == "__main__":
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
 
-   vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[0,1])
-   m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[0,1])
+   vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[4,5])
+   m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[4,5])
    
 
    #x1,x2,x3,x4,c = m.yearModel(X45,y45,bands=[0,1,2,3],algo="GMM")
