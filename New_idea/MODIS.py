@@ -392,6 +392,35 @@ class MODIS():
          #plt.plot(model0[:,0],model0[:,1],"bo")
          #plt.show() 
          return set_model,model1,veg_model,model0,cm
+  
+  def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
+          
+      veg_cov = []
+      set_cov = []
+      vegetation = []
+      settlement = []
+      
+      for k in range(45):
+          set_cov.append(model[k].covariances_[model0_label[k],:,:])
+          veg_cov.append(model[k].covariances_[model1_label[k],:,:])
+
+          settlement.append(model[k].means_[model0_label[k],:])
+          vegetation.append(model[k].means_[model1_label[k],:])
+
+      return veg_cov, set_cov, vegetation,settlement
+ 
+  def convertK(self,model,model0_label,model1_label, d, bands=[1,6]):
+            
+      k_cov = []
+      vegetation = []
+      settlement = []
+      
+      for k in range(45):
+          k_cov.append((d[k]**2)*np.diag(np.ones((len(bands),))))
+          settlement.append(model[k].cluster_centers_[model0_label[k],:])
+          vegetation.append(model[k].cluster_centers_[model1_label[k],:])
+
+      return k_cov,vegetation,settlement
 
 
   def createDictionary(self,X,y):
@@ -475,7 +504,8 @@ class MODIS():
       #   plt.ylim([-6,6])
       #plt.show()
 
-  def plotEllipsesAllModels(self,X,y,bands=[0,1],sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg):
+  def plotEllipsesAllModels(self,X,y,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1]):
+          X = X[:,:,bands]
           os.system("mkdir BAND"+str(bands[0])+str(bands[1]))
           cmd = "cd BAND"+str(bands[0])+str(bands[1])
           #print(cmd)
@@ -483,9 +513,10 @@ class MODIS():
           os.chdir("./BAND"+str(bands[0])+str(bands[1]))
       
           for k in range(45):
+              ax = plt.gca()
+              nstd = 1.0
               for m in range(3):
-                  ax = plt.gca()
-                  nstd = 2.0
+                  
 
                   ##PLOTTING ELLIPSES
                   for t in range(2):
@@ -493,78 +524,51 @@ class MODIS():
                          if m == 0:
                             vals, vecs = self.eigsorted(sup_veg[k].covariances_[0,:,:])
                          elif m == 1:
-                            vals, vec = self.eigsorted(kmeans_cov)
+                            vals, vec = self.eigsorted(kmeans_cov[k][:,:])
                          else:
-                            vals, vec = self.eigsorted(gmm_cov_veg)
+                            vals, vec = self.eigsorted(gmm_cov_veg[k][:,:])
                       else:
                          if m == 0:
                             vals, vecs = self.eigsorted(sup_set[k].covariances_[0,:,:])
                          elif m == 1:
-                            vals, vec = self.eigsorted(kmeans_cov)
+                            vals, vec = self.eigsorted(kmeans_cov[k][:,:])
                          else:
-                            vals, vec = self.eigsorted(gmm_cov_set)
+                            vals, vec = self.eigsorted(gmm_cov_set[k][:,:])
 
-                         
+                      #print(m)
+                      #print(vecs)   
                       theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
                       w, h = 2 * nstd * np.sqrt(vals)
                       if t==0:
                          if m == 0:
                             ell1 = Ellipse(xy=(sup_veg[k].means_[0,0], sup_veg[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1)
                          elif m == 1:
-                            ell1 = Ellipse(xy=(kmeans_veg[k][0,0], kmeans_veg[k][0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="--")
+                            ell1 = Ellipse(xy=(kmeans_veg[k][0], kmeans_veg[k][1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=2,linestyle="--")
                          else:
-                            ell1 = Ellipse(xy=(gmm_veg[k][0,0], gmm_veg[k][0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="..")
+                            ell1 = Ellipse(xy=(gmm_veg[k][0], gmm_veg[k][1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=3,linestyle=":")
  
                       else:
                          if m == 0:
-                            ell1 = Ellipse(xy=(sup_set[k].means_[0,0], sup_set[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=1)
+                            ell1 = Ellipse(xy=(sup_set[k].means_[0,0], sup_set[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=4)
                          elif m == 1:
-                            ell1 = Ellipse(xy=(kmeans_set[k][0,0], kmeans_set[k][0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="--")
+                            ell1 = Ellipse(xy=(kmeans_set[k][0], kmeans_set[k][1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=5,linestyle="--")
                          else:
-                            ell1 = Ellipse(xy=(gmm_set[k][0,0], gmm_set[k][0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="..")
+                            ell1 = Ellipse(xy=(gmm_set[k][0], gmm_set[k][1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=6,linestyle=":")
 
                       ell1.set_facecolor('none')
                       ax.add_artist(ell1)
                       col = ["r","b"]
 
-                      ax.plot(X[y==0,k,0],X[y==0,k,1],"ro",zorder=3,alpha=0.05)
-                      ax.plot(X[y==1,k,0],X[y==1,k,1],"go",zorder=3,alpha=0.05)
+                      ax.plot(X[y==0,k,0],X[y==0,k,1],"ro",zorder=7,alpha=0.0001)
+                      ax.plot(X[y==1,k,0],X[y==1,k,1],"go",zorder=7,alpha=0.0001)
 
               
-                      plt.savefig(str(k)+".png")
-                      ax.cla()
+              plt.savefig(str(k)+".png")
+              ax.cla()
           os.chdir("..")
       
 
-  def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
-          
-      veg_cov = []
-      set_cov = []
-      vegetation = []
-      settlement = []
-      
-      for k in range(45):
-          set_cov.append(model[k].covariances_[model0_label[k],:,:])
-          veg_cov.append(model[k].covariances_[model1_label[k],:,:])
-
-          settlement.append(model[k].means_[model0_label[k],:])
-          vegetation.append(model[k].means_[model1_label[k],:])
-
-      return veg_cov, set_cov, vegetation,settlement
- 
-  def convertKmeansmodel(self,model,model0_label,model1_label, d, bands=[1,6]):
             
-      k_cov = []
-      vegetation = []
-      settlement = []
-      
-      for k in range(45):
-          k_cov.append((d[k]**2)*np.diag(np.ones((len(bands),))))
-          settlement.append(model[k].cluster_centers_[model0_label[k],:])
-          vegetation.append(model[k].cluster_centers_[model1_label[k],:])
-
-      return k_cov,vegetation,settlement
-          
   def createSupervisedYearModel(self,X,y,bands=[0,1]):
       X = X[:,:,bands]
       vegetation_model = []
@@ -991,8 +995,17 @@ if __name__ == "__main__":
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
 
-   vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[4,5])
-   m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[4,5])
+   vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[0,1])
+   m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[0,1])
+   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[0,1],algo="KMEANS")
+   kmeans_cov,kmeans_veg,kmeans_set = m.convertK(model,model0_label,model1_label, d, bands=[0,1])
+   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[0,1],algo="GMM")
+   gmm_cov_veg,gmm_cov_set,gmm_veg,gmm_set = m.convertGMMmodel(model,model0_label,model1_label, bands=[0,1])
+   m.plotEllipsesAllModels(X45,y45,setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1])
+   
+   #def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
+   #def convertKmeansmodel(self,model,model0_label,model1_label, d, bands=[1,6]):
+   #plotEllipsesAllModels(self,X,y,bands=[0,1],sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg):
    
 
    #x1,x2,x3,x4,c = m.yearModel(X45,y45,bands=[0,1,2,3],algo="GMM")
