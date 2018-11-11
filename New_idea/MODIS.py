@@ -476,7 +476,65 @@ class MODIS():
       #plt.show()
 
   def plotEllipsesAllModels(self,X,y,bands=[0,1],sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg):
-      pass
+          os.system("mkdir BAND"+str(bands[0])+str(bands[1]))
+          cmd = "cd BAND"+str(bands[0])+str(bands[1])
+          #print(cmd)
+
+          os.chdir("./BAND"+str(bands[0])+str(bands[1]))
+      
+          for k in range(45):
+              for m in range(3):
+                  ax = plt.gca()
+                  nstd = 2.0
+
+                  ##PLOTTING ELLIPSES
+                  for t in range(2):
+                      if t == 0:
+                         if m == 0:
+                            vals, vecs = self.eigsorted(sup_veg[k].covariances_[0,:,:])
+                         elif m == 1:
+                            vals, vec = self.eigsorted(kmeans_cov)
+                         else:
+                            vals, vec = self.eigsorted(gmm_cov_veg)
+                      else:
+                         if m == 0:
+                            vals, vecs = self.eigsorted(sup_set[k].covariances_[0,:,:])
+                         elif m == 1:
+                            vals, vec = self.eigsorted(kmeans_cov)
+                         else:
+                            vals, vec = self.eigsorted(gmm_cov_set)
+
+                         
+                      theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+                      w, h = 2 * nstd * np.sqrt(vals)
+                      if t==0:
+                         if m == 0:
+                            ell1 = Ellipse(xy=(sup_veg[k].means_[0,0], sup_veg[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1)
+                         elif m == 1:
+                            ell1 = Ellipse(xy=(kmeans_veg[k][0,0], kmeans_veg[k][0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="--")
+                         else:
+                            ell1 = Ellipse(xy=(gmm_veg[k][0,0], gmm_veg[k][0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="..")
+ 
+                      else:
+                         if m == 0:
+                            ell1 = Ellipse(xy=(sup_set[k].means_[0,0], sup_set[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=1)
+                         elif m == 1:
+                            ell1 = Ellipse(xy=(kmeans_set[k][0,0], kmeans_set[k][0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="--")
+                         else:
+                            ell1 = Ellipse(xy=(gmm_set[k][0,0], gmm_set[k][0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="..")
+
+                      ell1.set_facecolor('none')
+                      ax.add_artist(ell1)
+                      col = ["r","b"]
+
+                      ax.plot(X[y==0,k,0],X[y==0,k,1],"ro",zorder=3,alpha=0.05)
+                      ax.plot(X[y==1,k,0],X[y==1,k,1],"go",zorder=3,alpha=0.05)
+
+              
+                      plt.savefig(str(k)+".png")
+                      ax.cla()
+          os.chdir("..")
+      
 
   def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
           
