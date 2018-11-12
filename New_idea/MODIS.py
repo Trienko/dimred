@@ -111,7 +111,6 @@ class MODIS():
   def timeVaryingModel(self,X,y,bands=[1,6],algo="KMEANS"):
       true_set_model,set_model,true_veg_model,veg_model,cm_year = self.yearModel(np.copy(X),np.copy(y),bands=bands,algo="KMEANS")
       #model -> [time(45),bands]
-     
 
       X = X[:,:,bands]
       model = []
@@ -559,8 +558,17 @@ class MODIS():
                       ax.add_artist(ell1)
                       col = ["r","b"]
 
-                      ax.plot(X[y==0,k,0],X[y==0,k,1],"ro",zorder=7,alpha=0.0001)
-                      ax.plot(X[y==1,k,0],X[y==1,k,1],"go",zorder=7,alpha=0.0001)
+                      #REDUCING NUMBER OF DATAPOINTS TO PLOT
+                      yselect = np.random.randint(2, size=X.shape[0])
+                      X_new = X[yselect==1,:,:]
+                      y_new = y[yselect==1]
+                      yselect = np.random.randint(2, size=X_new.shape[0])
+                      X_new = X_new[yselect==1,:,:]
+                      y_new = y_new[yselect==1]
+
+
+                      ax.plot(X_new[y_new==0,k,0],X_new[y_new==0,k,1],"ro",zorder=7,alpha=0.01)
+                      ax.plot(X_new[y_new==1,k,0],X_new[y_new==1,k,1],"go",zorder=7,alpha=0.01)
 
               
               plt.savefig(str(k)+".png")
