@@ -503,6 +503,51 @@ class MODIS():
       #   plt.ylim([-6,6])
       #plt.show()
 
+  def HD(self,mean1,Sigma1,mean2,Sigma2):
+      #print(mean1)
+      mean1 = mean1.reshape((2,1))
+      mean2 = mean2.reshape((2,1))
+      #print(mean1)
+      #print(mean1.shape)
+      #print(Sigma1.shape)
+      
+      M = (Sigma1+Sigma2)/2.0
+      u = mean1-mean2
+      
+      Minv = np.linalg.inv(M)
+      x = np.dot(np.dot(u.T,Minv),u)[0,0]*(-1)*(1.0/8.0)
+
+      detM = np.linalg.det(M)
+      det1 = np.linalg.det(Sigma1)
+      det2 = np.linalg.det(Sigma2)
+
+      num = (det1**(1.0/4.0))*(det2**(1.0/4.0))
+      den = detM**(1.0/2.0)
+      y = num/den
+
+      H = 1-y*np.exp(x)
+      return np.sqrt(H)
+
+  def plotHDAllModels(self,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg):
+      hd_mat = np.zeros((4,45))
+      plt.clf()
+
+      for k in range(45):
+          hd_mat[0,k] = self.HD(sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:],gmm_set[k][:],gmm_cov_set[k][:,:])
+          hd_mat[1,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],gmm_veg[k][:],gmm_cov_veg[k][:,:])
+
+          hd_mat[2,k] = self.HD(sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:],kmeans_set[k][:],kmeans_cov[k][:,:])
+          hd_mat[3,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],kmeans_veg[k][:],kmeans_cov[k][:,:])
+
+      c = ["r","b","g","m"]
+      for t in range(4):
+          plt.plot(hd_mat[t,:],c[t])
+
+      plt.ylim([0,1])
+      plt.show() 
+
+
+         
   def plotEllipsesAllModels(self,X,y,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1]):
           X = X[:,:,bands]
           os.system("mkdir BAND"+str(bands[0])+str(bands[1]))
@@ -513,7 +558,7 @@ class MODIS():
       
           for k in range(45):
               ax = plt.gca()
-              nstd = 1.0
+              nstd = 2.0
               for m in range(3):
                   
 
@@ -565,12 +610,15 @@ class MODIS():
                       yselect = np.random.randint(2, size=X_new.shape[0])
                       X_new = X_new[yselect==1,:,:]
                       y_new = y_new[yselect==1]
+                      yselect = np.random.randint(2, size=X_new.shape[0])
+                      X_new = X_new[yselect==1,:,:]
+                      y_new = y_new[yselect==1]
 
 
                       ax.plot(X_new[y_new==0,k,0],X_new[y_new==0,k,1],"ro",zorder=7,alpha=0.01)
                       ax.plot(X_new[y_new==1,k,0],X_new[y_new==1,k,1],"go",zorder=7,alpha=0.01)
 
-              
+              ax.set_aspect('equal', adjustable='datalim')
               plt.savefig(str(k)+".png")
               ax.cla()
           os.chdir("..")
@@ -935,6 +983,45 @@ class MODIS():
           plt.plot(k,yearly_mean[second_model_label[k],k],c[overall_label_2]+"o")
       plt.show()
 
+  def testCircleTheory(self):
+      rv = multivariate_normal([0.5, -0.2], [[10.0, 0.999], [0.3, 0.25]]) 
+
+      x = rv.rvs(1000)
+      m_model = mixture.GaussianMixture(n_components=1).fit(x)
+
+      var = np.std(np.sqrt(np.sum((np.array([0.5,-0.2]) - x)**2,axis=1)))**2      
+      mat = var*np.array([[1,0],[0,1]])
+      print(mat)
+      
+
+      ax = plt.gca()
+      nstd = 2.0
+      vals, vecs = self.eigsorted(m_model.covariances_[0,:,:])
+      print(vals)
+      print(vecs)
+      
+      theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+      w, h = 2 * nstd * np.sqrt(vals)
+      ell1 = Ellipse(xy=(m_model.means_[0,0], m_model.means_[0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=2)
+      ax.add_artist(ell1)
+
+      vals, vecs = self.eigsorted(mat)
+      print(vals)
+      print(vecs)
+      theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+      w, h = 2 * nstd * np.sqrt(vals)
+      ell2 = Ellipse(xy=(m_model.means_[0,0], m_model.means_[0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1)
+      ax.add_artist(ell2)
+ 
+ 
+       
+      plt.plot(x[:,0],x[:,1],"ro",alpha=0.1,zorder=3)
+      ax.set_aspect('equal', adjustable='datalim')
+      plt.show()
+      #print(x)
+
+       
+
   def validtionCurveTest(self,X_model,y_model,X_old,y_old):
        from sklearn.linear_model import LogisticRegression
        '''
@@ -989,11 +1076,16 @@ class MODIS():
 
 
 
+
+
 if __name__ == "__main__":
    m = MODIS()
    veg,bwt = m.loadDataSet(name="Gauteng_nochange.mat",province="Gauteng")
    X,y = m.concatDataSets(veg,bwt)
 
+
+   m.testCircleTheory()
+   
    #m.kmeans45(X,y)
    #m.gmm45(X,y)
    
@@ -1002,15 +1094,19 @@ if __name__ == "__main__":
    #print(y45.shape)
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
-
-   vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[0,1])
-   m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[0,1])
-   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[0,1],algo="KMEANS")
-   kmeans_cov,kmeans_veg,kmeans_set = m.convertK(model,model0_label,model1_label, d, bands=[0,1])
-   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[0,1],algo="GMM")
-   gmm_cov_veg,gmm_cov_set,gmm_veg,gmm_set = m.convertGMMmodel(model,model0_label,model1_label, bands=[0,1])
-   m.plotEllipsesAllModels(X45,y45,setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1])
    
+   #MOST IMPORTANT PART OF CODE
+   
+   vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[1,3])
+   m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[1,3])
+   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,3],algo="KMEANS")
+   kmeans_cov,kmeans_veg,kmeans_set = m.convertK(model,model0_label,model1_label, d, bands=[1,3])
+   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,3],algo="GMM")
+   gmm_cov_veg,gmm_cov_set,gmm_veg,gmm_set = m.convertGMMmodel(model,model0_label,model1_label, bands=[1,3])
+   m.plotEllipsesAllModels(X45,y45,setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[1,3])
+   m.plotHDAllModels(setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg)   
+
+
    #def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
    #def convertKmeansmodel(self,model,model0_label,model1_label, d, bands=[1,6]):
    #plotEllipsesAllModels(self,X,y,bands=[0,1],sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg):
