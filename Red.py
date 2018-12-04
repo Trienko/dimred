@@ -216,9 +216,9 @@ class RedClass():
           X_bwt = features[boundary:,:2,c]
           X = features[:,:2,c]      
 
-          gmm1 = mixture.GaussianMixture(n_components=1, covariance_type='full').fit(X_veg)
-          gmm2 = mixture.GaussianMixture(n_components=1, covariance_type='full').fit(X_bwt)
-          gmm = mixture.GaussianMixture(n_components=2, covariance_type='full').fit(X)
+          gmm1 = mixture.GaussianMixture(n_components=1, covariance_type='full',max_iter=300,random_state=1).fit(X_veg)
+          gmm2 = mixture.GaussianMixture(n_components=1, covariance_type='full',max_iter=300,random_state=1).fit(X_bwt)
+          gmm = mixture.GaussianMixture(n_components=2, covariance_type='full',max_iter=300,random_state=1).fit(X)
           
           self.plot_results(X_veg,X_bwt,gmm.means_[0],gmm.means_[1],gmm.covariances_[0],gmm.covariances_[1],gmm1.means_[0],gmm2.means_[0],gmm1.covariances_[0],gmm2.covariances_[0],c1="red",c2="blue",fourier=fourier,chan=c) 
           meanFinal1_un[:,c] = gmm.means_[0]
@@ -397,7 +397,157 @@ class RedClass():
        #plt.yticks(np.arange(0, 81, 10))
        plt.legend((p1[0], p2[0],p3[0]), ('FFT', 'PCA', 'PCA-FFT'))
        plt.savefig('HD.pdf')
-       plt.show()      
+       plt.show()   
+
+  def examplePlot2(self,H_FFT,H_PCA,H_FFT_un,H_PCA_un):
+	import seaborn as sns
+	import matplotlib.pyplot as plt
+	import numpy as np
+        plt.show()
+        d_sup = H_PCA - H_FFT
+        d_un = H_PCA_un - H_FFT_un
+
+        #d_un_pos = np.zeros((len(d_un),),dtype) 
+
+	# make up some fake data
+	#pos_mut_pcts = np.array([20, 10, 5, 7.5, 30, 50])
+	#pos_cna_pcts = np.array([10, 0, 0, 7.5, 10, 0])
+	#pos_both_pcts = np.array([10, 0, 0, 0, 0, 0])
+	#neg_mut_pcts = np.array([10, 30, 5, 0, 10, 25])
+	#neg_cna_pcts = np.array([5, 0, 7.5, 0, 0, 10])
+	#neg_both_pcts = np.array([0, 0, 0, 0, 0, 10])
+        
+	genes = ['1', '2', '3', '4', '5', '6', '7', 'NDVI']
+
+	with sns.axes_style("white"):
+    		sns.set_style("ticks")
+    		sns.set_context("talk")
+    
+    		# plot details
+    		bar_width = 0.35
+    		epsilon = .015
+    		line_width = 1
+    		opacity = 0.7
+    		pos_bar_positions = np.arange(len(H_FFT))
+    		neg_bar_positions = pos_bar_positions + bar_width
+
+    		# make bar plots
+    		sup_fft = plt.bar(pos_bar_positions, H_FFT, bar_width,
+                              color='#ED0020',
+                              label='FFT (S)')
+    		hpv_pos_cna_bar = plt.bar(pos_bar_positions, H_PCA, bar_width-epsilon,
+                              bottom=H_FFT,
+                              alpha=opacity,
+                              color='white',
+                              edgecolor='#ED0020',
+                              linewidth=line_width,
+                              hatch='//',
+                              label='PCA (S)')
+    		hpv_pos_both_bar = plt.bar(pos_bar_positions, d_sup, bar_width-epsilon,
+                               bottom=H_FFT+H_PCA,
+                               alpha=opacity,
+                               color='green',
+                               edgecolor='#ED0020',
+                               linewidth=line_width,
+                               hatch='0',
+                               label='- (S)')
+    		hpv_neg_mut_bar = plt.bar(neg_bar_positions, H_FFT_un, bar_width,
+                              color='#0000DD',
+                              label='FFT (U)')
+    		hpv_neg_cna_bar = plt.bar(neg_bar_positions, H_PCA_un, bar_width-epsilon,
+                              bottom=H_FFT_un,
+                              color="white",
+                              hatch='//',
+                              edgecolor='#0000DD',
+                              ecolor="#0000DD",
+                              linewidth=line_width,
+                              label='PCA (U)')
+                hpv_neg_both_bar = plt.bar(neg_bar_positions, d_un, bar_width-epsilon,
+                               bottom=H_FFT_un+H_PCA_un,
+                               color="green",
+                               hatch='0',
+                               edgecolor='#0000DD',
+                               ecolor="#0000DD",
+                               linewidth=line_width,
+                               label='- (S)')
+    	plt.xticks(neg_bar_positions, genes, rotation=45)
+    	plt.ylabel('Percentage of Samples')
+    	plt.legend(loc='best')
+    	sns.despine()   
+        plt.show()
+
+
+
+  def examplePlot(self):
+	import seaborn as sns
+	import matplotlib.pyplot as plt
+	import numpy as np
+
+	# make up some fake data
+	pos_mut_pcts = np.array([20, 10, 5, 7.5, 30, 50])
+	pos_cna_pcts = np.array([10, 0, 0, 7.5, 10, 0])
+	pos_both_pcts = np.array([10, 0, 0, 0, 0, 0])
+	neg_mut_pcts = np.array([10, 30, 5, 0, 10, 25])
+	neg_cna_pcts = np.array([5, 0, 7.5, 0, 0, 10])
+	neg_both_pcts = np.array([0, 0, 0, 0, 0, 10])
+	genes = ['PIK3CA', 'PTEN', 'CDKN2A', 'FBXW7', 'KRAS', 'TP53']
+
+	with sns.axes_style("white"):
+    		sns.set_style("ticks")
+    		sns.set_context("talk")
+    
+    		# plot details
+    		bar_width = 0.35
+    		epsilon = .015
+    		line_width = 1
+    		opacity = 0.7
+    		pos_bar_positions = np.arange(len(pos_mut_pcts))
+    		neg_bar_positions = pos_bar_positions + bar_width
+
+    		# make bar plots
+    		hpv_pos_mut_bar = plt.bar(pos_bar_positions, pos_mut_pcts, bar_width,
+                              color='#ED0020',
+                              label='HPV+ Mutations')
+    		hpv_pos_cna_bar = plt.bar(pos_bar_positions, pos_cna_pcts, bar_width-epsilon,
+                              bottom=pos_mut_pcts,
+                              alpha=opacity,
+                              color='white',
+                              edgecolor='#ED0020',
+                              linewidth=line_width,
+                              hatch='//',
+                              label='HPV+ CNA')
+    		hpv_pos_both_bar = plt.bar(pos_bar_positions, pos_both_pcts, bar_width-epsilon,
+                               bottom=pos_cna_pcts+pos_mut_pcts,
+                               alpha=opacity,
+                               color='white',
+                               edgecolor='#ED0020',
+                               linewidth=line_width,
+                               hatch='0',
+                               label='HPV+ Both')
+    		hpv_neg_mut_bar = plt.bar(neg_bar_positions, neg_mut_pcts, bar_width,
+                              color='#0000DD',
+                              label='HPV- Mutations')
+    		hpv_neg_cna_bar = plt.bar(neg_bar_positions, neg_cna_pcts, bar_width-epsilon,
+                              bottom=neg_mut_pcts,
+                              color="white",
+                              hatch='//',
+                              edgecolor='#0000DD',
+                              ecolor="#0000DD",
+                              linewidth=line_width,
+                              label='HPV- CNA')
+    		hpv_neg_both_bar = plt.bar(neg_bar_positions, neg_both_pcts, bar_width-epsilon,
+                               bottom=neg_cna_pcts+neg_mut_pcts,
+                               color="white",
+                               hatch='0',
+                               edgecolor='#0000DD',
+                               ecolor="#0000DD",
+                               linewidth=line_width,
+                               label='HPV- Both')
+    	plt.xticks(neg_bar_positions, genes, rotation=45)
+    	plt.ylabel('Percentage of Samples')
+    	plt.legend(loc='best')
+    	sns.despine()   
+        plt.show()
        
 if __name__ == "__main__":
       
@@ -422,9 +572,14 @@ if __name__ == "__main__":
       mean1,mean2,Sigma1,Sigma2,x1,x2,x3,x4 = red_object.constructDensitiesAndPlot2(X_PCA)
 
       H_PCA = np.zeros((X.shape[2],),dtype=float)
+      H_PCA_un = np.zeros((X.shape[2],),dtype=float)
+
 
       for c in xrange(X.shape[2]):
-          H_PCA[c] = red_object.HD(mean1[:,c],Sigma1[:,:,c],mean2[:,c],Sigma2[:,:,c])
+          H_PCA_un[c] = red_object.HD(mean1[:,c],Sigma1[:,:,c],mean2[:,c],Sigma2[:,:,c])
+      for c in xrange(X.shape[2]):
+          H_PCA[c] = red_object.HD(x1[:,c],x3[:,:,c],x2[:,c],x4[:,:,c])
+      
       #print("H_PCA = "+str(H_PCA))
 
       '''
@@ -440,13 +595,24 @@ if __name__ == "__main__":
       mean1,mean2,Sigma1,Sigma2,x1,x2,x3,x4 = red_object.constructDensitiesAndPlot2(X_FFT,fourier=True)
 
       print("Computing HD ...")
+      H_FFT_un = np.zeros((X.shape[2],),dtype=float)
       H_FFT = np.zeros((X.shape[2],),dtype=float)
 
-      for c in xrange(X.shape[2]):
-          H_FFT[c] = red_object.HD(mean1[:,c],Sigma1[:,:,c],mean2[:,c],Sigma2[:,:,c])
-      #print("H_FFT = "+str(H_FFT))
 
-      red_object.plotBar(H_FFT,H_PCA)
+      for c in xrange(X.shape[2]):
+          H_FFT_un[c] = red_object.HD(mean1[:,c],Sigma1[:,:,c],mean2[:,c],Sigma2[:,:,c])
+      #print("H_FFT = "+str(H_FFT))
+      for c in xrange(X.shape[2]):
+          H_FFT[c] = red_object.HD(x1[:,c],x3[:,:,c],x2[:,c],x4[:,:,c])
+      
+      d1 = H_PCA-H_FFT
+      d2 = H_PCA_un-H_FFT_un
+      
+      print(d1)
+      print(d2)
+
+      #red_object.plotBar(H_FFT,H_PCA)
+      red_object.examplePlot2(H_FFT,H_PCA,H_FFT_un,H_PCA_un)
       
       print(np.average(H_PCA/H_FFT))
 
