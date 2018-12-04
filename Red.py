@@ -193,6 +193,46 @@ class RedClass():
           covFinal2[:,:,c] = gmm2.covariances_[0]
       return meanFinal1,meanFinal2,covFinal1,covFinal2 
           
+  def constructDensitiesAndPlot2(self,features,boundary=592,fourier=False):
+      print("Constructing densities...")
+      chan = features.shape[2]
+      pixels = features.shape[0]
+
+      meanFinal1_un = np.zeros((2,chan),dtype=float)
+      covFinal1_un = np.zeros((2,2,chan),dtype=float)
+
+      meanFinal2_un = np.zeros((2,chan),dtype=float)
+      covFinal2_un = np.zeros((2,2,chan),dtype=float)
+      
+      meanFinal1 = np.zeros((2,chan),dtype=float)
+      covFinal1 = np.zeros((2,2,chan),dtype=float)
+
+      meanFinal2 = np.zeros((2,chan),dtype=float)
+      covFinal2 = np.zeros((2,2,chan),dtype=float)
+      
+      for c in range(chan):
+
+          X_veg = features[:boundary,:2,c]
+          X_bwt = features[boundary:,:2,c]
+          X = features[:,:2,c]      
+
+          gmm1 = mixture.GaussianMixture(n_components=1, covariance_type='full').fit(X_veg)
+          gmm2 = mixture.GaussianMixture(n_components=1, covariance_type='full').fit(X_bwt)
+          gmm = mixture.GaussianMixture(n_components=2, covariance_type='full').fit(X)
+          
+          self.plot_results(X_veg,X_bwt,gmm.means_[0],gmm.means_[1],gmm.covariances_[0],gmm.covariances_[1],gmm1.means_[0],gmm2.means_[0],gmm1.covariances_[0],gmm2.covariances_[0],c1="red",c2="blue",fourier=fourier,chan=c) 
+          meanFinal1_un[:,c] = gmm.means_[0]
+          meanFinal2_un[:,c] = gmm.means_[1]
+          covFinal1_un[:,:,c] = gmm.covariances_[0]
+          covFinal2_un[:,:,c] = gmm.covariances_[1]
+          meanFinal1[:,c] = gmm1.means_[0]
+          meanFinal2[:,c] = gmm2.means_[0]
+          covFinal1[:,:,c] = gmm1.covariances_[0]
+          covFinal2[:,:,c] = gmm2.covariances_[0]
+
+      return meanFinal1_un,meanFinal2_un,covFinal1_un,covFinal2_un,meanFinal1,meanFinal2,covFinal1,covFinal2
+
+
   def HD(self,mean1,Sigma1,mean2,Sigma2):
       #print(mean1)
       mean1 = mean1.reshape((2,1))
@@ -224,18 +264,31 @@ class RedClass():
       order = vals.argsort()[::-1]
       return vals[order], vecs[:,order]
         
-  def plot_results(self,X_veg,X_bwt,mean1,mean2,cov1,cov2,c1="red",c2="blue",fourier=False,chan=0):
+  def plot_results(self,X_veg,X_bwt,mean1,mean2,cov1,cov2,mean1_sup,mean2_sup,cov1_sup,cov2_sup,c1="red",c2="blue",fourier=False,chan=0):
+      import matplotlib 
+      matplotlib.rcParams.update({'font.size': 20})
       plt.clf()
       ax = plt.gca()
       nstd = 2.0
       
+      #CODE TO FIX COLOURING OF ELLIPSES
+      d1 = np.sqrt((mean1_sup[0]-mean1[0])**2 + (mean1_sup[1]-mean1[1])**2)
+      d2 = np.sqrt((mean2_sup[0]-mean2[0])**2 + (mean2_sup[1]-mean2[1])**2)
+      d3 = np.sqrt((mean1_sup[0]-mean2[0])**2 + (mean1_sup[1]-mean2[1])**2)
+      d4 = np.sqrt((mean2_sup[0]-mean1[0])**2 + (mean2_sup[1]-mean1[1])**2)
+ 
+      if ((d3+d4) <= (d1+d2)):
+         mean_temp = mean2
+         mean2 = mean1
+         mean1 = mean_temp
+
       ##ELLIPSE 1
       vals, vecs = self.eigsorted(cov1[:,:])
       theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
       w, h = 2 * nstd * np.sqrt(vals)
       ell1 = Ellipse(xy=(mean1[0], mean1[1]),
               width=w, height=h,
-              angle=theta, edgecolor=c1,facecolor='white',fill=True,linewidth=3,zorder=1)
+              angle=theta, edgecolor=c1,facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="--")
       ell1.set_facecolor('none')
       ax.add_artist(ell1)
 
@@ -245,9 +298,30 @@ class RedClass():
       w, h = 2 * nstd * np.sqrt(vals)
       ell2 = Ellipse(xy=(mean2[0], mean2[1]),
               width=w, height=h,
-              angle=theta, edgecolor=c2,facecolor='white',fill=True,linewidth=3,zorder=1)
+              angle=theta, edgecolor=c2,facecolor='white',fill=True,linewidth=3,zorder=1,linestyle="--")
       ell2.set_facecolor('none')
       ax.add_artist(ell2)
+      
+      ##ELLIPSE 3
+      vals, vecs = self.eigsorted(cov1_sup[:,:])
+      theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+      w, h = 2 * nstd * np.sqrt(vals)
+      ell3 = Ellipse(xy=(mean1_sup[0], mean1_sup[1]),
+              width=w, height=h,
+              angle=theta, edgecolor=c1,facecolor='white',fill=True,linewidth=3,zorder=1)
+      ell3.set_facecolor('none')
+      ax.add_artist(ell3)
+      
+      ##ELLIPSE 4
+      vals, vecs = self.eigsorted(cov2_sup[:,:])
+      theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+      w, h = 2 * nstd * np.sqrt(vals)
+      ell4 = Ellipse(xy=(mean2_sup[0], mean2_sup[1]),
+              width=w, height=h,
+              angle=theta, edgecolor=c2,facecolor='white',fill=True,linewidth=3,zorder=1)
+      ell4.set_facecolor('none')
+      ax.add_artist(ell4)
+
 
       for i in range(X_veg.shape[0]):
          #col = c1[0]
@@ -256,25 +330,31 @@ class RedClass():
       for i in range(X_bwt.shape[0]):
          #col = c2[0]
          ax.scatter(X_bwt[i,0],X_bwt[i,1],c=c2,zorder=3,alpha=0.2)
+      
+      
 
       if fourier:
          ax.set_xlabel("$f_1$")
          ax.set_ylabel("$f_1$")
          if chan <> 7:
-            ax.set_title("FFT: Band "+str(chan+1))
-            plt.savefig("FFT_Band_"+str(chan+1))
+            #ax.set_title("FFT: Band "+str(chan+1))
+            plt.tight_layout()
+            plt.savefig("FFT_Band_"+str(chan+1)+".pdf",bbox_inches='tight')
          else:
-            ax.set_title("FFT: NDVI")
-            plt.savefig("FFT_NDVI")
+            #ax.set_title("FFT: NDVI")
+            plt.tight_layout()
+            plt.savefig("FFT_NDVI.pdf",bbox_inches='tight')
       else:
          ax.set_xlabel("PC 1")
          ax.set_ylabel("PC 2")
          if chan <> 7:
-            ax.set_title("PCA: Band "+str(chan+1))
-            plt.savefig("PCA_Band_"+str(chan+1))
+            #ax.set_title("PCA: Band "+str(chan+1))
+            plt.tight_layout()
+            plt.savefig("PCA_Band_"+str(chan+1)+".pdf",bbox_inches='tight')
          else:
-            ax.set_title("PCA: NDVI")
-            plt.savefig("PCA_NDVI")
+            #ax.set_title("PCA: NDVI")
+            plt.tight_layout()
+            plt.savefig("PCA_NDVI.pdf",bbox_inches='tight')
 
   '''
   def plot_results(X, Y_, means, covariances, index, title):
@@ -308,14 +388,15 @@ class RedClass():
 
        p1 = plt.bar(ind, x1, width)
        p2 = plt.bar(ind, x2, width, bottom=x1)
+       p3 = plt.bar(ind, x2-x1, width, bottom=x2+x1)
 
        plt.ylabel('HD (Cumulative)')
        plt.title('Hellinger Distance Plot')
        plt.xticks(ind, ('1', '2', '3', '4', '5', '6', '7', 'NDVI'))
        plt.xlabel("MODIS Bands")
        #plt.yticks(np.arange(0, 81, 10))
-       plt.legend((p1[0], p2[0]), ('FFT', 'PCA'))
-       plt.savefig('HD.png')
+       plt.legend((p1[0], p2[0],p3[0]), ('FFT', 'PCA', 'PCA-FFT'))
+       plt.savefig('HD.pdf')
        plt.show()      
        
 if __name__ == "__main__":
@@ -338,7 +419,7 @@ if __name__ == "__main__":
       X_PCA,var_ratio = red_object.PCATransform(X)
       #print(X_PCA.shape)
       
-      mean1,mean2,Sigma1,Sigma2 = red_object.constructDensitiesAndPlot(X_PCA)
+      mean1,mean2,Sigma1,Sigma2,x1,x2,x3,x4 = red_object.constructDensitiesAndPlot2(X_PCA)
 
       H_PCA = np.zeros((X.shape[2],),dtype=float)
 
@@ -355,8 +436,9 @@ if __name__ == "__main__":
 
       X_FFT = red_object.findDomFFTFeatures(X,Xf)
       
-      mean1,mean2,Sigma1,Sigma2 = red_object.constructDensitiesAndPlot(X_FFT,fourier=True)
-      
+      #mean1,mean2,Sigma1,Sigma2 = red_object.constructDensitiesAndPlot(X_FFT,fourier=True)
+      mean1,mean2,Sigma1,Sigma2,x1,x2,x3,x4 = red_object.constructDensitiesAndPlot2(X_FFT,fourier=True)
+
       print("Computing HD ...")
       H_FFT = np.zeros((X.shape[2],),dtype=float)
 
@@ -365,6 +447,8 @@ if __name__ == "__main__":
       #print("H_FFT = "+str(H_FFT))
 
       red_object.plotBar(H_FFT,H_PCA)
+      
+      print(np.average(H_PCA/H_FFT))
 
       '''
       ratio = red_object.FourierInfo(Xf)
