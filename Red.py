@@ -403,7 +403,8 @@ class RedClass():
 	import seaborn as sns
 	import matplotlib.pyplot as plt
 	import numpy as np
-        plt.show()
+        plt.clf()
+ 
         d_sup = H_PCA - H_FFT
         d_un = H_PCA_un - H_FFT_un
 
@@ -487,9 +488,12 @@ class RedClass():
                                label='-n (U)')
 
     	plt.xticks(neg_bar_positions-bar_width/2, genes, rotation=45)
-    	plt.ylabel('Cumulative Hellinger Distance')
+    	plt.ylabel('HD (Cumulative)')
     	#plt.legend(loc='best')
-    	sns.despine()   
+    	plt.xticks(fontsize=20)
+        plt.yticks(fontsize=20)
+        
+        sns.despine()   
         plt.show()
 
 
