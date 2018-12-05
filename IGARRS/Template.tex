@@ -64,8 +64,19 @@ in the literature (especially in the case of hypertemporal remote sensing data).
 a meaningful way of empirically comparing different dimensionality reduction techniques. To illustrate how this framework functions, we employ it and a case study to compare two hypertemporal 
 dimensionality reduction techniques, namely PCA (Principal Component Analysis) and the Fast Fourier Transform (FFT).
 
-For our case study we consider a hypertemporal Moderate Resolution Imaging Spectroradiometer (MODIS) dataset containing both vegetation and settlement pixels. Our study area is located in the Gauteng province of South Africa. Settlemet expansion is one of the most pervasive forms of landcover change in southern Africa. It is therefore of the utmost importance to be able to discern 
-between these two land cover types, especially in the case of South Africa \cite{grobler2012}. 
+For our case study we consider a hypertemporal Moderate Resolution Imaging Spectroradiometer (MODIS) dataset. In this paper, we will employ a labelled as well as an unlabelled version of this data set.
+We do this in order to show that this method can be applied to labelled as well as unlabelled data. Comparing feature reduction techniques that were applied to labelled 
+data can  be achieved by comparing the accuracy of a host of supervised classifiers which  
+
+is to emphasize the proposed method's usefulness. It can be used to compare the efficacy of two feature reduction approaches 
+
+containing both vegetation and settlement pixels 
+as well as an unlabelled version of this same dataset. ,
+not only can it compare the efficacy of feature reduction techniques on a labelled dataset (which can admitantly also be accomplished by evaluating the success of a host of different supervised classifiers which were trained using the 
+labelled dataset), it can also be used to compare the efficacy of feature reduction thecniques on a dataset which does not contain any class labels.
+it can be used to compare to feature reduction techniques even if the dataset contains no class labels. 
+Our study area is located in the Gauteng province of South Africa. Settlemet expansion is one of the most pervasive forms of landcover change in southern Africa. It is therefore of the utmost importance to be able to discern 
+between these two land cover types, especially in the case of South Africa \cite{grobler2012}. We also use an unlabelled version of the aforemention The reason for considering both a labelled and unlabe
 
 PCA has been applied extensively to remote sensing data \cite{byrne1980,crist1984} and in particular to remote sensing time-series \cite{eastman1993,hall2003}. PCA remains a popular dimensionality reduction technique. It was recently used to analyze the spatio-temporal variability of 
 the Pantanal vegetation cover (which is the largest tropical wetland in the world) \cite{almeida2015}.  %and to determine spatio-temporal patterns between multiple time-series
