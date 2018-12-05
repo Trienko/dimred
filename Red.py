@@ -407,8 +407,12 @@ class RedClass():
         d_sup = H_PCA - H_FFT
         d_un = H_PCA_un - H_FFT_un
 
-        #d_un_pos = np.zeros((len(d_un),),dtype) 
+        d_un_pos = np.zeros((len(d_un),)) 
+        d_un_neg = np.copy(d_un_pos)
 
+        d_un_pos[d_un>=0] = d_un[d_un>=0]
+        d_un_neg[d_un<0] = d_un[d_un< 0]
+        d_un_neg = np.absolute(d_un_neg)
 	# make up some fake data
 	#pos_mut_pcts = np.array([20, 10, 5, 7.5, 30, 50])
 	#pos_cna_pcts = np.array([10, 0, 0, 7.5, 10, 0])
@@ -425,7 +429,7 @@ class RedClass():
     
     		# plot details
     		bar_width = 0.35
-    		epsilon = .015
+    		epsilon = .02
     		line_width = 1
     		opacity = 0.7
     		pos_bar_positions = np.arange(len(H_FFT))
@@ -433,9 +437,11 @@ class RedClass():
 
     		# make bar plots
     		sup_fft = plt.bar(pos_bar_positions, H_FFT, bar_width,
+                              edgecolor='#ED0020',
+                              linewidth=line_width,
                               color='#ED0020',
                               label='FFT (S)')
-    		hpv_pos_cna_bar = plt.bar(pos_bar_positions, H_PCA, bar_width-epsilon,
+    		hpv_pos_cna_bar = plt.bar(pos_bar_positions, H_PCA, bar_width,
                               bottom=H_FFT,
                               alpha=opacity,
                               color='white',
@@ -443,18 +449,19 @@ class RedClass():
                               linewidth=line_width,
                               hatch='//',
                               label='PCA (S)')
-    		hpv_pos_both_bar = plt.bar(pos_bar_positions, d_sup, bar_width-epsilon,
+    		hpv_pos_both_bar = plt.bar(pos_bar_positions, d_sup, bar_width,
                                bottom=H_FFT+H_PCA,
-                               alpha=opacity,
-                               color='green',
+                               color='magenta',
                                edgecolor='#ED0020',
                                linewidth=line_width,
                                hatch='0',
                                label='- (S)')
     		hpv_neg_mut_bar = plt.bar(neg_bar_positions, H_FFT_un, bar_width,
+                              edgecolor='#0000DD',
+                              linewidth=line_width,
                               color='#0000DD',
                               label='FFT (U)')
-    		hpv_neg_cna_bar = plt.bar(neg_bar_positions, H_PCA_un, bar_width-epsilon,
+    		hpv_neg_cna_bar = plt.bar(neg_bar_positions, H_PCA_un, bar_width,
                               bottom=H_FFT_un,
                               color="white",
                               hatch='//',
@@ -462,17 +469,26 @@ class RedClass():
                               ecolor="#0000DD",
                               linewidth=line_width,
                               label='PCA (U)')
-                hpv_neg_both_bar = plt.bar(neg_bar_positions, d_un, bar_width-epsilon,
+                hpv_neg_both_bar = plt.bar(neg_bar_positions, d_un_pos, bar_width,
                                bottom=H_FFT_un+H_PCA_un,
-                               color="green",
+                               color="magenta",
                                hatch='0',
                                edgecolor='#0000DD',
                                ecolor="#0000DD",
                                linewidth=line_width,
-                               label='- (S)')
-    	plt.xticks(neg_bar_positions, genes, rotation=45)
-    	plt.ylabel('Percentage of Samples')
-    	plt.legend(loc='best')
+                               label='-p (U)')
+                hpv_neg_2 = plt.bar(neg_bar_positions, d_un_neg, bar_width,
+                               bottom=H_FFT_un+H_PCA_un+d_un_pos,
+                               color="cyan",
+                               hatch='0',
+                               edgecolor='#0000DD',
+                               ecolor="#0000DD",
+                               linewidth=line_width,
+                               label='-n (U)')
+
+    	plt.xticks(neg_bar_positions-bar_width/2, genes, rotation=45)
+    	plt.ylabel('Cumulative Hellinger Distance')
+    	#plt.legend(loc='best')
     	sns.despine()   
         plt.show()
 
