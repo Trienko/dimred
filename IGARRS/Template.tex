@@ -60,23 +60,21 @@ Principal Component Analhysis (PCA), dimensionality reduction, harmonic analysis
 \label{sec:intro}
 
 Many dimensionality reduction techniques have been proposed in the remote sensing literature \cite{grobler2012}. However, there are few empirical comparison studies between the different methods
-in the literature (especially in the case of hypertemporal remote sensing data). In this paper we present a basic comparison framework which if it is extended can provide 
-a meaningful way of empirically comparing different dimensionality reduction techniques. To illustrate how this framework functions, we employ it and a case study to compare two hypertemporal 
+in the literature (especially in the case of hypertemporal remote sensing data). 
+
+The most straightforward approach one could follow to perform such an empirical 
+study would be to first create $x$ intermediate datasets by applying $x$ reduction techniques on an original dataset. One would then use the $x$ intermediate 
+datasets to train $x$ supervised classifiers (each of the aforementioned classifiers should use the same underlying classification strategy). The last step of this approach would then 
+involve comparing the accuracy of the $x$ classifiers with one another. One drawback of such an approach is that this approach can only be used if your original dataset is 
+labelled. 
+
+In this paper we present a basic comparison framework that can be used to compare the 
+efficacy of different reduction techniques wheter the original dataset is labelled or not. To illustrate how this framework functions, we employ it and a case study to compare two hypertemporal 
 dimensionality reduction techniques, namely PCA (Principal Component Analysis) and the Fast Fourier Transform (FFT).
 
-For our case study we consider a hypertemporal Moderate Resolution Imaging Spectroradiometer (MODIS) dataset. In this paper, we will employ a labelled as well as an unlabelled version of this data set.
-We do this in order to show that this method can be applied to labelled as well as unlabelled data. Comparing feature reduction techniques that were applied to labelled 
-data can  be achieved by comparing the accuracy of a host of supervised classifiers which  
-
-is to emphasize the proposed method's usefulness. It can be used to compare the efficacy of two feature reduction approaches 
-
-containing both vegetation and settlement pixels 
-as well as an unlabelled version of this same dataset. ,
-not only can it compare the efficacy of feature reduction techniques on a labelled dataset (which can admitantly also be accomplished by evaluating the success of a host of different supervised classifiers which were trained using the 
-labelled dataset), it can also be used to compare the efficacy of feature reduction thecniques on a dataset which does not contain any class labels.
-it can be used to compare to feature reduction techniques even if the dataset contains no class labels. 
-Our study area is located in the Gauteng province of South Africa. Settlemet expansion is one of the most pervasive forms of landcover change in southern Africa. It is therefore of the utmost importance to be able to discern 
-between these two land cover types, especially in the case of South Africa \cite{grobler2012}. We also use an unlabelled version of the aforemention The reason for considering both a labelled and unlabe
+For our case study we consider a hypertemporal Moderate Resolution Imaging Spectroradiometer (MODIS) dataset containing both vegetation and settlement pixels.
+Settlemet expansion is one of the most pervasive forms of landcover change in southern Africa. It is therefore of the utmost importance to be able to discern 
+between these two land cover types, especially in the case of South Africa \cite{grobler2012}. 
 
 PCA has been applied extensively to remote sensing data \cite{byrne1980,crist1984} and in particular to remote sensing time-series \cite{eastman1993,hall2003}. PCA remains a popular dimensionality reduction technique. It was recently used to analyze the spatio-temporal variability of 
 the Pantanal vegetation cover (which is the largest tropical wetland in the world) \cite{almeida2015}.  %and to determine spatio-temporal patterns between multiple time-series
@@ -285,16 +283,20 @@ We end the section by discussing the distance metric we used to quantify the sep
 The proposed comparison framework:
 
 \begin{description}
- \item[Feature Reduction] Apply the different feature reduction approaches to a hypertemporal data set (repeat for each spectral band).
+ \item[Feature Reduction] Apply the different feature reduction approaches to either a labelled or an unlabelled hypertemporal dataset (repeat for each spectral band). 
  \begin{itemize}
   \item In this paper, we used the \textsc{scikit-learn}\footnote{http://scikit-learn.org/stable/index.html} library to run PCA on each MODIS band. We then stored the two largest principal components for each band in a feature matrix (Section~\ref{sec:PCA}). 
   \item In this paper, we used the \textsc{numpy}\footnote{http://www.numpy.org} library to extract the mean and seasonal component out of each MODIS pixel for each band and stored the result in a feature matrix (Section~\ref{sec:fft}). 
  \end{itemize}
- \item[Density Estimation] Estimate the densities associated with the reduced feature space for each feature reduction method and landcover type. 
+ \item[Density Estimation] If the dataset is labelled then we estimate the densities associated with the reduced feature space for each feature reduction method and landcover type and if 
+ it is unlabbeld we fit a mixture model to the reduced feature space instead.
  \begin{itemize}
-  \item In this paper, we made use of \textsc{scikit-learn} to fit Gaussian densities to the feature space of each method for each band and land cover type (considered a maximum of two features). 
+  \item In the case of a labelled dataset 
+  we assumed that the feature space associated with each landcover type (and band) could be represented by a Gaussian density. In the case 
+  of an unlabelled dataset we assumed that the reduced feature space could be represented by a Gaussian Mixture Model (GMM). We only considered two features. The aforementioned densities were estimated 
+  using \textsc{scikit-learn}.
  \end{itemize}
- \item[Hellinger Distance] Compute the Hellinger distance between the different densities fitted on the reduced feature space of each landcover type and compare to 
+ \item[Hellinger Distance] Compute the Hellinger distance between the different densities (or in the case of an unlabelled dataset the distance between the different mixture components) fitted on the reduced feature space of each landcover type and compare to 
  find the best dimensionality reduction technique (Section~\ref{sec:HD}). 
 \end{description}
 
