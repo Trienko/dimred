@@ -296,8 +296,8 @@ The proposed comparison framework:
   of an unlabelled dataset we assumed that the reduced feature space could be represented by a Gaussian Mixture Model (GMM). We only considered two features. The aforementioned densities were estimated 
   using \textsc{scikit-learn}.
  \end{itemize}
- \item[Hellinger Distance] Compute the Hellinger distance between the different densities (or in the case of an unlabelled dataset the distance between the different mixture components) fitted on the reduced feature space of each landcover type and compare to 
- find the best dimensionality reduction technique (Section~\ref{sec:HD}). 
+ \item[Hellinger Distance] Compute the Hellinger distance between the estimated densities (or in the case of an unlabelled dataset the distance between the different mixture components) associated with the different reduction techniques (Section~\ref{sec:HD}).
+ A Hellinger distance close to 0 implies that the densities are inseparable, while a value close to 1 implies the opposite.
 \end{description}
 
 \subsection{Principal Component Analysis (PCA)}
@@ -357,16 +357,29 @@ H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\
 
 \section{Results}
 
-We plot the reduced feature space obtained using the procedure described in Section~\ref{sec:met} in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT}. The graphs in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT} suggest that PCA outperforms the FFT method, i.e. the two 
-classes are more separable in the reduced feature space when PCA is employed as a dimensionality reduction technique if compared to when the FFT techniques is used. This observation is confirmed 
+We plot the reduced feature space obtained using the framework described in Section~\ref{sec:met} on the dataset described in Section~\ref{} in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT}. The graphs in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT} suggest that PCA outperforms the FFT method, i.e. the two 
+classes are more separable in the reduced feature space when PCA is employed as a dimensionality reduction technique if compared to when the FFT techniques is used (wheter we incorporate the labels of the aformentioned dataset into our analysis or not). This observation is confirmed 
 by Fig.~\ref{fig:HD}, which indicates that PCA performs about 1.3 times better (on average) than the FFT method. Fig.~\ref{fig:HD} also shows us that:
+Fig to
+
+\begin{description}
+ \item[Labelled data] The two landcover classes are the most separable in MODIS band 7 and NDVI. PCA and FFT perform similarly for these two bands. The two landcover classes are the least separable in MODIS band 5 and 6. PCA performs significantly better than the FFT method in these two bands.
+ The landcover classes are somewhat separable in MODIS bands 1, 2, 3, and 4. PCA performs slightly better than the FFT approach in these bands. 
+ \item[Unlabelled data] 
+ If the data is not seperable enough, or cannot be accurately represented by the chosen mixture model then the results that are produced by our framework when applied to 
+ a unlabelled dataset is meaningless (this is the case for band 5, 6, 7 and NDVI). In contrast, if 
+ the aforementioned conditions are met then the framework performs well and produces results similar to the case when the framework is applied to labelled data (this is the case for band
+ 1, 2, 3 and 4). The only major difference being: the FFT technique performs a little bit better than PCA in band 1.
+\end{description}
+
 \begin{itemize}
- \item The two landcover classes are the most separable in MODIS band 7 and NDVI. The two reduction methods, PCA and FFT, perform similarly for these two bands.
- \item The two landcover classes are the least separable in MODIS band 5 and 6. PCA performs significantly better than the FFT method in these two bands.
- \item The landcover classes are somewhat separable in MODIS bands 1, 2, 3, and 4. PCA performs slightly better than the FFT approach in these bands. 
+  \item  When we incorporate the labels into our analysis then the two reduction methods, PCA and FFT, perform similarly for these two bands.
+ If we do not incorporate the labels, the FFT approach gives better results. This is because a GMM is not a good 
+ 
+ \item 
+ \item
 \end{itemize}
 
-...
 
 % \section{Introduction}
 % \label{sec:intro}
@@ -523,7 +536,7 @@ by Fig.~\ref{fig:HD}, which indicates that PCA performs about 1.3 times better (
 % Copyright Form system.
 
 \begin{figure}[h]
-\begin{minipage}[b]{1.0\linewidth}
+\begin{minipage}[b]{0.9\linewidth}
    \centering
    \centerline{\epsfig{figure=HD_new-crop.pdf,width=8.5cm}}
 %   %\vspace{2.0cm}
