@@ -16,10 +16,12 @@
 %
 % Single address.
 % ---------------
-\name{T.L. Grobler$^{\dagger}$ and W. Kleynhans$^{\star}$}
+\name{T.L. Grobler$^{\dagger}$, W. Kleynhans$^{\star}$ and B.P. Salmon$^{\ddagger}$}
 \address{$\dagger$Dept of Mathematical Sciences, Computer Science Division, Stellenbosch University,\\ Private Bag X1, 7602 Matieland, South Africa\\
 $\star$Department of Electrical, Electronic and Computer Engineering University of Pretoria,\\
-Pretoria 0002, South Africa}
+Pretoria 0002, South Africa\\
+${\ddagger}$School of Engineering, University of Tasmania,
+Hobart, TAS 7001, Australia}
 %
 % For example:
 % ------------
@@ -47,12 +49,12 @@ Pretoria 0002, South Africa}
 %
 \begin{abstract}
 In this paper we present a class label agnostic dimensionality reduction comparison framework. 
-We illustrate the usefulness of this framework at the hand of a case study. For our case study, we consider two of the prominent land cover classes in the Gauteng province, namely natural vegetation and settlement using a 7 year MODIS dataset. We use the framework to compare two 
-feature extraction techniques, namely PCA and FFT. For the case study we considered in this paper we found that the PCA technique performed on average 1.15 times better (across the spectral dimension) than the FFT method.
+We illustrate the usefulness of this framework at the hand of a case study. For our case study, we consider two prominent land cover classes in the Gauteng province, namely natural vegetation and settlement using an 8 year MODIS dataset. We use the framework to compare two 
+feature extraction techniques, namely PCA and FFT. For the case study we considered in this paper, we found that the feature space produced by the PCA technique was on average 15\% more seperable than the feature space produced by the FFT approach.
 \end{abstract}
 %
 \begin{keywords}
-Principal Component Analhysis (PCA), harmonic analysis, Moderate Resolution Imaging Spectroradiometer (MODIS).
+Principal Component Analhysis (PCA), harmonic analysis, hypertemporal remote sensing.
 \end{keywords}
 %
 
@@ -60,33 +62,23 @@ Principal Component Analhysis (PCA), harmonic analysis, Moderate Resolution Imag
 \label{sec:intro}
 
 Many dimensionality reduction techniques have been proposed in the remote sensing literature \cite{grobler2012}. However, there are few empirical comparison studies between the different methods
-in the literature (especially in the case of hypertemporal remote sensing data). 
-
-The most straightforward approach one could follow to perform such an empirical 
+in the literature (especially in the case of hypertemporal remote sensing data). The most straightforward approach one could follow to perform such an empirical 
 study would be to first create $x$ intermediate datasets by applying $x$ reduction techniques on an original dataset. One would then use the $x$ intermediate 
 datasets to train $x$ supervised classifiers (each of the aforementioned classifiers should use the same underlying classification strategy). The last step of this approach would then 
 involve comparing the accuracy of the $x$ classifiers with one another. One drawback of such an approach is that this approach can only be used if your original dataset is 
-labelled. 
-
-In this paper we present a basic comparison framework that can be used to compare the 
+labelled. In this paper we present a basic comparison framework that can be used to compare the 
 efficacy of different reduction techniques whether the original dataset is labelled or not. To illustrate how this framework functions, we employ it and a case study to compare two hypertemporal 
-dimensionality reduction techniques, namely PCA (Principal Component Analysis) and the Fast Fourier Transform (FFT).
-
-For our case study we consider a hypertemporal Moderate Resolution Imaging Spectroradiometer (MODIS) dataset containing both vegetation and settlement pixels.
-Settlement expansion is one of the most pervasive forms of landcover change in southern Africa. It is therefore of the utmost importance to be able to discern 
-between these two land cover types, especially in the case of South Africa \cite{grobler2012}. 
-
-PCA has been applied extensively to remote sensing data \cite{byrne1980} and in particular to remote sensing time-series \cite{hall2003}. PCA remains a popular dimensionality reduction technique. It was recently used to analyze the spatio-temporal variability of 
+dimensionality reduction techniques, namely PCA (Principal Component Analysis) and the Fast Fourier Transform (FFT). For our case study we consider a hypertemporal Moderate Resolution Imaging Spectroradiometer (MODIS) dataset containing both vegetation and settlement time-series.
+Settlement expansion is one of the most pervasive forms of land cover change in southern Africa. It is therefore of the utmost importance to be able to discern 
+between these two land cover types \cite{grobler2012}. PCA has been applied extensively to remote sensing data \cite{byrne1980} and in particular to remote sensing time-series \cite{hall2003}. PCA remains a popular dimensionality reduction technique. It was recently used to analyze the spatio-temporal variability of 
 the Pantanal vegetation cover (which is the largest tropical wetland in the world) \cite{almeida2015}.  %and to determine spatio-temporal patterns between multiple time-series
-Harmonic features (i.e. the FFT) have also been used extensively for landcover classification and change detection \cite{jakubauskas2002}. It was recently used in a tree/grass fractional cover case study conducted in 
-the Kruger national park (South Africa) \cite{ibrahim2018}. 
-
-We start the paper by discussing the dataset we considered and then we present the feature extraction comparison framework. Lastly we present our results and conclusions.
+Harmonic features (i.e. the FFT) have also been used extensively for land cover classification and change detection \cite{jakubauskas2002}. It was recently used in a tree/grass fractional cover case study conducted in 
+the Kruger national park South Africa \cite{ibrahim2018}. We start the paper by discussing the dataset we considered and then we present the feature extraction comparison framework. Lastly we present our results and conclusions.
 
 \section{Data Description}
 \label{sec:data}
-The hypertemporal dataset that we made use of in this paper is composed of 8 daily (45 observations per year) composite MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
-data and correspond to a total area of approximately 230 km$^2$ of the Gauteng province of South Africa. In this paper we consider two classes of landcover, namely vegetation and settlements. The settlements class contains pixels (333 pixels) consisting of about
+The hypertemporal dataset that we used contains MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
+data (corresponding to a total area of approximately 230 km$^2$ of the Gauteng province of South Africa). The temporal cadence of the data is 45 observations a year (one every 8 days) In this paper we consider two classes of land cover, namely vegetation and settlement. The settlements class contains pixels (333 pixels) consisting of about
 50\% buildings, and 50\% vegetation, whereas the vegetation class contains pixels (592 pixels) which contain more than 90\% vegetation. Each pixel consist of eight time-series that contain 368 samples. The eight time-series can be associated with the first seven MODIS bands and the Normalized Difference Vegetation Index (NDVI).
 %The MODIS pixels where hand picked after inspecting two high resolution Système Probatoire d’Observation de la Terre (SPOT) images from the year 2000 and 2008 respectively (i.e. they did not change).
 We selected MODIS pixels that according to Système Probatoire d’Observation de la Terre (SPOT) images had the appropriate percentage land cover type in a MODIS pixel and did not change from 2000 to 2008 \cite{grobler2012}.
@@ -182,8 +174,8 @@ We selected MODIS pixels that according to Système Probatoire d’Observation d
 
 %
 \caption{The reduced feature space obtained after running PCA on the Gauteng dataset (i.e. we plot the feature matrix $\mathbf{Y}_2$ for each MODIS band). The first
-principal component is associated with the $x$-axis, while the second principal component is associated with the $y$-axis. We plotted the features using their correct labels (red for vegetation 
-and blue for settlements). The solid ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each landcover class.
+principal component is associated with the $x$-axis, while the second principal component is associated with the $y$-axis. We plotted the features using their corresponding labels (red for vegetation 
+and blue for settlements). The solid ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each land cover class.
 The dashed ellipses represent the 95\% confidence interval of the obtained GMM mixture components that were fitted to the dataset. 
 The raw MCD43A4 data are digital numbers (16-bit unsigned integer values).}
 \label{fig:density_PCA}
@@ -263,8 +255,8 @@ The raw MCD43A4 data are digital numbers (16-bit unsigned integer values).}
 \end{minipage}
 
 %
-\caption{The reduced feature space obtained after running the FFT on the Gauteng dataset (i.e. we plot the feature matrix $\mathbf{Y}_2$ for each MODIS band). The mean of each pixel is associated with the $x$-axis, while the seasonal amplitude of each pixel is associated with the $y$-axis. We plotted the features using their correct labels (red for vegetation 
-and blue for settlements). The ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each landcover class. 
+\caption{The reduced feature space obtained after running the FFT on the Gauteng dataset (i.e. we plot the feature matrix $\mathbf{Y}_2$ for each MODIS band). The mean of each pixel is associated with the $x$-axis, while the seasonal amplitude of each pixel is associated with the $y$-axis. We plotted the features using their corresponding labels (red for vegetation 
+and blue for settlements). The ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each land cover class. 
 The dashed ellipses represent the 95\% confidence interval of the GMM mixture components that were fitted to the dataset.}
 \label{fig:density_FFT}
 %
@@ -276,7 +268,7 @@ The dashed ellipses represent the 95\% confidence interval of the GMM mixture co
 \section{Methodology}
 \label{sec:met}
 We describe the proposed comparison framework in Section~\ref{sec:comp}. We then discuss the two dimensionality reduction techniques we considered in Section~\ref{sec:PCA} and Section~\ref{sec:fft}. 
-We end the section by discussing the distance metric we used to quantify the separability between the two landcover classes (after feature extraction). 
+We end the section by discussing the distance metric we used to quantify the separability between the two land cover classes (after feature extraction). 
 
 \subsection{Comparison Framework}
 \label{sec:comp}
@@ -285,18 +277,18 @@ The proposed comparison framework:
 \begin{description}
  \item[Feature Reduction] Apply the different feature reduction approaches to either a labelled or an unlabelled hypertemporal dataset (repeat for each spectral band). 
  \begin{itemize}
-  \item In this paper, we used the \textsc{scikit-learn}\footnote{http://scikit-learn.org/stable/index.html} library to run PCA on each MODIS band. We then stored the two largest principal components for each band in a feature matrix (Section~\ref{sec:PCA}). 
-  \item In this paper, we used the \textsc{numpy}\footnote{http://www.numpy.org} library to extract the mean and seasonal component out of each MODIS pixel for each band and stored the result in a feature matrix (Section~\ref{sec:fft}). 
+  \item In this paper, we used the \textsc{scikit-learn} library to run PCA on each MODIS band \cite{scikitlearn}. We then stored the two largest principal components for each band in a feature matrix (Section~\ref{sec:PCA}). 
+  \item In this paper, we used the \textsc{NumPy} library to extract the mean and seasonal component out of each MODIS pixel for each band and stored the result in a feature matrix (Section~\ref{sec:fft}) \cite{oliphant2006}. 
  \end{itemize}
- \item[Density Estimation] If the dataset is labelled then we estimate the densities associated with the reduced feature space for each feature reduction method and landcover type and if 
+ \item[Density Estimation] If the dataset is labelled then we estimate the densities associated with the reduced feature space for each feature reduction method and land cover type and if 
  it is unlabbeled we fit a mixture model to the reduced feature space instead.
  \begin{itemize}
   \item In the case of a labelled dataset 
-  we assumed that the feature space associated with each landcover type (and band) could be represented by a Gaussian density. In the case 
+  we assumed that the feature space associated with each land cover type (and band) could be represented by a Gaussian density. In the case 
   of an unlabelled dataset we assumed that the reduced feature space could be represented by a Gaussian Mixture Model (GMM). We only considered two features. The aforementioned densities were estimated 
   using \textsc{scikit-learn}.
  \end{itemize}
- \item[Hellinger Distance] Compute the Hellinger distance between the estimated densities (or the different mixture components) associated with the different landcover classes (or clusters) for each reduction technique (Section~\ref{sec:HD}).
+ \item[Hellinger Distance] Compute the Hellinger distance between the estimated densities (or the different mixture components) associated with the different land cover classes (or clusters) for each reduction technique (Section~\ref{sec:HD}).
  A Hellinger distance close to 0 implies that the densities are inseparable, while a value close to 1 implies the opposite.
 \end{description}
 
@@ -341,7 +333,7 @@ in the feature matrix $\mathbf{Y}_2$ (the dimension of $\mathbf{Y}_2$ is $n\time
 2|\mathcal{F}[x_i(t)][f_s]|&~\textrm{if}~j=2\\
 \end{cases}.
 \end{equation}
-In the above equation $x_i(t)$ denotes the time series of MODIS pixel $i$ in band $b$, $\mathcal{F}\{\}$ denotes the Fourier Transform and $fs = \frac{1}{45}$ Hz.
+In the above equation $x_i(t)$ denotes the time series of MODIS pixel $i$ in band $b$, $\mathcal{F}\{\}$ denotes the Fourier Transform and $f_s = \frac{1}{45}$ Hz.
 
 \subsection{Hellinger Distance}
 \label{sec:HD}
@@ -359,11 +351,11 @@ H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\
 
 We plot the reduced feature space obtained using the framework described in Section~\ref{sec:met} on the dataset (a labelled and an unlabelled version of this dataset) described in Section~\ref{sec:data} in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT}. The graphs in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT} suggest that PCA outperforms the FFT method, i.e. the two 
 classes are more separable in the reduced feature space associated with PCA than the feature space generated by the FFT technique (wheter we incorporated the labels of the aformentioned dataset into our analysis or not). This observation is confirmed 
-by Fig.~\ref{fig:HD}, which indicates that PCA performs about 1.15 times better (on average) than the FFT method. Figs.~\ref{fig:density_PCA}--\ref{fig:HD} show us that:
+by Fig.~\ref{fig:HD}, which indicates that PCA produces a feature space which is about 15\% more separable than the feature space produced by the FFT method (not in an absolute sense). Figs.~\ref{fig:density_PCA}--\ref{fig:HD} show us that:
 \begin{description}
- \item[Separability] Indicates that the Hellinger distance is a good metric to use as an indication of class separability.
- \item[Labelled data] The two landcover classes are the most separable in MODIS band 7 and NDVI. PCA and FFT perform similarly for these two bands. The two landcover classes are the least separable in MODIS band 5 and 6. PCA performs significantly better than the FFT method in these two bands.
- The landcover classes are somewhat separable in MODIS bands 1, 2, 3, and 4. PCA performs slightly better than the FFT approach in these bands. 
+ %\item[Separability] Indicates that the Hellinger distance is a good metric to use as an indication of class separability.
+ \item[Labelled data] The two land cover classes are the most separable in MODIS band 7 and NDVI. PCA and FFT perform similarly for these two bands. The two land cover classes are the least separable in MODIS band 5 and 6. PCA performs significantly better than the FFT method in these two bands.
+ The land cover classes are somewhat separable in MODIS bands 1, 2, 3, and 4. PCA performs slightly better than the FFT approach in these bands. 
  \item[Unlabelled data]  
  If the data is not separable enough, or cannot be accurately represented by the chosen mixture model then the results produced by our framework has no physical meaning. This is the case for band 5, 6, 7 and NDVI. The only 
  exception being: the FFT technique applied to NDVI. In contrast, if the aforementioned conditions are met then the framework performs well and produces results similar to the case when the framework is applied to labelled data. This is the case for band
@@ -527,7 +519,7 @@ by Fig.~\ref{fig:HD}, which indicates that PCA performs about 1.15 times better 
 \begin{figure}[h]
 \begin{minipage}[b]{0.9\linewidth}
    \centering
-   \centerline{\epsfig{figure=HD_new-crop.pdf,width=8.5cm}}
+   \centerline{\epsfig{figure=HD_new-crop.pdf,width=7.0cm}}
 %   %\vspace{2.0cm}
    %\centerline{(a) Result 1}\medskip
  \end{minipage}
@@ -541,7 +533,7 @@ by Fig.~\ref{fig:HD}, which indicates that PCA performs about 1.15 times better 
 \section{Conclusion}
 \label{sec:ref}
 We presented a label agnostic feature extraction comparison framework in this paper. We demonstrated its usefulness by employing it and a case study to compare two feature extraction methods,
-namely FFT and PCA. For the dataset we considered here we found that the PCA method performed on average 1.15 times better than the FFT method (across the spectral dimension).
+namely FFT and PCA (we also found that the PCA approach outperformed the FFT approach).
 
 %List and number all bibliographical references at the end of the paper.  The references can be numbered in alphabetic order or in order of appearance in the document.  When referring to them in the text, type the corresponding reference number in square brackets as shown at the end of this sentence \cite{C2}.
 
