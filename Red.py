@@ -335,7 +335,7 @@ class RedClass():
 
       if fourier:
          ax.set_xlabel("$f_1$")
-         ax.set_ylabel("$f_1$")
+         ax.set_ylabel("$f_2$")
          if chan <> 7:
             #ax.set_title("FFT: Band "+str(chan+1))
             plt.tight_layout()
@@ -588,7 +588,7 @@ if __name__ == "__main__":
 
       X_PCA,var_ratio = red_object.PCATransform(X)
       #print(X_PCA.shape)
-      
+      print(np.average(var_ratio[0,:]+var_ratio[1,:]))
       mean1,mean2,Sigma1,Sigma2,x1,x2,x3,x4 = red_object.constructDensitiesAndPlot2(X_PCA)
 
       H_PCA = np.zeros((X.shape[2],),dtype=float)
@@ -634,7 +634,9 @@ if __name__ == "__main__":
       #red_object.plotBar(H_FFT,H_PCA)
       red_object.examplePlot2(H_FFT,H_PCA,H_FFT_un,H_PCA_un)
       
-      print(np.average(H_PCA/H_FFT))
+      PCA = np.concatenate((H_PCA,H_PCA_un),axis=0)
+      FFT = np.concatenate((H_FFT,H_FFT_un),axis=0)
+      print(np.average(PCA/FFT))
 
       '''
       ratio = red_object.FourierInfo(Xf)
