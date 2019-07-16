@@ -50,7 +50,8 @@ Hobart, TAS 7001, Australia}
 \begin{abstract}
 In this paper we present a class label agnostic dimensionality reduction comparison framework. 
 We illustrate the usefulness of this framework at the hand of a case study. For our case study, we consider two prominent land cover classes in the Gauteng province, namely natural vegetation and settlement using an 8 year MODIS dataset. We use the framework to compare two 
-feature extraction techniques, namely PCA and FFT. For the case study we considered in this paper, we found that the feature space produced by the PCA technique was on average 15\% more seperable than the feature space produced by the FFT approach.
+feature extraction techniques, namely PCA and FFT. For the case study we considered in this paper, the PCA technique produced a reduced feature space which was 15\% more 
+separable than the feature space produced by the FFT method.
 \end{abstract}
 %
 \begin{keywords}
@@ -84,7 +85,6 @@ data (corresponding to a total area of approximately 230 km$^2$ of the Gauteng p
 We selected MODIS pixels that according to Système Probatoire d’Observation de la Terre (SPOT) images had the appropriate percentage land cover type in a MODIS pixel and did not change from 2000 to 2008 \cite{grobler2012}.
 
 
-% \textbf{NB:: REWRITE TO AVOID PLAGIARISM}
 % The ground truth time series data is extracted from the  The study area is
 % illustrated in Fig. 1 [4].
 % 
@@ -177,7 +177,7 @@ We selected MODIS pixels that according to Système Probatoire d’Observation d
 principal component is associated with the $x$-axis, while the second principal component is associated with the $y$-axis. We plotted the features using their corresponding labels (red for vegetation 
 and blue for settlements). The solid ellipses represent the 95\% confidence interval of the Gaussian density which was fitted on the feature space of each land cover class.
 The dashed ellipses represent the 95\% confidence interval of the obtained GMM mixture components that were fitted to the dataset. 
-The raw MCD43A4 data are digital numbers (16-bit unsigned integer values).}
+The raw MCD43A4 data are digital numbers (16-bit unsigned integer values -- did not convert to reflectance ratios).}
 \label{fig:density_PCA}
 %
 \end{figure}
@@ -285,7 +285,7 @@ The proposed comparison framework:
  \begin{itemize}
   \item In the case of a labelled dataset 
   we assumed that the feature space associated with each land cover type (and band) could be represented by a Gaussian density. In the case 
-  of an unlabelled dataset we assumed that the reduced feature space could be represented by a Gaussian Mixture Model (GMM). We only considered two features. The aforementioned densities were estimated 
+  of an unlabelled dataset we assumed that the reduced feature space could be represented by a Gaussian Mixture Model (GMM) (we assumed two components, i.e. semi-supervised). We only considered two features (ensure fairness). The aforementioned densities were estimated 
   using \textsc{scikit-learn}.
  \end{itemize}
  \item[Hellinger Distance] Compute the Hellinger distance between the estimated densities (or the different mixture components) associated with the different land cover classes (or clusters) for each reduction technique (Section~\ref{sec:HD}).
@@ -295,7 +295,7 @@ The proposed comparison framework:
 \subsection{Principal Component Analysis (PCA)}
 \label{sec:PCA}
 %Let us assume that it is centered, i.e. column means have been subtracted and are now equal to zero.
-The two largest principal components associated with the time-series of each MODIS pixel were extracted and stored in a feature matrix for each band. The above is realized
+The two largest principal components associated with the time-series of each MODIS pixel were extracted ($\sim 66$\% of variance captured) and stored in a feature matrix for each band. The above is realized
 via:
 \begin{itemize}
  \item Let $\mathbf{X}_b$ denote an $n\times t$ centered matrix (i.e. column means have been subtracted and are now equal to zero) containing MODIS band $b$ hypertemporal data (to reduce clutter we will omit the $b$ subscript in the rest of the paper). Moreover, assume that $n$ denotes a MODIS pixel index and that $t$ denotes a time-step index. 
@@ -333,11 +333,11 @@ in the feature matrix $\mathbf{Y}_2$ (the dimension of $\mathbf{Y}_2$ is $n\time
 2|\mathcal{F}[x_i(t)][f_s]|&~\textrm{if}~j=2\\
 \end{cases}.
 \end{equation}
-In the above equation $x_i(t)$ denotes the time series of MODIS pixel $i$ in band $b$, $\mathcal{F}\{\}$ denotes the Fourier Transform and $f_s = \frac{1}{45}$ Hz.
+In the above equation $x_i(t)$ denotes the time series of MODIS pixel $i$ in band $b$, $\mathcal{F}\{\}$ denotes the Fourier Transform and $f_s = \frac{1}{45}$ Hz \cite{grobler2012}.
 
 \subsection{Hellinger Distance}
 \label{sec:HD}
-The Hellinger distance between $P\sim\mathcal{N}(\mathbf{u}_1,\mathbf{\Sigma}_1)$ and $Q\sim\mathcal{N}(\mathbf{u}_2,\mathbf{\Sigma}_2)$ is defined as:
+The Hellinger distance (HD) between $P\sim\mathcal{N}(\mathbf{u}_1,\mathbf{\Sigma}_1)$ and $Q\sim\mathcal{N}(\mathbf{u}_2,\mathbf{\Sigma}_2)$ is defined as:
 \begin{equation}
 \label{eq:HD}
 H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\frac{1}{4}}}{|\mathbf{M}|^{\frac{1}{2}}}\exp \{-\frac{1}{8}\mathbf{u}^T\mathbf{M}^{-1}\mathbf{u}\}},
@@ -351,7 +351,7 @@ H(P,Q) = \sqrt{1 - \frac{|\mathbf{\Sigma}_1|^{\frac{1}{4}}|\mathbf{\Sigma}_2|^{\
 
 We plot the reduced feature space obtained using the framework described in Section~\ref{sec:met} on the dataset (a labelled and an unlabelled version of this dataset) described in Section~\ref{sec:data} in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT}. The graphs in Figs.~\ref{fig:density_PCA} and \ref{fig:density_FFT} suggest that PCA outperforms the FFT method, i.e. the two 
 classes are more separable in the reduced feature space associated with PCA than the feature space generated by the FFT technique (wheter we incorporated the labels of the aformentioned dataset into our analysis or not). This observation is confirmed 
-by Fig.~\ref{fig:HD}, which indicates that PCA produces a feature space which is about 15\% more separable than the feature space produced by the FFT method (not in an absolute sense). Figs.~\ref{fig:density_PCA}--\ref{fig:HD} show us that:
+by Fig.~\ref{fig:HD}, which indicates that PCA produces a feature space which is about 15\% more separable than the feature space produced by the FFT method (not in an absolute sense -- i.e. good indicator of separability). Figs.~\ref{fig:density_PCA}--\ref{fig:HD} show us that:
 \begin{description}
  %\item[Separability] Indicates that the Hellinger distance is a good metric to use as an indication of class separability.
  \item[Labelled data] The two land cover classes are the most separable in MODIS band 7 and NDVI. PCA and FFT perform similarly for these two bands. The two land cover classes are the least separable in MODIS band 5 and 6. PCA performs significantly better than the FFT method in these two bands.
