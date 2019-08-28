@@ -284,6 +284,7 @@ class MODIS():
       cm = confusion_matrix(y,y_pred)
       self.plot_confusion_matrix(cm,["s","v"])
       plt.show()  
+
   #1 is vegetation
   #0 is settlement
   ################
@@ -316,6 +317,7 @@ class MODIS():
       y_pred[sprt_value[:,-1]>0] = 1
       
       c = ["r","b"]
+      plt.clf()
       for p in range(X.shape[0]):
           plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
       plt.show()
@@ -559,7 +561,7 @@ class MODIS():
           for k in range(45):
               ax = plt.gca()
               nstd = 2.0
-              for m in range(3):
+              for m in np.array([0,2]):
                   
 
                   ##PLOTTING ELLIPSES
@@ -622,7 +624,7 @@ class MODIS():
               plt.savefig(str(k)+".png")
               ax.cla()
           os.chdir("..")
-      
+
 
             
   def createSupervisedYearModel(self,X,y,bands=[0,1]):
@@ -1099,12 +1101,13 @@ if __name__ == "__main__":
    
    vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[1,3])
    m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[1,3])
-   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,3],algo="KMEANS")
-   kmeans_cov,kmeans_veg,kmeans_set = m.convertK(model,model0_label,model1_label, d, bands=[1,3])
+   #model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,3],algo="KMEANS")
+   #kmeans_cov,kmeans_veg,kmeans_set = m.convertK(model,model0_label,model1_label, d, bands=[1,3])
    model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,3],algo="GMM")
    gmm_cov_veg,gmm_cov_set,gmm_veg,gmm_set = m.convertGMMmodel(model,model0_label,model1_label, bands=[1,3])
-   m.plotEllipsesAllModels(X45,y45,setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[1,3])
-   m.plotHDAllModels(setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg)   
+   m.plotEllipsesAllModels(X45,y45,setmodel,vegmodel,0,0,0,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[1,3])
+   #m.plotHDAllModels(setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg)   
+   m.SPRT_classifierGMM(X,y,model,model0_label,model1_label, d, bands=[1,3])
 
 
    #def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
