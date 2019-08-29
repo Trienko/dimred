@@ -18,6 +18,7 @@ from matplotlib.colors import ListedColormap
 from sklearn.mixture import GaussianMixture
 from scipy.stats import multivariate_normal
 import os
+import pickle
 
 # Create color maps
 cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
@@ -45,11 +46,11 @@ class MODIS():
     """
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
+        #print("Normalized confusion matrix")
     else:
         print('Confusion matrix, without normalization')
 
-    print(cm)
+    #print(cm)
 
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
     plt.title(title)
@@ -70,7 +71,7 @@ class MODIS():
     plt.xlabel('Predicted label')
 
   def loadDataSet(self,name="Gauteng_nochange.mat",province="Gauteng"):
-      print("Loading Dataset")
+      #print("Loading Dataset")
 
       mat = scipy.io.loadmat(name)
       #print(mat.keys())
@@ -84,7 +85,7 @@ class MODIS():
       return veg,bwt
 
   def concatDataSets(self,veg,bwt):
-      print("Concatting data set...")
+      #print("Concatting data set...")
       chan = veg.shape[2]
       timeslots = veg.shape[0]
       v_pixels = veg.shape[1]
@@ -143,11 +144,11 @@ class MODIS():
              model_0_values_k = model[k].means_[0,:] 
              model_1_values_k = model[k].means_[1,:]
 
-          e1 = np.sum((set_model[k,:]-model_0_values_k)**2)  
-          e2 = np.sum((veg_model[k,:]-model_1_values_k)**2)  
+          e1 = np.sum((true_set_model[k,:]-model_0_values_k)**2)  
+          e2 = np.sum((true_veg_model[k,:]-model_1_values_k)**2)  
 
-          e3 = np.sum((set_model[k,:]-model_1_values_k)**2)  
-          e4 = np.sum((veg_model[k,:]-model_0_values_k)**2)  
+          e3 = np.sum((true_set_model[k,:]-model_1_values_k)**2)  
+          e4 = np.sum((true_veg_model[k,:]-model_0_values_k)**2)  
   
           if (e1+e2) >= (e3+e4):
              model0_label[k] = 1 #SETTLEMENT
@@ -164,7 +165,7 @@ class MODIS():
           #   model1_label[k] = 1
           #   model2_label[k] = 0
    
-
+      """ 
       if len(bands) == 2:
          plt.plot(veg_model[:,0],veg_model[:,1],"b")
          plt.plot(set_model[:,0],set_model[:,1],"r")   
@@ -180,7 +181,7 @@ class MODIS():
 
 
          plt.show()
-
+      """
       
       #COMPUTE STD (A FIRST ATTEMPT)
       if algo == "KMEANS":
@@ -196,7 +197,7 @@ class MODIS():
       else:
          d = -1   
 
-      print("d = "+str(d))     
+      #print("d = "+str(d))     
       
       return model, model0_label, model1_label, d  
   
@@ -219,7 +220,7 @@ class MODIS():
       sprt_value = np.zeros((X.shape[0],X.shape[1]))   
 
       for t in range(X.shape[1]):
-          print(t)
+          #print(t)
           
           for p in range(X.shape[0]):
               num = vegetation[t%45].pdf(np.squeeze(X[p,t,:]))
@@ -227,8 +228,8 @@ class MODIS():
               #print(num)
               #print(den)
               if t == 0:
-                 print(num)
-                 print(den)
+                 #print(num)
+                 #print(den)
                  sprt_value[p,0] = np.log(num)-np.log(den)
               else:
                  sprt_value[p,t] = sprt_value[p,t-1] + (np.log(num)-np.log(den)) 
@@ -236,14 +237,15 @@ class MODIS():
       y_pred = np.zeros(y.shape)
       y_pred[sprt_value[:,-1]>0] = 1
       
-      c = ["r","b"]
-      for p in range(X.shape[0]):
-          plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
-      plt.show()
+      #c = ["r","b"]
+      #for p in range(X.shape[0]):
+      #    plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
+      #plt.show()
 
       cm = confusion_matrix(y,y_pred)
-      self.plot_confusion_matrix(cm,["s","v"])
-      plt.show()  
+      #self.plot_confusion_matrix(cm,["s","v"])
+      #plt.show()
+      return cm  
       
 
   
@@ -276,14 +278,15 @@ class MODIS():
       y_pred = np.zeros(y.shape)
       y_pred[sprt_value[:,-1]>0] = 1
       
-      c = ["r","b"]
-      for p in range(X.shape[0]):
-          plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
-      plt.show()
+      #c = ["r","b"]
+      #for p in range(X.shape[0]):
+      #    plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
+      #plt.show()
 
       cm = confusion_matrix(y,y_pred)
-      self.plot_confusion_matrix(cm,["s","v"])
-      plt.show()  
+      #self.plot_confusion_matrix(cm,["s","v"])
+      #plt.show()
+      return cm  
 
   #1 is vegetation
   #0 is settlement
@@ -316,15 +319,16 @@ class MODIS():
       y_pred = np.zeros(y.shape)
       y_pred[sprt_value[:,-1]>0] = 1
       
-      c = ["r","b"]
-      plt.clf()
-      for p in range(X.shape[0]):
-          plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
-      plt.show()
+      #c = ["r","b"]
+      #plt.clf()
+      #for p in range(X.shape[0]):
+      #    plt.plot(sprt_value[p,:],c[int(y[p])],alpha=0.1)
+      #plt.show()
 
       cm = confusion_matrix(y,y_pred)
-      self.plot_confusion_matrix(cm,["s","v"])
-      plt.show()  
+      #self.plot_confusion_matrix(cm,["s","v"])
+      #plt.show() 
+      return cm 
           
 
   #X - [observations,time (0-44),bands]
@@ -451,7 +455,7 @@ class MODIS():
             start += M_LENGTH 
             stop += M_LENGTH 
             #print(stop)
-            print(start)
+            #print(start)
 
       X_model = {}
       y_model = {}
@@ -467,10 +471,10 @@ class MODIS():
           X_model[i] = temp_model
           y_model[i] = np.copy(temp_y)
 
-      for key in X_model.keys():
-          print(key)
-          print(X_model[key].shape)
-          print(y_model[key].shape)
+      #for key in X_model.keys():
+          #print(key)
+          #print(X_model[key].shape)
+          #print(y_model[key].shape)
 
       #plt.plot(y_model[0])
       #plt.show()
@@ -538,18 +542,17 @@ class MODIS():
           hd_mat[0,k] = self.HD(sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:],gmm_set[k][:],gmm_cov_set[k][:,:])
           hd_mat[1,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],gmm_veg[k][:],gmm_cov_veg[k][:,:])
 
-          hd_mat[2,k] = self.HD(sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:],kmeans_set[k][:],kmeans_cov[k][:,:])
-          hd_mat[3,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],kmeans_veg[k][:],kmeans_cov[k][:,:])
+          #hd_mat[2,k] = self.HD(sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:],kmeans_set[k][:],kmeans_cov[k][:,:])
+          #hd_mat[3,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],kmeans_veg[k][:],kmeans_cov[k][:,:])
 
       c = ["r","b","g","m"]
-      for t in range(4):
+      for t in range(2):
           plt.plot(hd_mat[t,:],c[t])
 
       plt.ylim([0,1])
       plt.show() 
+      return hd_mat[:2,45]
 
-
-         
   def plotEllipsesAllModels(self,X,y,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1]):
           X = X[:,:,bands]
           os.system("mkdir BAND"+str(bands[0])+str(bands[1]))
@@ -644,7 +647,7 @@ class MODIS():
       os.chdir("./BAND"+str(bands[0])+str(bands[1]))
           
       for k in range(45):
-          print(k)
+          #print(k)
           ax = plt.gca()
           nstd = 2.0
 
@@ -688,7 +691,7 @@ class MODIS():
       for b in range(1,len(bands)):
           X_reshaped = np.concatenate((X_reshaped,np.squeeze(X[:,:,b])),axis=1)
 
-      print(X_reshaped.shape)
+      #print(X_reshaped.shape)
 
       kmeans = KMeans(n_clusters=2, random_state=0)
       kmeans.fit(X_reshaped)
@@ -698,8 +701,8 @@ class MODIS():
       veg_model = np.mean(X_reshaped[y==1,:],axis=0)
       set_model = np.mean(X_reshaped[y==0,:],axis=0)
 
-      print("HALLO")
-      print(veg_model.shape)
+      #print("HALLO")
+      #print(veg_model.shape)
 
       plt.plot(veg_model[:45],veg_model[45:],"b") 
       plt.plot(set_model[:45],set_model[45:],"r") 
@@ -1076,17 +1079,29 @@ class MODIS():
        plt.legend(loc="best")
        plt.show()
 
+  def plot_accuracy(self, c):
+       m = np.zeros((7,7),dtype=float)
+       count = 0;
+       m[0,0] = np.nan
+       for i in range(0,7):
+           for j in range(i+1,7):
+               m[j,j] = np.nan
+               m[i,j] = 100*(c[count,0,0]+c[count,1,1])/np.sum(c[count,:,:]) 
+               m[j,i] = m[i,j]
+               count = count + 1
+       print(m)
+       
+       
 
-
-
+       plt.imshow(m,cmap="jet",vmin=15,vmax=100)
+       plt.show()
 
 if __name__ == "__main__":
    m = MODIS()
    veg,bwt = m.loadDataSet(name="Gauteng_nochange.mat",province="Gauteng")
    X,y = m.concatDataSets(veg,bwt)
 
-
-   m.testCircleTheory()
+   #m.testCircleTheory()
    
    #m.kmeans45(X,y)
    #m.gmm45(X,y)
@@ -1099,16 +1114,46 @@ if __name__ == "__main__":
    
    #MOST IMPORTANT PART OF CODE
    
-   vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[1,3])
-   m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[1,3])
-   #model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,3],algo="KMEANS")
-   #kmeans_cov,kmeans_veg,kmeans_set = m.convertK(model,model0_label,model1_label, d, bands=[1,3])
-   model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,3],algo="GMM")
-   gmm_cov_veg,gmm_cov_set,gmm_veg,gmm_set = m.convertGMMmodel(model,model0_label,model1_label, bands=[1,3])
-   m.plotEllipsesAllModels(X45,y45,setmodel,vegmodel,0,0,0,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[1,3])
-   #m.plotHDAllModels(setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg)   
-   m.SPRT_classifierGMM(X,y,model,model0_label,model1_label, d, bands=[1,3])
+   cm_sup = np.zeros((21,2,2),dtype=float)
+   cm_un = np.zeros((21,2,2),dtype=float)
+   c = 0
+   
+   '''
+   for k in range(0,7):
+       for j in range(k+1,7):
+           str_val = str(k+1) + " " + str(j+1)
+           print("CREATING SUPERVISED MODEL FOR BAND "+str_val)
+           vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[k,j])
+           print("PERFORMING SPRT ON SUPERVISED MODEL")
+           cm_sup[c,:,:] = m.SPRT_supervised(X,y,vegmodel,setmodel,bands=[k,j])
+           #model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[1,3],algo="KMEANS")
+           #kmeans_cov,kmeans_veg,kmeans_set = m.convertK(model,model0_label,model1_label, d, bands=[1,3])
+           print("CREATING UNSUPERVISED MODEL FOR BAND "+str_val)
+           model, model0_label, model1_label, d = m.timeVaryingModel(X45,y45,bands=[k,j],algo="GMM")
+           gmm_cov_veg,gmm_cov_set,gmm_veg,gmm_set = m.convertGMMmodel(model,model0_label,model1_label, bands=[k,j])
+           print("PLOTTING THE MODEL")
+           m.plotEllipsesAllModels(X45,y45,setmodel,vegmodel,0,0,0,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[k,j])
+           #m.plotHDAllModels(setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg)   
+           print("PERFORMING SPRT ON UNSUPERVISED MODEL")
+           cm_un[c,:,:] = m.SPRT_classifierGMM(X,y,model,model0_label,model1_label, d, bands=[k,j])
+           c = c + 1
 
+   f = open('data.pickle', 'wb')
+   pickle.dump(cm_sup, f)
+   pickle.dump(cm_un,f)
+   f.close()
+   '''
+   f = open('data.pickle', 'rb')
+   c1  = pickle.load(f)
+   c2  = pickle.load(f)
+   f.close()
+   print(c1)
+   print(c2)
+
+   m.plot_accuracy(c1)
+   m.plot_accuracy(c2)
+
+   
 
    #def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
    #def convertKmeansmodel(self,model,model0_label,model1_label, d, bands=[1,6]):
