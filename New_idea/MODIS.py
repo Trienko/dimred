@@ -537,21 +537,25 @@ class MODIS():
   def plotHDAllModels(self,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg):
       hd_mat = np.zeros((4,45))
       plt.clf()
-
+      #print(sup_set[0].means_.shape)
       for k in range(45):
           hd_mat[0,k] = self.HD(sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:],gmm_set[k][:],gmm_cov_set[k][:,:])
           hd_mat[1,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],gmm_veg[k][:],gmm_cov_veg[k][:,:])
+          hd_mat[2,k] = hd_mat[0,k]+hd_mat[1,k]
+
+          #print("set_true : "+str(sup_set[k].means_[0,:]))
+          #print("set_true : "+str(sup_set[k].means_[0,:]))
 
           #hd_mat[2,k] = self.HD(sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:],kmeans_set[k][:],kmeans_cov[k][:,:])
           #hd_mat[3,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],kmeans_veg[k][:],kmeans_cov[k][:,:])
 
-      c = ["r","b","g","m"]
-      for t in range(2):
-          plt.plot(hd_mat[t,:],c[t])
+      #c = ["r","b","g","m"]
+      #for t in range(2):
+      #    plt.plot(hd_mat[t,:],c[t])
 
-      plt.ylim([0,1])
-      plt.show() 
-      return hd_mat[:2,45]
+      #plt.ylim([0,1])
+      #plt.show() 
+      return hd_mat[:3,:]
 
   def plotEllipsesAllModels(self,X,y,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1]):
           X = X[:,:,bands]
@@ -1096,6 +1100,27 @@ class MODIS():
        plt.imshow(m,cmap="jet",vmin=15,vmax=100)
        plt.show()
 
+  def plot_hd(self,hd):
+
+      for k in range(21):
+          plt.plot(hd[k,2,:])
+
+      plt.show()
+
+      plt.plot(hd[0,0,:],"r")#0,2
+      #plt.plot(hd[2,2,:])#0,3
+      #plt.plot(hd[3,2,:],"r--")#0,4
+      
+      
+
+      plt.plot(hd[5,0,:],"b")#0,6
+      #plt.plot(hd[14,2,:])#2,6
+      #plt.plot(hd[17,2,:],"b--")#3,6
+      
+      plt.plot(np.mean(hd[:,0,:],axis=0),"k")
+
+      plt.show()          
+
 if __name__ == "__main__":
    m = MODIS()
    veg,bwt = m.loadDataSet(name="Gauteng_nochange.mat",province="Gauteng")
@@ -1113,12 +1138,13 @@ if __name__ == "__main__":
    #m.yearModel(X45,y45,bands=[0,1])
    
    #MOST IMPORTANT PART OF CODE
-   
+   '''
    cm_sup = np.zeros((21,2,2),dtype=float)
    cm_un = np.zeros((21,2,2),dtype=float)
+   hd = np.zeros((21,3,45),dtype=float)
    c = 0
    
-   '''
+   
    for k in range(0,7):
        for j in range(k+1,7):
            str_val = str(k+1) + " " + str(j+1)
@@ -1133,7 +1159,7 @@ if __name__ == "__main__":
            gmm_cov_veg,gmm_cov_set,gmm_veg,gmm_set = m.convertGMMmodel(model,model0_label,model1_label, bands=[k,j])
            print("PLOTTING THE MODEL")
            m.plotEllipsesAllModels(X45,y45,setmodel,vegmodel,0,0,0,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[k,j])
-           #m.plotHDAllModels(setmodel,vegmodel,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg)   
+           hd[c,:,:] = m.plotHDAllModels(setmodel,vegmodel,0,0,0,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg)   
            print("PERFORMING SPRT ON UNSUPERVISED MODEL")
            cm_un[c,:,:] = m.SPRT_classifierGMM(X,y,model,model0_label,model1_label, d, bands=[k,j])
            c = c + 1
@@ -1141,19 +1167,21 @@ if __name__ == "__main__":
    f = open('data.pickle', 'wb')
    pickle.dump(cm_sup, f)
    pickle.dump(cm_un,f)
+   pickle.dump(hd,f)
    f.close()
    '''
    f = open('data.pickle', 'rb')
    c1  = pickle.load(f)
    c2  = pickle.load(f)
+   hd  = pickle.load(f)
    f.close()
    print(c1)
    print(c2)
-
+   print(hd)
    m.plot_accuracy(c1)
    m.plot_accuracy(c2)
 
-   
+   m.plot_hd(hd)
 
    #def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
    #def convertKmeansmodel(self,model,model0_label,model1_label, d, bands=[1,6]):
