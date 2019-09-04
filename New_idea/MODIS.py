@@ -541,7 +541,9 @@ class MODIS():
       for k in range(45):
           hd_mat[0,k] = self.HD(sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:],gmm_set[k][:],gmm_cov_set[k][:,:])
           hd_mat[1,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],gmm_veg[k][:],gmm_cov_veg[k][:,:])
-          hd_mat[2,k] = hd_mat[0,k]+hd_mat[1,k]
+          hd_mat[2,k] = self.HD(sup_veg[k].means_[0,:],sup_veg[k].covariances_[0,:,:],sup_set[k].means_[0,:],sup_set[k].covariances_[0,:,:])
+          hd_mat[3,k] = self.HD(gmm_set[k][:],gmm_cov_set[k][:,:],gmm_veg[k][:],gmm_cov_veg[k][:,:])
+          #hd_mat[2,k] = hd_mat[0,k]+hd_mat[1,k]
 
           #print("set_true : "+str(sup_set[k].means_[0,:]))
           #print("set_true : "+str(sup_set[k].means_[0,:]))
@@ -555,7 +557,7 @@ class MODIS():
 
       #plt.ylim([0,1])
       #plt.show() 
-      return hd_mat[:3,:]
+      return hd_mat[:4,:]
 
   def plotEllipsesAllModels(self,X,y,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1]):
           X = X[:,:,bands]
@@ -750,6 +752,8 @@ class MODIS():
 
       #c = ["ro","bo"]
 
+      #cm = confusion_matrix(y,)
+
       for k in range(45):
           plt.plot(model[k].cluster_centers_[model1_label[k],0],model[k].cluster_centers_[model1_label[k],1],"ro") 
           plt.plot(model[k].cluster_centers_[model2_label[k],0],model[k].cluster_centers_[model2_label[k],1],"bo")
@@ -793,10 +797,76 @@ class MODIS():
       plt.show()   
 
 
+  def kmeans45_multi(self,X,y,bands=np.array([1,6])):
+      X = X[:,:,bands]
 
+      X_reshaped = np.squeeze(X[:,:,0])
+
+      for b in range(1,len(bands)):
+          X_reshaped = np.concatenate((X_reshaped,np.squeeze(X[:,:,b])),axis=1)
+
+      kmeans = KMeans(n_clusters=2, random_state=0)
+      kmeans.fit(X_reshaped)
       
+      temp_mean = np.zeros((2,X_reshaped.shape[1]))
+      temp_mean[0,:] = np.mean(X_reshaped[y==0,:],axis=0)
+      temp_mean[1,:] = np.mean(X_reshaped[y==1,:],axis=0)
+     
+      mod1 = np.sum(kmeans.cluster_centers_[0,:] - temp_mean[0,:])**2
+      mod2 = np.sum(kmeans.cluster_centers_[1,:] - temp_mean[1,:])**2 
+          
+      mod3 = np.sum(kmeans.cluster_centers_[0,:] - temp_mean[1,:])**2
+      mod4 = np.sum(kmeans.cluster_centers_[1,:] - temp_mean[0,:])**2
+
+      if (mod1+mod2) <= (mod3+mod4):
+        print("CORRECT LABELS")
+        cm = confusion_matrix(y,kmeans.labels_)
+      else:
+        #print(str(mod1+mod2))
+        #print(str(mod3+mod4))
+        print("SWOP LABELS")
+        cm = confusion_matrix(y,np.absolute(kmeans.labels_-1))
+             
+      #self.plot_confusion_matrix(cm,["s","v"])
+      #plt.show()
+      return cm
+
+  def gmm45_multi(self,X,y,bands=np.array([1,6])):
+      X = X[:,:,bands]
+
+      X_reshaped = np.squeeze(X[:,:,0])
+
+      for b in range(1,len(bands)):
+          X_reshaped = np.concatenate((X_reshaped,np.squeeze(X[:,:,b])),axis=1)
+
+      kmeans = mixture.GaussianMixture(n_components=2)
+      kmeans.fit(X_reshaped)
+      
+      temp_mean = np.zeros((2,X_reshaped.shape[1]))
+      temp_mean[0,:] = np.mean(X_reshaped[y==0,:],axis=0)
+      temp_mean[1,:] = np.mean(X_reshaped[y==1,:],axis=0)
+     
+      mod1 = np.sum(kmeans.means_[0,:] - temp_mean[0,:])**2
+      mod2 = np.sum(kmeans.means_[1,:] - temp_mean[1,:])**2 
+          
+      mod3 = np.sum(kmeans.means_[0,:] - temp_mean[1,:])**2
+      mod4 = np.sum(kmeans.means_[1,:] - temp_mean[0,:])**2
+
+      if (mod1+mod2) <= (mod3+mod4):
+        print("CORRECT LABELS")
+        cm = confusion_matrix(y,kmeans.predict(X_reshaped))
+      else:
+        #print(str(mod1+mod2))
+        #print(str(mod3+mod4))
+        print("SWOP LABELS")
+        cm = confusion_matrix(y,np.absolute(kmeans.predict(X_reshaped)-1))
+             
+      #self.plot_confusion_matrix(cm,["s","v"])
+      #plt.show()
+      return cm
 
 
+  #NB BROKEN CODE
   def kmeans45(self,X,y):
       X = X[:,0:45,:]
       print("K-MEANS")
@@ -825,12 +895,12 @@ class MODIS():
 
           if (mod1+mod2) <= (mod3+mod4):
              print("CORRECT LABELS")
-             cm = confusion_matrix(y,model[b].labels_)
+             cm = confusion_matrix(y,k_means.predict(X_reshaped))
           else:
              #print(str(mod1+mod2))
              #print(str(mod3+mod4))
              print("SWOP LABELS")
-             cm = confusion_matrix(y,np.absolute(model[b].labels_-1))
+             cm = confusion_matrix(y,k_means(model[b].labels_-1))
              
           self.plot_confusion_matrix(cm,["s","v"])
           #plt.show()
@@ -1103,17 +1173,21 @@ class MODIS():
   def plot_hd(self,hd):
 
       for k in range(21):
-          plt.plot(hd[k,2,:])
+          plt.plot(hd[k,0,:])
 
       plt.show()
 
-      plt.plot(hd[0,0,:],"r")#0,2
+      plt.plot(hd[1,0,:],"r")#0,2
+      plt.plot(hd[1,2,:],"r--")#0,2
+      plt.plot(hd[1,3,:],"r:")#0,2
       #plt.plot(hd[2,2,:])#0,3
       #plt.plot(hd[3,2,:],"r--")#0,4
       
       
 
       plt.plot(hd[5,0,:],"b")#0,6
+      plt.plot(hd[5,2,:],"b--")#0,6
+      plt.plot(hd[5,3,:],"b:")#0,6
       #plt.plot(hd[14,2,:])#2,6
       #plt.plot(hd[17,2,:],"b--")#3,6
       
@@ -1126,6 +1200,8 @@ if __name__ == "__main__":
    veg,bwt = m.loadDataSet(name="Gauteng_nochange.mat",province="Gauteng")
    X,y = m.concatDataSets(veg,bwt)
 
+   
+
    #m.testCircleTheory()
    
    #m.kmeans45(X,y)
@@ -1134,20 +1210,25 @@ if __name__ == "__main__":
    Xdic,ydic,X45,y45 = m.createDictionary(X,y)
    #print(X45.shape)
    #print(y45.shape)
+   #m.kmeans45_multi(X45,y45,bands=[0,1])
+   #m.gmm45_multi(X45,y45,bands=[0,1])
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
    
    #MOST IMPORTANT PART OF CODE
-   '''
+  
    cm_sup = np.zeros((21,2,2),dtype=float)
    cm_un = np.zeros((21,2,2),dtype=float)
-   hd = np.zeros((21,3,45),dtype=float)
+   cm_unk = np.zeros((21,2,2),dtype=float)
+   cm_ung = np.zeros((21,2,2),dtype=float)
+   hd = np.zeros((21,4,45),dtype=float)
    c = 0
    
    
    for k in range(0,7):
        for j in range(k+1,7):
            str_val = str(k+1) + " " + str(j+1)
+           
            print("CREATING SUPERVISED MODEL FOR BAND "+str_val)
            vegmodel,setmodel = m.createSupervisedYearModel(X45,y45,bands=[k,j])
            print("PERFORMING SPRT ON SUPERVISED MODEL")
@@ -1162,24 +1243,38 @@ if __name__ == "__main__":
            hd[c,:,:] = m.plotHDAllModels(setmodel,vegmodel,0,0,0,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg)   
            print("PERFORMING SPRT ON UNSUPERVISED MODEL")
            cm_un[c,:,:] = m.SPRT_classifierGMM(X,y,model,model0_label,model1_label, d, bands=[k,j])
+           cm_unk[c,:,:] = m.kmeans45_multi(X45,y45,bands=[k,j])
+           cm_ung[c,:,:] = m.gmm45_multi(X45,y45,bands=[k,j])
            c = c + 1
 
    f = open('data.pickle', 'wb')
    pickle.dump(cm_sup, f)
    pickle.dump(cm_un,f)
+   pickle.dump(cm_unk,f)
+   pickle.dump(cm_ung,f)
    pickle.dump(hd,f)
    f.close()
-   '''
+   
    f = open('data.pickle', 'rb')
    c1  = pickle.load(f)
    c2  = pickle.load(f)
+   c3  = pickle.load(f)
+   c4  = pickle.load(f)
    hd  = pickle.load(f)
    f.close()
    print(c1)
    print(c2)
+   print(c3)
+   print(c4)
    print(hd)
    m.plot_accuracy(c1)
    m.plot_accuracy(c2)
+   m.plot_accuracy(c3)
+   m.plot_accuracy(c4) 
+   #print(c1[5,:,:])
+   #print(c2[5,:,:])
+
+   
 
    m.plot_hd(hd)
 
