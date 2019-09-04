@@ -800,10 +800,14 @@ class MODIS():
   def kmeans45_multi(self,X,y,bands=np.array([1,6])):
       X = X[:,:,bands]
 
+      print(X.shape)  
+
       X_reshaped = np.squeeze(X[:,:,0])
 
       for b in range(1,len(bands)):
           X_reshaped = np.concatenate((X_reshaped,np.squeeze(X[:,:,b])),axis=1)
+
+      print(X_reshaped.shape)
 
       kmeans = KMeans(n_clusters=2, random_state=0)
       kmeans.fit(X_reshaped)
@@ -811,21 +815,28 @@ class MODIS():
       temp_mean = np.zeros((2,X_reshaped.shape[1]))
       temp_mean[0,:] = np.mean(X_reshaped[y==0,:],axis=0)
       temp_mean[1,:] = np.mean(X_reshaped[y==1,:],axis=0)
+
+      #plot(
      
       mod1 = np.sum(kmeans.cluster_centers_[0,:] - temp_mean[0,:])**2
       mod2 = np.sum(kmeans.cluster_centers_[1,:] - temp_mean[1,:])**2 
           
       mod3 = np.sum(kmeans.cluster_centers_[0,:] - temp_mean[1,:])**2
       mod4 = np.sum(kmeans.cluster_centers_[1,:] - temp_mean[0,:])**2
-
+      #print(y)
+      #print(kmeans.labels_)
+      
       if (mod1+mod2) <= (mod3+mod4):
+      #if (mod1+mod2) >= (mod3+mod4):
         print("CORRECT LABELS")
-        cm = confusion_matrix(y,kmeans.labels_)
+        cm = confusion_matrix(y,np.absolute(kmeans.labels_))
+        #print(np.absolute(y-kmeans.labels_))
       else:
         #print(str(mod1+mod2))
         #print(str(mod3+mod4))
         print("SWOP LABELS")
         cm = confusion_matrix(y,np.absolute(kmeans.labels_-1))
+        #print(np.absolute(y-np.absolute(kmeans.labels_-1)))
              
       #self.plot_confusion_matrix(cm,["s","v"])
       #plt.show()
@@ -1167,7 +1178,23 @@ class MODIS():
        
        
 
-       plt.imshow(m,cmap="jet",vmin=15,vmax=100)
+       plt.imshow(m,cmap=plt.cm.Blues,vmin=35,vmax=100)
+
+       classes = [1,2,3,4,5,6,7]
+       tick_marks = np.arange(len(classes))
+       plt.xticks(tick_marks, classes)
+       plt.yticks(tick_marks, classes)
+
+       fmt = '.0f'
+       thresh = m.max() / 2.
+       for i, j in itertools.product(range(m.shape[0]), range(m.shape[1])):
+           if i <> j:
+              plt.text(j, i, format(m[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if m[i, j] > thresh else "black")
+
+       plt.xlabel("Band $i$")
+       plt.ylabel("Band $j$")
        plt.show()
 
   def plot_hd(self,hd):
@@ -1210,7 +1237,8 @@ if __name__ == "__main__":
    Xdic,ydic,X45,y45 = m.createDictionary(X,y)
    #print(X45.shape)
    #print(y45.shape)
-   #m.kmeans45_multi(X45,y45,bands=[0,1])
+   #c = m.kmeans45_multi(X,y,bands=[0,6])
+   #print(c)
    #m.gmm45_multi(X45,y45,bands=[0,1])
    #m.multi_kmeans_45(X45,y45)
    #m.yearModel(X45,y45,bands=[0,1])
@@ -1224,7 +1252,7 @@ if __name__ == "__main__":
    hd = np.zeros((21,4,45),dtype=float)
    c = 0
    
-   
+   '''
    for k in range(0,7):
        for j in range(k+1,7):
            str_val = str(k+1) + " " + str(j+1)
@@ -1254,7 +1282,7 @@ if __name__ == "__main__":
    pickle.dump(cm_ung,f)
    pickle.dump(hd,f)
    f.close()
-   
+   '''
    f = open('data.pickle', 'rb')
    c1  = pickle.load(f)
    c2  = pickle.load(f)
@@ -1276,7 +1304,7 @@ if __name__ == "__main__":
 
    
 
-   m.plot_hd(hd)
+   #m.plot_hd(hd)
 
    #def convertGMMmodel(self,model,model0_label,model1_label, bands=[1,6]):
    #def convertKmeansmodel(self,model,model0_label,model1_label, d, bands=[1,6]):
