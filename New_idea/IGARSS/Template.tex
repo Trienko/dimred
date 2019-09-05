@@ -64,6 +64,37 @@ Principal Component Analhysis (PCA), harmonic analysis, hypertemporal remote sen
 \label{sec:intro}
 Hallo \cite{almeida2015}.
 
+\section{Dataset}
+
+\section{Preliminaries}
+
+\section{Methodology}
+%At the start of the analysis the MODIS data set had the following dimensions (592,368,7). The first dimension is associated with the number of MODIS pixels, the second dimension indicates the number of observations, 
+%while the third dimensions represents the number of spectral bands consdidered. The datset is then reshaped into a cube with the following dimensions (x,45,7), i.e. we treat each year of data as 
+%a totally new observation. Let us denote this reshaped data set as $\mathcal{D}$.  Moreover, let $\mathbf{x}_{\mathbf{b}}$ denote a single MODIS pixel from $\mathcal{D}$ that contain only the time-series 
+%associated with spectral bands $\mathbf{b}$. The dimension of $\mathbf{x}$ is therefore $(45,|\mathbf{b}|)$, where $|\cdot|$ denotes the lenght of its operand. We can now build a statistical model for each two band combination for every time-step of the year using either a supervised or an unsupervised strategy.
+%We considered two band combinations as we know that two-band derived indices, like NDVI (Normalized Difference Vegitation Index), achieve good results. 
+Let $\mathbf{x}$ denote a MODIS pixel from the reshaped Gauteng dataset. Each MODIS pixel $\mathbf{x}$ contain seven time-series; each time-series is associated with a spectral band and contain 45 observations.
+We will use the subscript $t$ to denote a time-step index and the subscript $\mathbf{b}$ to denote a composite spectralband index. The superscript $c\in\{v~\textrm{(vegetation)},s~\textrm{(settlement)}\}$ acts as a labelling index. XX showed, that we can employ the Sequential Probability Ratio Test (SPRT) to classify $\mathbf{x}$ as either belonging to the vegetation or the settelment class if 
+the underlying time-varying model of the two classes are known. The details of this classification strategy follows below. The aforementioned time-varying model $\{q_{t,\mathbf{b}}^c\}_{t=1,2,\cdots,45}$ of each class $c$ and spectral subset $\mathbf{b}$ is composed of 45 densities. Each density is associated with a time-step $t$. 
+We can estimate this time-varying model from labelled training data. For each unlabelled MODIS pixel $\mathbf{x}_{\mathbf{b}}$ we can then compute the following scalar quantity 
+\begin{equation}
+S = \sum_{t=1}^{368} \ln \frac{q_{(t-1)\%45+1,\mathbf{b}}^v(\mathbf{x}_{t,\mathbf{b}})}{q_{(t-1)\%45+1,\mathbf{b}}^s(\mathbf{x}_{t,\mathbf{b}})}. 
+\end{equation}
+The unlabelled pixel $\mathbf{x}$ is then classified as $v$ if $S\geq 0$ and as $s$ otherwise.
+
+
+
+
+
+ated at each time-step of the year 
+using some available training data. We can express this     
+
+
+\subsection{Supervised Model}
+
+\subsection{Unsupervised Model}
+
 \begin{minipage}[b]{.47\linewidth}
   \centering 
   \centerline{\epsfig{figure=11.pdf,width=4.0cm}}
@@ -92,6 +123,7 @@ Hallo \cite{almeida2015}.
   \centerline{(d) Band 4}\medskip
 \end{minipage}
 
+\section{Results}
 
 \begin{figure*}[h] 
   \begin{subfigure}[b]{0.49\linewidth}
