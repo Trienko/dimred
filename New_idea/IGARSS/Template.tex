@@ -77,11 +77,21 @@ Hallo \cite{almeida2015}.
 Let $\mathbf{x}$ denote a MODIS pixel from the reshaped Gauteng dataset. Each MODIS pixel $\mathbf{x}$ contain seven time-series; each time-series is associated with a spectral band and contain 45 observations.
 We will use the subscript $t$ to denote a time-step index and the subscript $\mathbf{b}$ to denote a composite spectralband index. The superscript $c\in\{v~\textrm{(vegetation)},s~\textrm{(settlement)}\}$ acts as a labelling index. XX showed, that we can employ the Sequential Probability Ratio Test (SPRT) to classify $\mathbf{x}$ as either belonging to the vegetation or the settelment class if 
 the underlying time-varying model of the two classes are known. The details of this classification strategy follows below. The aforementioned time-varying model $\{q_{t,\mathbf{b}}^c\}_{t=1,2,\cdots,45}$ of each class $c$ and spectral subset $\mathbf{b}$ is composed of 45 densities. Each density is associated with a time-step $t$. 
-We can estimate this time-varying model from labelled training data. For each unlabelled MODIS pixel $\mathbf{x}_{\mathbf{b}}$ we can then compute the following scalar quantity 
+For each unlabelled MODIS pixel $\mathbf{x}_{\mathbf{b}}$ we can then compute the following scalar quantity 
 \begin{equation}
 S = \sum_{t=1}^{368} \ln \frac{q_{(t-1)\%45+1,\mathbf{b}}^v(\mathbf{x}_{t,\mathbf{b}})}{q_{(t-1)\%45+1,\mathbf{b}}^s(\mathbf{x}_{t,\mathbf{b}})}. 
 \end{equation}
-The unlabelled pixel $\mathbf{x}$ is then classified as $v$ if $S\geq 0$ and as $s$ otherwise.
+The unlabelled pixel $\mathbf{x}$ is then classified as $v$ if $S\geq 0$ and as $s$ otherwise. We can estimate this time-varying model using either a supervised or an unsupervised 
+approach. The approach in was to use a supervised approach.
+
+
+\subsection{Supervised Time-Varying Model}
+We estimates the density 
+
+
+\subsection{Unsupervised Time-Varying Model}
+
+
 
 
 
