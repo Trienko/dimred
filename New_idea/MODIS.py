@@ -561,6 +561,8 @@ class MODIS():
 
   def plotEllipsesAllModels(self,X,y,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1]):
           X = X[:,:,bands]
+          #y_new = y_new[yselect==1]
+          #X_0 = X_new[y_new==0,k,0]
           os.system("mkdir BAND"+str(bands[0])+str(bands[1]))
           cmd = "cd BAND"+str(bands[0])+str(bands[1])
           #print(cmd)
@@ -624,13 +626,27 @@ class MODIS():
                       yselect = np.random.randint(2, size=X_new.shape[0])
                       X_new = X_new[yselect==1,:,:]
                       y_new = y_new[yselect==1]
+                      yselect = np.random.randint(2, size=X_new.shape[0])
+                      X_new = X_new[yselect==1,:,:]
+                      y_new = y_new[yselect==1]
+                      yselect = np.random.randint(2, size=X_new.shape[0])
+                      X_new = X_new[yselect==1,:,:]
+                      y_new = y_new[yselect==1]
+                      yselect = np.random.randint(2, size=X_new.shape[0])
+                      X_new = X_new[yselect==1,:,:]
+                      y_new = y_new[yselect==1]
+                                            
+                       
+                      ax.plot(X_new[y_new==0,k,0],X_new[y_new==0,k,1],"ro",zorder=7,alpha=0.2)
+                      ax.plot(X_new[y_new==1,k,0],X_new[y_new==1,k,1],"go",zorder=7,alpha=0.2)
 
-
-                      ax.plot(X_new[y_new==0,k,0],X_new[y_new==0,k,1],"ro",zorder=7,alpha=0.01)
-                      ax.plot(X_new[y_new==1,k,0],X_new[y_new==1,k,1],"go",zorder=7,alpha=0.01)
-
+              if (bands[0] == 0) and (bands[1] == 1):
+                 ax.set_xlim([0,1500])
+                 ax.set_ylim([800,3800])
+                 ax.set_xlabel("Band 1 [DN]")
+                 ax.set_ylabel("Band 2 [DN]")
               ax.set_aspect('equal', adjustable='datalim')
-              plt.savefig(str(k)+".png")
+              plt.savefig(str(k)+".pdf")
               ax.cla()
           os.chdir("..")
 
@@ -1252,9 +1268,9 @@ if __name__ == "__main__":
    hd = np.zeros((21,4,45),dtype=float)
    c = 0
    
-   '''
-   for k in range(0,7):
-       for j in range(k+1,7):
+   
+   for k in range(0,2):
+       for j in range(k+1,2):
            str_val = str(k+1) + " " + str(j+1)
            
            print("CREATING SUPERVISED MODEL FOR BAND "+str_val)
@@ -1274,7 +1290,7 @@ if __name__ == "__main__":
            cm_unk[c,:,:] = m.kmeans45_multi(X45,y45,bands=[k,j])
            cm_ung[c,:,:] = m.gmm45_multi(X45,y45,bands=[k,j])
            c = c + 1
-
+   '''
    f = open('data.pickle', 'wb')
    pickle.dump(cm_sup, f)
    pickle.dump(cm_un,f)
