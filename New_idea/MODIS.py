@@ -560,6 +560,7 @@ class MODIS():
       return hd_mat[:4,:]
 
   def plotEllipsesAllModels(self,X,y,sup_set,sup_veg,kmeans_cov,kmeans_set,kmeans_veg,gmm_cov_set,gmm_cov_veg,gmm_set,gmm_veg,bands=[0,1]):
+          
           X = X[:,:,bands]
           #y_new = y_new[yselect==1]
           #X_0 = X_new[y_new==0,k,0]
@@ -598,19 +599,19 @@ class MODIS():
                       w, h = 2 * nstd * np.sqrt(vals)
                       if t==0:
                          if m == 0:
-                            ell1 = Ellipse(xy=(sup_veg[k].means_[0,0], sup_veg[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=1)
+                            ell1 = Ellipse(xy=(sup_veg[k].means_[0,0], sup_veg[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=4,zorder=1)
                          elif m == 1:
-                            ell1 = Ellipse(xy=(kmeans_veg[k][0], kmeans_veg[k][1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=2,linestyle="--")
+                            ell1 = Ellipse(xy=(kmeans_veg[k][0], kmeans_veg[k][1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=4,zorder=2,linestyle=":")
                          else:
-                            ell1 = Ellipse(xy=(gmm_veg[k][0], gmm_veg[k][1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=3,zorder=3,linestyle=":")
+                            ell1 = Ellipse(xy=(gmm_veg[k][0], gmm_veg[k][1]),width=w,height=h,angle=theta,edgecolor='green',facecolor='white',fill=True,linewidth=4,zorder=3,linestyle="--")
  
                       else:
                          if m == 0:
-                            ell1 = Ellipse(xy=(sup_set[k].means_[0,0], sup_set[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=4)
+                            ell1 = Ellipse(xy=(sup_set[k].means_[0,0], sup_set[k].means_[0,1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=4,zorder=4)
                          elif m == 1:
-                            ell1 = Ellipse(xy=(kmeans_set[k][0], kmeans_set[k][1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=5,linestyle="--")
+                            ell1 = Ellipse(xy=(kmeans_set[k][0], kmeans_set[k][1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=4,zorder=5,linestyle=":")
                          else:
-                            ell1 = Ellipse(xy=(gmm_set[k][0], gmm_set[k][1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=3,zorder=6,linestyle=":")
+                            ell1 = Ellipse(xy=(gmm_set[k][0], gmm_set[k][1]),width=w,height=h,angle=theta,edgecolor='red',facecolor='white',fill=True,linewidth=4,zorder=6,linestyle="--")
 
                       ell1.set_facecolor('none')
                       ax.add_artist(ell1)
@@ -641,12 +642,13 @@ class MODIS():
                       ax.plot(X_new[y_new==1,k,0],X_new[y_new==1,k,1],"go",zorder=7,alpha=0.2)
 
               if (bands[0] == 0) and (bands[1] == 1):
-                 ax.set_xlim([0,1500])
+                 ax.set_xlim([0,2000])
                  ax.set_ylim([800,3800])
                  ax.set_xlabel("Band 1 [DN]")
                  ax.set_ylabel("Band 2 [DN]")
-              ax.set_aspect('equal', adjustable='datalim')
-              plt.savefig(str(k)+".pdf")
+              #ax.set_aspect('equal', adjustable='datalim')
+              plt.tight_layout()
+              plt.savefig(str(k)+".pdf",bbox_inches='tight')
               ax.cla()
           os.chdir("..")
 
@@ -1243,7 +1245,9 @@ if __name__ == "__main__":
    veg,bwt = m.loadDataSet(name="Gauteng_nochange.mat",province="Gauteng")
    X,y = m.concatDataSets(veg,bwt)
 
-   
+   import matplotlib 
+   matplotlib.rcParams.update({'font.size': 20})
+      
 
    #m.testCircleTheory()
    
