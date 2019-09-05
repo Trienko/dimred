@@ -4,6 +4,7 @@
 % --------------------------------------------------------------------------
 \documentclass{article}
 \usepackage{spconf,amsmath,epsfig,graphicx}
+\usepackage{subcaption}
 
 % Example definitions.
 % --------------------
@@ -12,7 +13,7 @@
 
 % Title.
 % ------
-\title{Building a time-varying unsupervised classification model of MODIS time-series}
+\title{Unsupervised Sequential Classification of MODIS Time-Series}
 %
 % Single address.
 % ---------------
@@ -62,6 +63,70 @@ Principal Component Analhysis (PCA), harmonic analysis, hypertemporal remote sen
 \section{Introduction}
 \label{sec:intro}
 Hallo \cite{almeida2015}.
+
+\begin{minipage}[b]{.47\linewidth}
+  \centering 
+  \centerline{\epsfig{figure=11.pdf,width=4.0cm}}
+  %\vspace{1.5cm}
+  \centerline{(a) Band 1}\medskip
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.47\linewidth}
+  \centering
+  \centerline{\epsfig{figure=22.pdf,width=4.0cm}}
+  %\vspace{1.5cm}
+  \centerline{(b) Band 2}\medskip
+\end{minipage}
+
+\begin{minipage}[b]{.47\linewidth}
+  \centering 
+  \centerline{\epsfig{figure=33.pdf,width=4.0cm}}
+  %\vspace{1.5cm}
+  \centerline{(c) Band 3}\medskip
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.47\linewidth}
+  \centering
+  \centerline{\epsfig{figure=44.pdf,width=4.0cm}}
+  %\vspace{1.5cm}
+  \centerline{(d) Band 4}\medskip
+\end{minipage}
+
+
+\begin{figure*}[h] 
+  \begin{subfigure}[b]{0.49\linewidth}
+    \centering
+    \includegraphics[width=0.9\linewidth]{sup-crop.pdf} 
+    \caption{Logarithm applied} 
+    \label{fig7:a} 
+    %\vspace{4ex}
+  \end{subfigure}%% 
+  \begin{subfigure}[b]{0.49\linewidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{un-crop.pdf} 
+    \caption{Binary segmented image} 
+    \label{fig7:b} 
+    %\vspace{13ex}
+    \end{subfigure} 
+  \begin{subfigure}[b]{0.49\linewidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{kmeans-crop.pdf} 
+    \caption{Hough Transform} 
+    \label{fig7:c} 
+  \end{subfigure}%%
+  \begin{subfigure}[b]{0.49\linewidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{gmm-crop.pdf} 
+    \caption{Segmented image} 
+    \label{fig7:d} 
+  \end{subfigure} 
+  \caption{c}
+  \label{fig7} 
+\end{figure*}
+
+
+
+
 
 \section{Conclusion}
 \label{sec:ref}
