@@ -3,7 +3,7 @@
 %          IEEEbib.bst - IEEE bibliography style file.
 % --------------------------------------------------------------------------
 \documentclass{article}
-\usepackage{spconf,amsmath,epsfig,graphicx}
+\usepackage{spconf,amsmath,epsfig,graphicx,amsfonts}
 \usepackage{subcaption}
 
 % Example definitions.
@@ -94,20 +94,38 @@ doing so build the required time-varying model.
 Let $\mathbf{X}_{t,\mathbf{b}}$ represent all the data from $\mathbf{X}$ at time-step $t$ associated with spectral bands $\mathbf{b}$. We can now fit a two-component Gaussian Mixture Model to $\mathbf{X}_{t,\mathbf{b}}$ (as $\mathbf{X}$ contain only two classes). Again,
 the dimension of this model is determined by the number of spectral bands one consides (see Section~). We can repeat the above procedure for each time-step and in doing so 
 build the required time-varying model. The only problem now is that the components of the mixture models will have been inconsistantly labelled. There are many approaces one could use to assure 
-that the components of the mixture model are consistently labelled over time. The simplest approach would be to find the set  would be to find the set 
-\begin{enumerate}
- \item One can keep track of the mean vectors of the two components and make sure 
-\end{enumerate}
+that the components of the mixture model are consistently labelled over time. The simplest approach would be to select for every $t$ a $\mathbf{c} = \{c_0,c_1\}\in\{\{0,1\},\{1,0\}\}$ s.t. the following optimization problem is optimized:
+\begin{equation}
+\inf_{\mathbf{c}} \|\mathbf{u}_{t,\mathbf{b}}^{0}-\mathbf{u}_{t-1,\mathbf{b}}^{c_0}\| + \|\mathbf{u}_{t,\mathbf{b}}^{1}-\mathbf{u}_{t-1,\mathbf{b}}^{c_1}\|,  
+\end{equation}
+where $\mathbf{u}_{t,\mathbf{b}}^{x}$ denotes the mean vector associated with the $x$-th component of the mixture model fitted to $\mathbf{X}_{t,\mathbf{b}}$.
+Next, if $c_0 \neq 0$ then the labels associated with the components of the GMM fitted at time-step $t$ should be first swoped around before moving on to time-step $t+1$.
 
 
+In this paper, however, we labelled our time-varying model by employing the supervised time-varying models mentioned in Section. We followed this approach, because 
+we wanted to to quantify the optimal performance of the unsupervised time-varying model we constructed. At each time-step $t$ we 
+determined whether the sum of the difference between our first GMM component and the density belonging to our settlement model and the difference 
+between our second GMM component and the density belonging to our vegetation model; was smaller than the sum of the difference between our first GMM coponent and the density 
+belonging to our vegetation model and the difference between our second GMM component and the density within our settlement model. If this was the case then our first GMM component 
+was labelled as belonging to the settlement class and the second component was labbelled as belonging to the vegetation class. If this was not the case then 
+the reverse labels were assigned.
+
+% density contained in the vegetation model well as our v than to the density 
+% contained in our vegetation model.
+% assigned the components of the GMM at that time-step 
+% to the density  closest to it. 
+% 
+% approach as we were interested i We used our supervised 
+% model to label our unsupervised model (the GMM component at time-step $t$ which was closest to the settlement density at time-step $t$  was identified as being 
+% cluster was
 
 
-
-
-
-ated at each time-step of the year 
-using some available training data. We can express this     
-
+We first solved the following 
+optimization problem:
+\begin{equation}
+\inf_{\mathbf{c}\in\{\{s,v\},\{v,s\}\}} \|\mathbf{u}_{t,\mathbf{b}}^{0}-\tilde{\mathbf{u}}_{t,\mathbf{b}}^{c_0}\| + \|\mathbf{u}_{t,\mathbf{b}}^{1}-\tilde{\mathbf{u}}_{t-1,\mathbf{b}}^{c_1}\|,  
+\end{equation}
+with $\tilde{\mathbf{u}}_{t,\mathbf{b}}^{c} = \mathbb{E}_t[\mathbf{X}_{t,\mathbf{b}}^c]$. Then, if $c_0 = s$ then the component   
 
 \subsection{Supervised Model}
 
