@@ -68,15 +68,14 @@ Hallo \cite{almeida2015}.
 
 \section{Preliminaries}
 
-\section{Methodology}
+\section{Sequential Probability Ratio Test}
 %At the start of the analysis the MODIS data set had the following dimensions (592,368,7). The first dimension is associated with the number of MODIS pixels, the second dimension indicates the number of observations, 
 %while the third dimensions represents the number of spectral bands consdidered. The datset is then reshaped into a cube with the following dimensions (x,45,7), i.e. we treat each year of data as 
 %a totally new observation. Let us denote this reshaped data set as $\mathcal{D}$.  Moreover, let $\mathbf{x}_{\mathbf{b}}$ denote a single MODIS pixel from $\mathcal{D}$ that contain only the time-series 
 %associated with spectral bands $\mathbf{b}$. The dimension of $\mathbf{x}$ is therefore $(45,|\mathbf{b}|)$, where $|\cdot|$ denotes the lenght of its operand. We can now build a statistical model for each two band combination for every time-step of the year using either a supervised or an unsupervised strategy.
 %We considered two band combinations as we know that two-band derived indices, like NDVI (Normalized Difference Vegitation Index), achieve good results. 
 Let $\mathbf{x}$ denote a MODIS pixel from the reshaped Gauteng dataset $\mathbf{X}$. Each MODIS pixel $\mathbf{x}$ contain seven time-series; each time-series is associated with a spectral band and contain 45 observations.
-We will use the subscript $t$ to denote a time-step index and the subscript $\mathbf{b}$ to denote a composite spectralband index. The superscript $c\in\{v~\textrm{(vegetation)},s~\textrm{(settlement)}\}$ acts as a labelling index. XX showed, that we can employ the Sequential Probability Ratio Test (SPRT) to classify $\mathbf{x}$ as either belonging to the vegetation or the settelment class if 
-the underlying time-varying model of the two classes are known. The details of this classification strategy follows below. The aforementioned time-varying model $\{q_{t,\mathbf{b}}^c\}_{t=1,2,\cdots,45}$ of each class $c$ and spectral subset $\mathbf{b}$ is composed of 45 densities. Each density is associated with a time-step $t$. 
+We will use the subscript $t$ to denote a time-step index and the subscript $\mathbf{b}$ to denote a composite spectralband index. The superscript $c\in\{v~\textrm{(vegetation)},s~\textrm{(settlement)}\}$ acts as a labelling index. XX showed, that the Sequential Probability Ratio Test (SPRT) can be used to distinguish between settlement and vegetation MODIS pixels if the underlying time-varying model of the two classes are known. The details of this classification strategy follows below. The aforementioned time-varying model $\{q_{t,\mathbf{b}}^c\}_{t=1,2,\cdots,45}$ of each class $c$ and spectral subset $\mathbf{b}$ is composed of 45 densities. Each density is associated with a time-step $t$. 
 For each unlabelled MODIS pixel $\mathbf{x}_{\mathbf{b}}$ we can then compute the following scalar quantity 
 \begin{equation}
 S = \sum_{t=1}^{368} \ln \frac{q_{(t-1)\%45+1,\mathbf{b}}^v(\mathbf{x}_{t,\mathbf{b}})}{q_{(t-1)\%45+1,\mathbf{b}}^s(\mathbf{x}_{t,\mathbf{b}})}. 
@@ -86,12 +85,20 @@ approach. The approach in was to use a supervised approach. We elaborate on this
 
 
 \subsection{Supervised Time-Varying Model}
-Let $\mathbf{X}_{t,\mathbf{b}}^c$ represent all the data from $\mathbf{X}$ at time-step $t$, labbeled as class $c$ and associated with spectral bands $\mathbf{b}$. We can now fit a Gaussian density 
-on $\mathbf{X}_{t,\mathbf{b}}^c$ the dimension of which is determined by the number of spectral bands one considers. To accomplish this in practise we used the 
-xxx function from scikit-learn. As we are creating separate time-varying models for $v$ and $s$ we set the number..of ..components parameter of to 1 when using it.
+Let $\mathbf{X}_{t,\mathbf{b}}^c$ represent all the data from $\mathbf{X}$ at time-step $t$, associated with spectral bands $\mathbf{b}$ and labbeled as $c$. We can now fit a Gaussian density 
+to $\mathbf{X}_{t,\mathbf{b}}^c$; the dimension of which is determined by the number of spectral bands one considers. To accomplish this in practise we used the xxx function from scikit-learn. 
+As we are creating separate time-varying models for $v$ and $s$ we set the number..of ..components parameter of to 1. We can repeat the above procedure for each class and time-step and in 
+doing so build the required time-varying model.
 
 \subsection{Unsupervised Time-Varying Model}
-Let 
+Let $\mathbf{X}_{t,\mathbf{b}}$ represent all the data from $\mathbf{X}$ at time-step $t$ associated with spectral bands $\mathbf{b}$. We can now fit a two-component Gaussian Mixture Model to $\mathbf{X}_{t,\mathbf{b}}$ (as $\mathbf{X}$ contain only two classes). Again,
+the dimension of this model is determined by the number of spectral bands one consides (see Section~). We can repeat the above procedure for each time-step and in doing so 
+build the required time-varying model. The only problem now is that the components of the mixture models will have been inconsistantly labelled. There are many approaces one could use to assure 
+that the components of the mixture model are consistently labelled over time. The simplest approach would be to find the set  would be to find the set 
+\begin{enumerate}
+ \item One can keep track of the mean vectors of the two components and make sure 
+\end{enumerate}
+
 
 
 
