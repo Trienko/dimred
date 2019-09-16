@@ -134,9 +134,9 @@ larger than the former the labels of the components at $t$ should be swopped, ot
 
 In this paper, however, we labelled our unsupervised time-varying model by employing the supervised time-varying models mentioned in Section. We followed this approach, because 
 we wanted to to quantify the optimal performance of the unsupervised time-varying model we constructed. At each time-step $t$ we 
-determined whether the sum of the difference between our first GMM component and the density belonging to our settlement model and the difference 
-between our second GMM component and the density belonging to our vegetation model; was smaller than the sum of the difference between our first GMM coponent and the density 
-belonging to our vegetation model and the difference between our second GMM component and the density within our settlement model. If this was the case then our first GMM component 
+determined whether the sum of the euclidean distance between the mean of our first GMM component and the mean of the density belonging to our settlement model and the euclidean distance 
+between the mean of our second GMM component and the mean of the density belonging to our vegetation model; was smaller than the sum of the euclidean distance between the mean of our first GMM coponent and the mean of the density 
+belonging to our vegetation model and the euclidean distance between the mean of our second GMM component and the mean of the density of our settlement model. If this was the case then our first GMM component 
 was labelled as belonging to the settlement class and the second component was labbelled as belonging to the vegetation class. If this was not the case then 
 the reverse labels were assigned.
 
