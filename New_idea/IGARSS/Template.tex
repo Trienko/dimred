@@ -68,6 +68,29 @@ Hallo \cite{almeida2015}.
 
 \section{Preliminaries}
 
+\subsection{Gaussian Mixture Models}
+Let us assume that our data $\mathbf{X}$ can be modelled using a Gaussian Mixture Model (GMM). If we make this assumption, then the likelihood of a single 
+observation $\mathbf{x}\in\mathbf{X}$ is:
+\begin{equation}
+ f(\mathbf{x}|\mathbf{\theta}) = \sum_{j=1}^k \pi_j \mathcal{N}(\mathbf{x}|\mathbf{u}_j,\mathbf{\Sigma}_j),
+\end{equation}
+where $\pi_j$ denotes the prior probability, $\mathbf{u}_j$ denotes the mean and $\mathbf{\Sigma}_j$ denotes the covariance matrix of the $j$-th Gaussian component. Moreover,
+$\mathcal{N}(\mathbf{x}|\mathbf{u}\mathbf{\Sigma})$ denotes a Gaussian density with a mean vector $\mathbf{u}$ and a covariance matrix $\mathbf{\Sigma}$, while $\mathbf{\theta}$ denotes the set of all model parameters.  
+We can determine $\mathbf{\theta}$ using the Expectation Maximization algorithm:
+\begin{enumerate}
+ \item Initialize $\mathbf{\theta}$. One possibility is to use the $k$-meanse algorithm.
+ \item \textbf{E-Step}. Compute the responsibilities:
+ \begin{equation}
+  jj
+ \end{equation}
+ \item \textbf{M-step}. Compute the model parameters:
+ \begin{equation}
+  ccc
+ \end{equation}
+
+\end{enumerate}
+
+
 \section{Sequential Probability Ratio Test}
 %At the start of the analysis the MODIS data set had the following dimensions (592,368,7). The first dimension is associated with the number of MODIS pixels, the second dimension indicates the number of observations, 
 %while the third dimensions represents the number of spectral bands consdidered. The datset is then reshaped into a cube with the following dimensions (x,45,7), i.e. we treat each year of data as 
@@ -82,7 +105,6 @@ S = \sum_{t=1}^{368} \ln \frac{q_{(t-1)\%45+1,\mathbf{b}}^v(\mathbf{x}_{t,\mathb
 \end{equation}
 The unlabelled pixel $\mathbf{x}$ is then classified as $v$ if $S\geq 0$ and as $s$ otherwise. We can estimate this time-varying model using either a supervised or an unsupervised 
 approach. The approach in was to use a supervised approach. We elaborate on this in the next two sections.
-
 
 \subsection{Supervised Time-Varying Model}
 Let $\mathbf{X}_{t,\mathbf{b}}^c$ represent all the data from $\mathbf{X}$ at time-step $t$, associated with spectral bands $\mathbf{b}$ and labbeled as $c$. We can now fit a Gaussian density 
@@ -102,7 +124,7 @@ where $\mathbf{u}_{t,\mathbf{b}}^{x}$ denotes the mean vector associated with th
 Next, if $c_0 \neq 0$ then the labels associated with the components of the GMM fitted at time-step $t$ should be first swoped around before moving on to time-step $t+1$.
 
 
-In this paper, however, we labelled our time-varying model by employing the supervised time-varying models mentioned in Section. We followed this approach, because 
+In this paper, however, we labelled our unsupervised time-varying model by employing the supervised time-varying models mentioned in Section. We followed this approach, because 
 we wanted to to quantify the optimal performance of the unsupervised time-varying model we constructed. At each time-step $t$ we 
 determined whether the sum of the difference between our first GMM component and the density belonging to our settlement model and the difference 
 between our second GMM component and the density belonging to our vegetation model; was smaller than the sum of the difference between our first GMM coponent and the density 
@@ -120,12 +142,12 @@ the reverse labels were assigned.
 % cluster was
 
 
-We first solved the following 
-optimization problem:
-\begin{equation}
-\inf_{\mathbf{c}\in\{\{s,v\},\{v,s\}\}} \|\mathbf{u}_{t,\mathbf{b}}^{0}-\tilde{\mathbf{u}}_{t,\mathbf{b}}^{c_0}\| + \|\mathbf{u}_{t,\mathbf{b}}^{1}-\tilde{\mathbf{u}}_{t-1,\mathbf{b}}^{c_1}\|,  
-\end{equation}
-with $\tilde{\mathbf{u}}_{t,\mathbf{b}}^{c} = \mathbb{E}_t[\mathbf{X}_{t,\mathbf{b}}^c]$. Then, if $c_0 = s$ then the component   
+% We first solved the following 
+% optimization problem:
+% \begin{equation}
+% \inf_{\mathbf{c}\in\{\{s,v\},\{v,s\}\}} \|\mathbf{u}_{t,\mathbf{b}}^{0}-\tilde{\mathbf{u}}_{t,\mathbf{b}}^{c_0}\| + \|\mathbf{u}_{t,\mathbf{b}}^{1}-\tilde{\mathbf{u}}_{t-1,\mathbf{b}}^{c_1}\|,  
+% \end{equation}
+% with $\tilde{\mathbf{u}}_{t,\mathbf{b}}^{c} = \mathbb{E}_t[\mathbf{X}_{t,\mathbf{b}}^c]$. Then, if $c_0 = s$ then the component   
 
 \subsection{Supervised Model}
 
