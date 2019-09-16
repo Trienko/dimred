@@ -64,30 +64,41 @@ Principal Component Analhysis (PCA), harmonic analysis, hypertemporal remote sen
 \label{sec:intro}
 Hallo \cite{almeida2015}.
 
-\section{Dataset}
+\section{Data Description}
+\label{sec:data}
+REWRITE.....
+The hypertemporal dataset that we used contains MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
+data (corresponding to a total area of approximately 230 km$^2$ of the Gauteng province of South Africa). The temporal cadence of the data is 45 observations a year (one every 8 days) In this paper we consider two classes of land cover, namely vegetation and settlement. The settlements class contains pixels (333 pixels) consisting of about
+50\% buildings, and 50\% vegetation, whereas the vegetation class contains pixels (592 pixels) which contain more than 90\% vegetation. Each pixel consist of eight time-series that contain 368 samples. The eight time-series can be associated with the first seven MODIS bands and the Normalized Difference Vegetation Index (NDVI).
+%The MODIS pixels where hand picked after inspecting two high resolution Système Probatoire d’Observation de la Terre (SPOT) images from the year 2000 and 2008 respectively (i.e. they did not change).
+We selected MODIS pixels that according to Système Probatoire d’Observation de la Terre (SPOT) images had the appropriate percentage land cover type in a MODIS pixel and did not change from 2000 to 2008 \cite{grobler2012}.
+
 
 \section{Preliminaries}
 
 \subsection{Gaussian Mixture Models}
-Let us assume that our data $\mathbf{X}$ can be modelled using a Gaussian Mixture Model (GMM). If we make this assumption, then the likelihood of a single 
-observation $\mathbf{x}\in\mathbf{X}$ is:
+Let $\mathbf{Y}$ denote an $N\times M$ dataset. The dataset $\mathbf{Y}$ contains $N$ observations. Each observation $\mathbf{y}$ consist of $M$ features. Let us further assume 
+that $\mathbf{Y}$ can be modelled as a $k$-component Gaussian Mixture Model (GMM):
 \begin{equation}
- f(\mathbf{x}|\mathbf{\theta}) = \sum_{j=1}^k \pi_j \mathcal{N}(\mathbf{x}|\mathbf{u}_j,\mathbf{\Sigma}_j),
+\sum_{j=1}^k \pi_j \mathcal{N}(\mathbf{y}|\mathbf{u}_j,\mathbf{\Sigma}_j),
 \end{equation}
 where $\pi_j$ denotes the prior probability, $\mathbf{u}_j$ denotes the mean and $\mathbf{\Sigma}_j$ denotes the covariance matrix of the $j$-th Gaussian component. Moreover,
-$\mathcal{N}(\mathbf{x}|\mathbf{u}\mathbf{\Sigma})$ denotes a Gaussian density with a mean vector $\mathbf{u}$ and a covariance matrix $\mathbf{\Sigma}$, while $\mathbf{\theta}$ denotes the set of all model parameters.  
-We can determine $\mathbf{\theta}$ using the Expectation Maximization algorithm:
+$\mathcal{N}(\mathbf{y}|\mathbf{u},\mathbf{\Sigma})$ denotes a Gaussian density with a mean vector $\mathbf{u}$ and a covariance matrix $\mathbf{\Sigma}$.  
+We can determine the model parameters using the Expectation Maximization algorithm:
 \begin{enumerate}
- \item Initialize $\mathbf{\theta}$. One possibility is to use the $k$-meanse algorithm.
+ \item Initialize the GMM model parameters. One possibility is to use the $k$-meanse algorithm.
  \item \textbf{E-Step}. Compute the responsibilities:
  \begin{equation}
-  jj
+  \gamma_{nj} = \frac{\pi_j\mathcal{N}(\mathbf{y}_n|\mathbf{u}_j,\mathbf{\Sigma}_j)}{\sum_{i=1}^{k}\pi_i\mathcal{N}(\mathbf{y}_n|\mathbf{u}_i,\mathbf{\Sigma}_i)}
  \end{equation}
  \item \textbf{M-step}. Compute the model parameters:
- \begin{equation}
-  ccc
- \end{equation}
-
+ \begin{eqnarray}
+  \mathbf{u}_j &=& \frac{1}{N_j} \sum_{n=1}^{N} \gamma_{nj}\mathbf{y}_n\\
+  \mathbf{\Sigma}_j &=& \frac{1}{N_j} \sum_{n=1}^{N} \gamma_{nj} (\mathbf{y}_n-\mathbf{u}_j)(\mathbf{y}_n-\mathbf{u}_j)^T\\
+  \pi_j &=& \frac{N_j}{N}
+ \end{eqnarray}
+ where $N_j = \sum_{n=1}^N \gamma_{nj}$.
+ \item Iterate from step two, until parameter convergence.
 \end{enumerate}
 
 
@@ -115,14 +126,11 @@ doing so build the required time-varying model.
 \subsection{Unsupervised Time-Varying Model}
 Let $\mathbf{X}_{t,\mathbf{b}}$ represent all the data from $\mathbf{X}$ at time-step $t$ associated with spectral bands $\mathbf{b}$. We can now fit a two-component Gaussian Mixture Model to $\mathbf{X}_{t,\mathbf{b}}$ (as $\mathbf{X}$ contain only two classes). Again,
 the dimension of this model is determined by the number of spectral bands one consides (see Section~). We can repeat the above procedure for each time-step and in doing so 
-build the required time-varying model. The only problem now is that the components of the mixture models will have been inconsistantly labelled. There are many approaces one could use to assure 
-that the components of the mixture model are consistently labelled over time. The simplest approach would be to select for every $t$ a $\mathbf{c} = \{c_0,c_1\}\in\{\{0,1\},\{1,0\}\}$ s.t. the following optimization problem is optimized:
-\begin{equation}
-\inf_{\mathbf{c}} \|\mathbf{u}_{t,\mathbf{b}}^{0}-\mathbf{u}_{t-1,\mathbf{b}}^{c_0}\| + \|\mathbf{u}_{t,\mathbf{b}}^{1}-\mathbf{u}_{t-1,\mathbf{b}}^{c_1}\|,  
-\end{equation}
-where $\mathbf{u}_{t,\mathbf{b}}^{x}$ denotes the mean vector associated with the $x$-th component of the mixture model fitted to $\mathbf{X}_{t,\mathbf{b}}$.
-Next, if $c_0 \neq 0$ then the labels associated with the components of the GMM fitted at time-step $t$ should be first swoped around before moving on to time-step $t+1$.
-
+build the required time-varying model. The only problem now is that the components of the mixture models will have been inconsistantly labelled accross time. There are many approaces one could use to assure 
+that the components of the mixture model are consistently labelled across time. The simplest approach would be to compute the sum of the euclidean distance between the means of 
+the first and the second components of the GMM at $t$ and $t-1$ and to compare this sum with the sum of the euclidean distance between the means of the first component of the GMM at time $t$ and 
+the second component of the GMM at time $t-1$ and the euclidean distance between the mean of the second component of the GMM at time $t$ and the first component of the GMM at time $t-1$. If the latter sum is 
+larger than the former the labels of the components at $t$ should be swopped, otherwise the labels should be left as is. This should be repeated for every time-step $t$.
 
 In this paper, however, we labelled our unsupervised time-varying model by employing the supervised time-varying models mentioned in Section. We followed this approach, because 
 we wanted to to quantify the optimal performance of the unsupervised time-varying model we constructed. At each time-step $t$ we 
