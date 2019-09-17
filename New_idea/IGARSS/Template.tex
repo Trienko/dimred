@@ -67,13 +67,14 @@ as widely used as the $k$-means algorithm for the clustering of remote sensing t
 
 \noindent
 XX used a Gaussian mixture model (GMM) and NDVI (Normalized Difference Vegetation Index) time-series to discriminate winter crops from other crops (spring and summer).
-The approach suggested by XX is, however, not a hypertemporal algorithm which implies that it does not fully exploit the temporal information contained witin the NDVI time-series it employs.\\
+The approach suggested by XX is, however, not a true hypertemporal algorithm, since it does not fully exploit the temporal information contained witin the NDVI time-series it employs (works on quantities derived 
+form the initial time-series instead of the raw time-series itself).\\
 
 \noindent
-In this paper, we propose a novel sequential (on-line) algorithm which uses a GMM to cluster MODIS time-series. As our proposed approach is sequential, it better utilises the information 
-contained within the temporal dimension of the data which is being clustered than a non-sequential approach would. A supervised sequential classification algorithm which could discriminate 
+In this paper, we propose a novel unsupervised sequential algorithm to cluster MODIS time-series. As our proposed approach is sequential, it is a hypertemporal technique per definition.
+Moreover, as it is sequential it can be applied in an on-line fashion, i.e. process observations as they are recorded. A supervised sequential classification algorithm which could discriminate 
 between vegetation and settlement MODIS time-series was proposed in XX. XX used the Sequential Probability Ratio Test (SPRT) and a time-varing model which was constructed in a supervised manner to perform this task. 
-The approach we present here uses the SPRT algorithm and a time-varying model which we construct by employing GMMs (i.e. in an unsupervised manner).\\
+The approach we present in this paper uses the SPRT algorithm and a time-varying model which we construct by employing GMMs (i.e. in an unsupervised manner).\\
 
 \noindent
 We start the paper by introducing the dataset we used to test the efficacy of our proposed algorithm. We present the GMM algorithm and our unsupervised sequential algorithm in Section ?? and 
@@ -130,7 +131,7 @@ For each unlabelled MODIS pixel $\mathbf{x}_{\mathbf{b}}$ we can then compute th
 S = \sum_{t=1}^{368} \ln \frac{q_{(t-1)\%45+1,\mathbf{b}}^v(\mathbf{x}_{t,\mathbf{b}})}{q_{(t-1)\%45+1,\mathbf{b}}^s(\mathbf{x}_{t,\mathbf{b}})}. 
 \end{equation}
 The unlabelled pixel $\mathbf{x}$ is then classified as $v$ if $S\geq 0$ and as $s$ otherwise. We can estimate this time-varying model using either a supervised or an unsupervised 
-approach. The approach in was to use a supervised approach. We elaborate on this in the next two sections.
+approach. The supervised and the unsupervised time-varying models which were constructed using $\mathbf{X}_{\{1,2\}}$ is depicted in Figure~\ref{fig:time_vary_model}. We elaborate on this in the next two sections.
 
 \subsection{Supervised Time-Varying Model}
 Let $\mathbf{X}_{t,\mathbf{b}}^c$ represent all the data from $\mathbf{X}$ at time-step $t$, associated with spectral bands $\mathbf{b}$ and labbeled as $c$. We can now fit a Gaussian density 
@@ -172,33 +173,38 @@ the reverse labels were assigned.
 % \end{equation}
 % with $\tilde{\mathbf{u}}_{t,\mathbf{b}}^{c} = \mathbb{E}_t[\mathbf{X}_{t,\mathbf{b}}^c]$. Then, if $c_0 = s$ then the component   
 
+\begin{figure}[h!]
 \begin{minipage}[b]{.47\linewidth}
   \centering 
   \centerline{\epsfig{figure=11.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(a) Band 1}\medskip
+  \centerline{(a) $t=11$}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.47\linewidth}
   \centering
   \centerline{\epsfig{figure=22.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(b) Band 2}\medskip
+  \centerline{(b) $t=22$}\medskip
 \end{minipage}
 
 \begin{minipage}[b]{.47\linewidth}
   \centering 
   \centerline{\epsfig{figure=33.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(c) Band 3}\medskip
+  \centerline{(c) $t=33$}\medskip
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.47\linewidth}
   \centering
   \centerline{\epsfig{figure=44.pdf,width=4.0cm}}
   %\vspace{1.5cm}
-  \centerline{(d) Band 4}\medskip
+  \centerline{(d) $t=44$}\medskip
 \end{minipage}
+\caption{The 95\% confidence intervals of the time-varying models associated with the settlement (red) and the vegetation (green) class which were constructed using either a supervised (solid) or an unsupervised approach at time-step 11, 22, 33 and 44 (constructed 
+for band 1 and band 2). The details of exactly how these models were constructed is discussed in Section~\ref{}.}
+\label{fig:time_vary_model}
+\end{figure}
 
 \section{Results}
 In this section we present the performance results of the supervised and the unsupervised sequential classification algorithms we presented in Section.
