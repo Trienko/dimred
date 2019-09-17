@@ -49,20 +49,35 @@ Hobart, TAS 7001, Australia}
 \maketitle
 %
 \begin{abstract}
-In this paper we present a class label agnostic dimensionality reduction comparison framework. 
-We illustrate the usefulness of this framework at the hand of a case study. For our case study, we consider two prominent land cover classes in the Gauteng province, namely natural vegetation and settlement using an 8 year MODIS dataset. We use the framework to compare two 
-feature extraction techniques, namely PCA and FFT. For the case study we considered in this paper, the PCA technique produced a reduced feature space which was 15\% more 
-separable than the feature space produced by the FFT method.
+In this paper we present a hypertemporal unsupervised sequential classification algorithm.  
+We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a MODIS (Moderate ...) hypertemporal dataset consisting of two prominent land cover classes, namely natural vegetation and settlement. For the 
+case study we considered in this paper, the proposed sequential classification approach perfomred xx\% better than a $k$-means based approach.
 \end{abstract}
 %
 \begin{keywords}
-Principal Component Analhysis (PCA), harmonic analysis, hypertemporal remote sensing.
+Gaussian Mixture Model (GMM), sequential detection, unsupervised, SPRT (Sequential Probability Ratio Test) and remote sensing.
 \end{keywords}
 %
 
 \section{Introduction}
 \label{sec:intro}
-Hallo \cite{almeida2015}.
+Clustering data into different classes can be a very useful first step in the analysis of unlabelled data. This is also true for remote sensing time-series. The algorithm
+which is arguably the most widely used approach to accomplish this task is the $k$-means algorithm (Chen 2013, Vivoy 2000). On the other hand, Gaussian Mixture Models (GMMs) have not been 
+as widely used as the $k$-means algorithm for the clustering of remote sensing time-series. \\
+
+\noindent
+XX used a Gaussian mixture model (GMM) and NDVI (Normalized Difference Vegetation Index) time-series to discriminate winter crops from other crops (spring and summer).
+The approach suggested by XX is, however, not a hypertemporal algorithm which implies that it does not fully exploit the temporal information contained witin the NDVI time-series it employs.\\
+
+\noindent
+In this paper, we propose a novel sequential (on-line) algorithm which uses a GMM to cluster MODIS time-series. As our proposed approach is sequential, it better utilises the information 
+contained within the temporal dimension of the data which is being clustered than a non-sequential approach would. A supervised sequential classification algorithm which could discriminate 
+between vegetation and settlement MODIS time-series was proposed in XX. XX used the Sequential Probability Ratio Test (SPRT) and a time-varing model which was constructed in a supervised manner to perform this task. 
+The approach we present here uses the SPRT algorithm and a time-varying model which we construct by employing GMMs (i.e. in an unsupervised manner).\\
+
+\noindent
+We start the paper by introducing the dataset we used to test the efficacy of our proposed algorithm. We present the GMM algorithm and our unsupervised sequential algorithm in Section ?? and 
+Section ??, respectively. We end our paper with some results and a conclusion.
 
 \section{Data Description}
 \label{sec:data}
@@ -157,10 +172,6 @@ the reverse labels were assigned.
 % \end{equation}
 % with $\tilde{\mathbf{u}}_{t,\mathbf{b}}^{c} = \mathbb{E}_t[\mathbf{X}_{t,\mathbf{b}}^c]$. Then, if $c_0 = s$ then the component   
 
-\subsection{Supervised Model}
-
-\subsection{Unsupervised Model}
-
 \begin{minipage}[b]{.47\linewidth}
   \centering 
   \centerline{\epsfig{figure=11.pdf,width=4.0cm}}
@@ -190,6 +201,13 @@ the reverse labels were assigned.
 \end{minipage}
 
 \section{Results}
+In this section we present the performance results of the supervised and the unsupervised sequential classification algorithms we presented in Section.
+Note that we only perform this comparison for all the possible two band combinations (we settled on two band combinations as the time-varying model 
+one can construct for two band combinations can be nicely visualized). We also compare these two approaches with two other more conventional clustering approaches, which entails applying the $k$-means and GMM algorithms to the entire time-series directly.
+The average classification accuracy of the supervised and the unsupervised sequential classification aproaches are xx and yy, repspectively. Which is 
+as expected a supervised approach will outperform an unsupervised approach. When we directly apply the $k$-means and the GMM algorithm to the time-series we obtain 
+an average classification accuracy of zz and gg. The $k$-means algorithm, therefore, outperforms the GMM approach. The sequential unsupervised approach which uses 
+GMMs to construct its underlying time-varying model, however, outperforms conventional $k$-means. 
 
 \begin{figure*}[h] 
   \begin{subfigure}[b]{0.49\linewidth}
