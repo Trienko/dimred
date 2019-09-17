@@ -63,31 +63,28 @@ Gaussian Mixture Model (GMM), sequential detection, unsupervised, SPRT (Sequenti
 \label{sec:intro}
 Clustering data into different classes can be a very useful first step in the analysis of unlabelled remote sensing time-series. The algorithm
 which is arguably the most widely used approach to accomplish this task is the $k$-means algorithm \cite{chen2013,viovy2000}. On the other hand, Gaussian Mixture Models (GMMs) have not been 
-as widely used as the $k$-means algorithm for the clustering of remote sensing time-series. \\
+as widely used as the $k$-means algorithm for the clustering of remote sensing time-series.
 
-\noindent
 Skakun et al. used an GMM and NDVI (Normalized Difference Vegetation Index) time-series to discriminate winter crops from other crops (spring and summer) \cite{skakun2017}.
 The approach suggested by Skakun et al. is, however, not a true hypertemporal algorithm, since it does not fully exploit the temporal information contained witin the NDVI time-series it employs (employs quantities derived 
-form the raw time-series instead of the raw time-series itself).\\
+form the raw time-series instead of the raw time-series itself).
 
-\noindent
 In this paper, we propose a novel unsupervised sequential algorithm to cluster MODIS (Moderate Resolution Imaging Spectroradiometer) time-series. As our proposed approach is sequential, it is a hypertemporal technique per definition.
 Moreover, as it is sequential it can be applied in an on-line fashion, i.e. process observations as they are recorded. A supervised sequential classification algorithm which could discriminate 
 between vegetation and settlement MODIS time-series was proposed in \cite{ackermann2011t,grobler2012,grobler2012c}. Grobler et al. used the Sequential Probability Ratio Test (SPRT) and a time-varing model which was constructed in a supervised manner to perform this task. 
-The approach we present in this paper uses the SPRT algorithm and a time-varying model which we construct by employing GMMs to cluster MODIS time-series (i.e. in an unsupervised manner).\\
+The approach we present in this paper uses the SPRT algorithm and a time-varying model which we construct by employing GMMs to cluster MODIS time-series (i.e. in an unsupervised manner).
 
-\noindent
 We start the paper by introducing the dataset we used to test the efficacy of our proposed algorithm. We present the GMM algorithm and our unsupervised sequential algorithm in Section~\ref{sec:GMM} and 
 Section~\ref{sec:sprt}, respectively. We end our paper with some results and a conclusion.
 \section{Data Description}
 \label{sec:data}
-REWRITE.....
-The hypertemporal dataset that we used contains MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
-data (corresponding to a total area of approximately 230 km$^2$ of the Gauteng province of South Africa). The temporal cadence of the data is 45 observations a year (one every 8 days) In this paper we consider two classes of land cover, namely vegetation and settlement. The settlements class contains pixels (333 pixels) consisting of about
-50\% buildings, and 50\% vegetation, whereas the vegetation class contains pixels (592 pixels) which contain more than 90\% vegetation. Each pixel consist of eight time-series that contain 368 samples. The eight time-series can be associated with the first seven MODIS bands and the Normalized Difference Vegetation Index (NDVI).
-%The MODIS pixels where hand picked after inspecting two high resolution Système Probatoire d’Observation de la Terre (SPOT) images from the year 2000 and 2008 respectively (i.e. they did not change).
-We selected MODIS pixels that according to Système Probatoire d’Observation de la Terre (SPOT) images had the appropriate percentage land cover type in a MODIS pixel and did not change from 2000 to 2008 \cite{grobler2012}.
-
+The dataset that we use contains eight years worht of MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
+data (925 MODIS pixels which correspond to approximately 230 km$^2$). The study area from which this data was obtained is the Gauteng province of South Africa. The dataset contain seven time-series which correspond to the 
+MODIS land bands. Each time-series consist of 368 observations. The temporal cadence of the data is 45 observations per year. We considered only two landcover classes, settlement and vegetation. 
+Vegetation MODIS pixels (592) contain more than 90\% vegetation. while settlement pixels (333) consist of more than 50\% buildings. We selected MODIS pixels that according to Système Probatoire d’Observation de la Terre (SPOT) images had the appropriate percentage land cover type in a MODIS pixel and did not change from 2000 to 2008 \cite{grobler2012}.
+In this paper we regarded the data of associated with each year as new separate observations of either settlement of vegetation pixels. The final datamatrix $\mathbf{X}$ had the following dimensions (7400,45,7). The first dimension
+indicates the number of observations we have, the second dimension represents the number of time-steps that we have, and the final dimension tells us the number of 
+spectral bands we are considering.
 
 \section{Gaussian Mixture Models}
 \label{sec:GMM}
