@@ -50,7 +50,7 @@ Hobart, TAS 7001, Australia}
 %
 \begin{abstract}
 In this paper we present a hypertemporal unsupervised sequential classification algorithm.  
-We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a Moderate Resolution Imaging Spectroradiometer hypertemporal dataset consisting of two land cover classes, namely natural vegetation and settlement. For the 
+We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a Moderate Resolution Imaging Spectroradiometer dataset containing two land cover classes, namely natural vegetation and settlement. For the 
 case study we considered in this paper, the proposed sequential classification approach perfomred on average 1.33 times better than conventional $k$-means.
 \end{abstract}
 %
@@ -61,17 +61,13 @@ Gaussian Mixture Model (GMM), sequential detection, unsupervised, SPRT (Sequenti
 
 \section{Introduction}
 \label{sec:intro}
-Clustering data into different classes can be a very useful first step in the analysis of unlabelled remote sensing time-series. The algorithm
-which is arguably the most widely used approach to accomplish this task is the $k$-means algorithm \cite{chen2013,viovy2000}. On the other hand, Gaussian Mixture Models (GMMs) have not been 
-as widely used as the $k$-means algorithm for the clustering of remote sensing time-series.
+A remote sensing time-series is hypertemporal if its observational cadence is every few days. Clustering unlabelled hypertemporal remote sensing time-series can be a very useful first step in the analysis thereof. The algorithm which is arguably the most widely used approach to accomplish this task is the $k$-means algorithm \cite{viovy2000}. On the other hand, Gaussian Mixture Models (GMMs) are not often used for the clustering of hypertemporal remote-sensing time-series.
 
-Skakun et al. used a GMM and NDVI (Normalized Difference Vegetation Index) time-series to discriminate winter crops from other crops (spring and summer) \cite{skakun2017}.
-The approach suggested by Skakun et al. is, however, not a true hypertemporal algorithm, since it does not fully exploit the temporal information contained witin the NDVI time-series it employs (it uses quantities derived 
-form the raw time-series instead of the raw time-series itself).
+Skakun et al. used a GMM and NDVI (Normalized Difference Vegetation Index) time-series to discriminate winter crops from other crops (spring and summer) \cite{skakun2017}. The approach suggested by Skakun et al., although hypertemporal, does not fully exploit the temporal information contained witin the NDVI time-series it employs (it uses quantities derived form the raw time-series instead of the raw time-series itself).
 
-In this paper, we propose a novel unsupervised sequential algorithm to cluster MODIS (Moderate Resolution Imaging Spectroradiometer) time-series. As our proposed approach is sequential, it is a hypertemporal technique per definition.
-Moreover, as it is sequential it can be applied in an on-line fashion, i.e. process observations as they are recorded. A supervised sequential classification algorithm which could discriminate 
-between vegetation and settlement MODIS time-series was proposed in \cite{ackermann2011t,grobler2012c}. Grobler et al. used the Sequential Probability Ratio Test (SPRT) and a time-varing model which was constructed in a supervised manner to perform this task. 
+In this paper, we propose a novel unsupervised sequential algorithm to cluster MODIS (Moderate Resolution Imaging Spectroradiometer) time-series. A sequential algorithm can process observations as they are received (it is an online algortihm). As our proposed approach is sequential, it is a hypertemporal technique per definition.
+A supervised sequential classification algorithm which could discriminate 
+between vegetation and settlement MODIS pixels was proposed in \cite{ackermann2011t,grobler2012c}. Grobler et al. used the Sequential Probability Ratio Test (SPRT) and a time-varing model which was constructed in a supervised manner to perform this task. 
 The approach we present in this paper uses the SPRT algorithm and a time-varying model which we construct by employing GMMs to cluster MODIS time-series (i.e. in an unsupervised manner).
 
 We start the paper by introducing the dataset we used to test the efficacy of our proposed algorithm. We present the GMM algorithm and our unsupervised sequential algorithm in Section~\ref{sec:GMM} and 
