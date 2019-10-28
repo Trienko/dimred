@@ -196,11 +196,10 @@ for band 1 and band 2). The details of exactly how these models were constructed
 \end{figure}
 
 \section{Results}
-In this section we present the performance results of the supervised and the unsupervised sequential classification algorithms we presented in Section~\ref{sec:sprt}.
+In this section we present the performance results of the supervised and the unsupervised sequential classification algorithms we presented in Section~\ref{sec:sprt} when used to cluster $\mathbf{X}$.
 Note, that the same data was used to build the time-varying models discussed in Section~\ref{sec:sprt} and to test the 
-performance of the SPRT algorithm. Furhtermore, we restricted our analysis to two band combinations. We also compare these two approaches with two other more conventional clustering approaches, which entails applying the $k$-means and GMM algorithms to the entire time-series directly.
-The results are depicted in Figure~\ref{fig:results}. The average classification accuracy of the supervised and the unsupervised sequential classification aproaches are 94\% and 80\%, repspectively. Which is 
-as expected; a supervised approach will outperform an unsupervised approach. When we directly apply the $k$-means and the GMM algorithm to the time-series we obtain 
+performance of the SPRT algorithm. Furhtermore, we restricted our analysis to two band combinations. We also compare the aforementioned sequential approaches with two other more conventional clustering approaches, which entails clustering $\mathbf{X}$ using $k$-means and GMM. The results are depicted in Figure~\ref{fig:results}. The average classification accuracy of the supervised and the unsupervised sequential classification aproaches are 94\% and 80\%, repspectively. Which is 
+as expected; a supervised approach will outperform an unsupervised approach. When we use the $k$-means and the GMM algorithm to cluster $\mathbf{X}$ we obtain 
 an average classification accuracy of 60\% and 51\%. The $k$-means algorithm, therefore, outperforms the GMM approach. Note, that the sequential unsupervised approach which uses 
 GMMs to construct its underlying time-varying model, however, outperforms conventional $k$-means. 
 
@@ -222,7 +221,7 @@ GMMs to construct its underlying time-varying model, however, outperforms conven
   \begin{subfigure}[b]{0.49\linewidth}
     \centering
     \includegraphics[width=0.85\textwidth]{kmeans-crop.pdf} 
-    \caption{$k$-meanse} 
+    \caption{$k$-means} 
     \label{fig7:c} 
   \end{subfigure}%%
   \begin{subfigure}[b]{0.49\linewidth}
@@ -233,8 +232,7 @@ GMMs to construct its underlying time-varying model, however, outperforms conven
   \end{subfigure} 
   \caption{c}
   \label{fig7} 
-  \caption{The classification accuracy results of the supervised (top left) and the unsupervised (top right) sequential classification approach presented in Section~\ref{sec:sprt}. The classification
-  accuracy results obtained by applying $k$-means (bottom left) and GMM (bottom-right) to the time-series directly are also depicted. The supervised approach outperforms the 
+  \caption{The classification accuracy results of the supervised (top left) and the unsupervised (top right) sequential classification approach presented in Section~\ref{sec:sprt} to the dataset presented in Section~\ref{sec:data}. The classification accuracy results obtained by applying $k$-means (bottom left) and GMM (bottom-right) to the the dataset presented in Section~\ref{sec:data} are also depicted. The supervised approach outperforms the 
   unsupervised approach as is expected. Note, the unsupervised sequential approach, however, outperforms traditional $k$-means.}
   \label{fig:results}
 \end{figure*}
@@ -242,7 +240,7 @@ GMMs to construct its underlying time-varying model, however, outperforms conven
 \section{Conclusion}
 \label{sec:ref}
 We presented a hypertemporal label agnostic sequential classification algorithm. For the case study presented in this paper, the proposed algorithm 
-outperforms traditional $k$-means. For the case study presented here, the sequential approach performed 1.33 times better than conventional $k$-means (on average). 
+outperforms traditional $k$-means (it on average performed 1.33 times better than conventional $k$-means). 
 
 %List and number all bibliographical references at the end of the paper.  The references can be numbered in alphabetic order or in order of appearance in the document.  When referring to them in the text, type the corresponding reference number in square brackets as shown at the end of this sentence \cite{C2}.
 
