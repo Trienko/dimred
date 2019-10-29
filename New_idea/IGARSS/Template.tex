@@ -49,8 +49,7 @@ Hobart, TAS 7001, Australia}
 \maketitle
 %
 \begin{abstract}
-In this paper we present a novel hypertemporal unsupervised sequential classification algorithm. We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a Moderate Resolution Imaging Spectroradiometer dataset containing two prominent South Afrcian land cover classes, namely natural vegetation and settlement. Being able to discern between the aformentioned classes is especially important as settlement expansion is one of the most pervasive forms of landcover change in South Africa. For the 
-case study we considered in this paper, the proposed sequential classification approach performed on average 1.33 times better than conventional $k$-means.
+In this paper we present a novel hypertemporal unsupervised sequential classification algorithm. We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a Moderate Resolution Imaging Spectroradiometer dataset containing two prominent South Afrcian land cover classes, namely natural vegetation and settlement. For the case study we considered in this paper, the proposed sequential classification approach performed on average 1.33 times better than conventional $k$-means.
 \end{abstract}
 %
 \begin{keywords}
@@ -65,9 +64,7 @@ cadence is every few days. Clustering unlabelled hypertemporal remote sensing ti
 
 Skakun et al. used a GMM and NDVI (Normalized Difference Vegetation Index) time-series to discriminate winter crops from other crops (spring and summer) \cite{skakun2017}. The approach suggested by Skakun et al., however, does not fully exploit the temporal information contained within the NDVI time-series it employs (it uses quantities derived form the raw hypertemporal time-series instead of the raw hypertemporal time-series itself).
 
-In this paper, we propose a novel unsupervised sequential algorithm to cluster MODIS (Moderate Resolution Imaging Spectroradiometer) time-series. A sequential algorithm processes hypertemporal time-series in an online fashion. 
-
-A supervised sequential classification algorithm which could discriminate 
+In this paper, we propose a novel unsupervised sequential algorithm to cluster MODIS (Moderate Resolution Imaging Spectroradiometer) time-series. A sequential algorithm processes hypertemporal time-series in an online fashion. A supervised sequential classification algorithm which could discriminate 
 between vegetation and settlement MODIS pixels was proposed in \cite{ackermann2011t,grobler2012c}. Grobler et al. used the Sequential Probability Ratio Test (SPRT) and a time-varying model which was constructed in a supervised manner to perform this task. The approach we present here, however, uses the SPRT algorithm and a time-varying model which we construct by employing GMMs (i.e. in an unsupervised manner).
 
 We start the paper by introducing the dataset we used to test the efficacy of our proposed algorithm. We present the GMM algorithm and our unsupervised sequential algorithm in Section~\ref{sec:GMM} and 
@@ -132,7 +129,7 @@ As we are creating separate time-varying models for $v$ and $s$ we set the \text
 doing so we build the required time-varying models. %The supervised time-varying models which were constructed using $\mathbf{b}=\{1,2\}$ is depicted in Figure~\ref{fig:time_vary_model}.
 
 \subsection{Unsupervised Time-Varying Model}
-Let $\mathbf{X}_{t,\mathbf{b}}$ represent all the data from $\mathbf{X}$ at time-step $t$ associated with spectral bands $\mathbf{b}$. We can now fit a two-component GMM to $\mathbf{X}_{t,\mathbf{b}}$ (as $\mathbf{X}$ contain only two classes). Again,
+Let $\mathbf{X}_{t,\mathbf{b}}$ represent all the data from $\mathbf{X}$ at time-step $t$ associated with spectral bands $\mathbf{b}$. We can now fit a two-component GMM to $\mathbf{X}_{t,\mathbf{b}}$ (as $\mathbf{X}$ contains only two classes). Again,
 the dimension of this model is determined by the number of spectral bands one considers (see Section~\ref{sec:GMM}). We can repeat the above procedure for each time-step and in doing so 
 build the required time-varying model (again this is accomplished in practise using \texttt{mixture.GaussianMixture} with \texttt{n\_components=2}). 
 
@@ -240,7 +237,7 @@ GMMs to construct its underlying time-varying model, however, outperforms conven
 
 \section{Conclusion}
 \label{sec:ref}
-We presented a hypertemporal label agnostic sequential classification algorithm. We  demonstrated its usefulness via a case study. We also compared it with conventional $k$-means (among other algorithms). For the case study presented in this paper, the proposed algorithm outperforms $k$-means (it performed 1.33 times better on average than conventional $k$-means). 
+We presented a hypertemporal label agnostic sequential classification algorithm. We  demonstrated its usefulness via a case study. For the case study presented in this paper, the proposed algorithm outperforms $k$-means (it performed 1.33 times better on average than conventional $k$-means). 
 
 %List and number all bibliographical references at the end of the paper.  The references can be numbered in alphabetic order or in order of appearance in the document.  When referring to them in the text, type the corresponding reference number in square brackets as shown at the end of this sentence \cite{C2}.
 
@@ -269,9 +266,9 @@ E.~R. Ackermann, ``Sequential land cover classification,'', M.S. thesis, Univers
 \bibitem{grobler2012c}
 T.~L. Grobler, E.~R. Ackermann, A.~J. van Zyl, W. Kleynhans,
   B.~P. Salmon, and J.~C. Olivier,
-\newblock ,''
+\newblock ,``Sequential classification of MODIS time-series,''
 \newblock in {\em {2012 IEEE International Geoscience and Remote Sensing
-  Symposium" }}, pp. 6236-6239.
+  Symposium,}} pp. 6236-6239.
 
 \bibitem{scikitlearn}
 F.~Pedregosa et~al.,
