@@ -17,7 +17,7 @@
 %
 % Single address.
 % ---------------
-\name{T.L. Grobler$^{\dagger}$, W. Kleynhans$^{\star}$ and B.P. Salmon$^{\ddagger}$}
+\name{T.L. Grobler$^{\dagger}$, W. Kleynhans$^{\star}$, B.P. Salmon$^{\ddagger}$ and C.N. Burger$^{\dagger}$}
 \address{$\dagger$Dept of Mathematical Sciences, Computer Science Division, Stellenbosch University,\\ Private Bag X1, 7602 Matieland, South Africa\\
 $\star$Department of Electrical, Electronic and Computer Engineering University of Pretoria,\\
 Pretoria 0002, South Africa\\
@@ -49,8 +49,7 @@ Hobart, TAS 7001, Australia}
 \maketitle
 %
 \begin{abstract}
-In this paper we present a hypertemporal unsupervised sequential classification algorithm.  
-We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a Moderate Resolution Imaging Spectroradiometer dataset containing two land cover classes, namely natural vegetation and settlement. For the 
+In this paper we present a novel hypertemporal unsupervised sequential classification algorithm. We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a Moderate Resolution Imaging Spectroradiometer dataset containing two land cover classes, namely natural vegetation and settlement. For the 
 case study we considered in this paper, the proposed sequential classification approach perfomred on average 1.33 times better than conventional $k$-means.
 \end{abstract}
 %
@@ -61,19 +60,22 @@ Gaussian Mixture Model (GMM), sequential detection, unsupervised, SPRT (Sequenti
 
 \section{Introduction}
 \label{sec:intro}
-A remote sensing time-series is hypertemporal if its observational cadence is every few days. Clustering unlabelled hypertemporal remote sensing time-series can be a very useful first step in the analysis thereof. The algorithm which is arguably the most widely used approach to accomplish this task is the $k$-means algorithm \cite{viovy2000}. On the other hand, Gaussian Mixture Models (GMMs) are not often used for the clustering of hypertemporal remote-sensing time-series.
+A remote sensing time-series is hypertemporal if its observational 
+cadence is every few days. Clustering unlabelled hypertemporal remote sensing time-series can be a very useful first step in the analysis thereof. The algorithm which is arguably the most widely used approach to accomplish this task is the $k$-means algorithm \cite{viovy2000}. On the other hand, Gaussian Mixture Models (GMMs) are not often used for the clustering of hypertemporal remote-sensing time-series.
 
-Skakun et al. used a GMM and NDVI (Normalized Difference Vegetation Index) time-series to discriminate winter crops from other crops (spring and summer) \cite{skakun2017}. The approach suggested by Skakun et al., however, does not fully exploit the temporal information contained witin the NDVI time-series it employs (it uses quantities derived form the raw hypertemporal time-series instead of the raw hypertemporal time-series itself).
+Skakun et al. used a GMM and NDVI (Normalized Difference Vegetation Index) time-series to discriminate winter crops from other crops (spring and summer) \cite{skakun2017}. The approach suggested by Skakun et al., however, does not fully exploit the temporal information contained within the NDVI time-series it employs (it uses quantities derived form the raw hypertemporal time-series instead of the raw hypertemporal time-series itself).
 
-In this paper, we propose a novel unsupervised sequential algorithm to cluster MODIS (Moderate Resolution Imaging Spectroradiometer) time-series. A sequential algorithm processes hypertemporal time-series in an online fashion. A supervised sequential classification algorithm which could discriminate 
-between vegetation and settlement MODIS pixels was proposed in \cite{ackermann2011t,grobler2012c}. Grobler et al. used the Sequential Probability Ratio Test (SPRT) and a time-varing model which was constructed in a supervised manner to perform this task. The approach we present here, however, uses the SPRT algorithm and a time-varying model which we construct by employing GMMs (i.e. in an unsupervised manner).
+In this paper, we propose a novel unsupervised sequential algorithm to cluster MODIS (Moderate Resolution Imaging Spectroradiometer) time-series. A sequential algorithm processes hypertemporal time-series in an online fashion. 
+
+A supervised sequential classification algorithm which could discriminate 
+between vegetation and settlement MODIS pixels was proposed in \cite{ackermann2011t,grobler2012c}. Grobler et al. used the Sequential Probability Ratio Test (SPRT) and a time-varying model which was constructed in a supervised manner to perform this task. The approach we present here, however, uses the SPRT algorithm and a time-varying model which we construct by employing GMMs (i.e. in an unsupervised manner).
 
 We start the paper by introducing the dataset we used to test the efficacy of our proposed algorithm. We present the GMM algorithm and our unsupervised sequential algorithm in Section~\ref{sec:GMM} and 
 Section~\ref{sec:sprt}, respectively. We end our paper with some results and a conclusion.
 \section{Data Description}
 \label{sec:data}
 The dataset that we use contains eight years worht of MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
-data (925 MODIS pixels which correspond to approximately 230 km$^2$). The study area from which this data was obtained is the Gauteng province of South Africa. The dataset contain seven time-series which correspond to the 
+data (925 MODIS pixels which correspond to approximately 230 km$^2$) \cite{grobler2012t}. The study area from which this data was obtained is the Gauteng province of South Africa. The dataset contain seven time-series which correspond to the 
 MODIS land bands. Each time-series consist of 368 observations. The temporal cadence of the data is 45 observations per year. We considered only two landcover classes, settlement and vegetation. 
 Vegetation MODIS pixels (592) contain more than 90\% vegetation, while settlement pixels (333) consist of more than 50\% buildings. We selected MODIS pixels that according to Système Probatoire d’Observation de la Terre (SPOT) images had the appropriate percentage land cover type in a MODIS pixel and did not change from 2000 to 2008. The above data can be stored in a datamatrix $\mathbf{X}$ having the following dimensions ($925\times8$,45,7) (if we discard the last eight observations). The first dimension of $\mathbf{X}$ indicates the number of pixels we have, the second dimension represents the number of time-steps that we have (45 in one year), and the final dimension tells us the number of spectral bands we are considering.
 
@@ -85,7 +87,7 @@ that $\mathbf{Y}$ can be modelled as a $k$-component GMM:
 P(\mathbf{y}|\boldsymbol{\theta})=\sum_{j=1}^k \pi_j \mathcal{N}(\mathbf{y}|\mathbf{u}_j,\mathbf{\Sigma}_j),
 \end{equation}
 where $\pi_j$ denotes the prior probability of the $j$-th Gaussian component, $\mathbf{u}_j$ denotes the mean and $\mathbf{\Sigma}_j$ denotes the covariance matrix associated with the $j$-th Gaussian component. Moreover,
-$\mathcal{N}(\mathbf{y}|\mathbf{u},\mathbf{\Sigma})$ denotes a Gaussian density with a mean vector $\mathbf{u}$ and a covariance matrix $\mathbf{\Sigma}$. Furhtermore, $\boldsymbol{\theta}$ denotes the entire set of model parameters, i.e. $\boldsymbol{\theta}=\{\pi_j,\mathbf{u}_j,\mathbf{\Sigma}_j|j\in\{1,2,\cdots,k\}\}$.
+$\mathcal{N}(\mathbf{y}|\mathbf{u},\mathbf{\Sigma})$ denotes a Gaussian density with a mean vector $\mathbf{u}$ and a covariance matrix $\mathbf{\Sigma}$. Furthermore, $\boldsymbol{\theta}$ denotes the entire set of model parameters, i.e. $\boldsymbol{\theta}=\{\pi_j,\mathbf{u}_j,\mathbf{\Sigma}_j|j\in\{1,2,\cdots,k\}\}$.
 We can determine $\boldsymbol{\theta}$ using the Expectation Maximization algorithm:
 \begin{enumerate}
  \item Initialize $\boldsymbol{\theta}$. One possibility is to use the $k$-means algorithm.
@@ -112,7 +114,7 @@ We can determine $\boldsymbol{\theta}$ using the Expectation Maximization algori
 %associated with spectral bands $\mathbf{b}$. The dimension of $\mathbf{x}$ is therefore $(45,|\mathbf{b}|)$, where $|\cdot|$ denotes the lenght of its operand. We can now build a statistical model for each two band combination for every time-step of the year using either a supervised or an unsupervised strategy.
 %We considered two band combinations as we know that two-band derived indices, like NDVI (Normalized Difference Vegitation Index), achieve good results. 
 Let $\mathbf{x}$ denote a MODIS pixel from the Gauteng dataset $\mathbf{X}$ (see Section~\ref{sec:data}). Each MODIS pixel $\mathbf{x}$ contain seven time-series; each time-series is associated with a spectral band and contain 45 observations.
-We will use the subscript $t$ to denote a time-step index and the subscript $\mathbf{b}$ to denote a composite spectralband index. The superscript $c\in\{v~\textrm{(vegetation)},s~\textrm{(settlement)}\}$ acts as a labelling index. Grobler et al. showed, that the SPRT algorithm can be used to distinguish between settlement and vegetation MODIS pixels if the underlying time-varying model of the two classes are known \cite{grobler2012c}. 
+We will use the subscript $t$ to denote a time-step index and the subscript $\mathbf{b}$ to denote a composite spectral band index. The superscript $c\in\{v~\textrm{(vegetation)},s~\textrm{(settlement)}\}$ acts as a labelling index. Grobler et al. showed, that the SPRT algorithm can be used to distinguish between settlement and vegetation MODIS pixels if the underlying time-varying model of the two classes are known \cite{grobler2012c}. 
 Let, $q_{t,\mathbf{b}}^c$ denote a density which accurately represents the data associated with class $c$, spectral bands $\mathbf{b}$ and time-step $t$. The aforementioned time-varying 
 model is expressed mathematically as: $\{q_{t,\mathbf{b}}^c\}_{t=1,2,\cdots,45}$.
 For each unlabelled MODIS pixel $\mathbf{x}_{\mathbf{b}}$ we can then compute the following scalar quantity: 
@@ -124,7 +126,7 @@ approach.
 
 \subsection{Supervised Time-Varying Model}
 \label{sec:sup_model}
-Let $\mathbf{X}_{t,\mathbf{b}}^c$ represent all the data from $\mathbf{X}$ at time-step $t$, associated with spectral bands $\mathbf{b}$ and labbeled as $c$. We can now fit a Gaussian density 
+Let $\mathbf{X}_{t,\mathbf{b}}^c$ represent all the data from $\mathbf{X}$ at time-step $t$, associated with spectral bands $\mathbf{b}$ and labeled as $c$. We can now fit a Gaussian density 
 to $\mathbf{X}_{t,\mathbf{b}}^c$; the dimension of which is determined by the number of spectral bands one considers. To accomplish this in practise we used the \texttt{mixture.GaussianMixture} class from \textsc{scikit-learn} \cite{scikitlearn}. 
 As we are creating separate time-varying models for $v$ and $s$ we set the \texttt{n\_components} input parameter of the aforementioned class's constructor to 1. We then repeat the above procedure for each class and time-step and in 
 doing so we build the required time-varying models. %The supervised time-varying models which were constructed using $\mathbf{b}=\{1,2\}$ is depicted in Figure~\ref{fig:time_vary_model}.
@@ -132,17 +134,19 @@ doing so we build the required time-varying models. %The supervised time-varying
 \subsection{Unsupervised Time-Varying Model}
 Let $\mathbf{X}_{t,\mathbf{b}}$ represent all the data from $\mathbf{X}$ at time-step $t$ associated with spectral bands $\mathbf{b}$. We can now fit a two-component GMM to $\mathbf{X}_{t,\mathbf{b}}$ (as $\mathbf{X}$ contain only two classes). Again,
 the dimension of this model is determined by the number of spectral bands one considers (see Section~\ref{sec:GMM}). We can repeat the above procedure for each time-step and in doing so 
-build the required time-varying model (again this is accomplished in practise using \texttt{mixture.GaussianMixture} with \texttt{n\_components=2}). The only problem now is that the components of the mixture models will have been inconsistantly labelled accross time. There are many approaches one could use to assure 
+build the required time-varying model (again this is accomplished in practise using \texttt{mixture.GaussianMixture} with \texttt{n\_components=2}). 
+
+The only problem now is that the components of the mixture models will have been inconsistently labelled across time. There are many approaches one could use to assure 
 that the components of the mixture model are consistently labelled across time. The simplest approach would be to compute the sum of the euclidean distance between the means of 
 the first and the second components of the GMM at $t$ and $t-1$; and to compare this sum with the sum of the euclidean distance between the means of the first component of the GMM at time $t$ and 
 the second component of the GMM at time $t-1$; and the euclidean distance between the mean of the second component of the GMM at time $t$ and the mean of the first component of the GMM at time $t-1$. If the latter sum is 
-larger than the former the labels of the components at $t$ should be swopped, otherwise the labels should be left as is. This relabelling procedure should be repeated for each time-step $t$.
+larger than the former the labels of the components at $t$ should be swapped, otherwise the labels should be left as is. This relabelling procedure should be repeated for each time-step $t$.
 
-In this paper, however, we labelled our unsupervised time-varying model by employing the supervised time-varying models mentioned in Section~\ref{sec:sup_model}. This labelling approach reduces the probability of making a labelling erorr and as such it will allow us to obtain a better estimate of the intrinsic classification accuracy of the constructed time-varying model. At each time-step $t$ we 
+In this paper, however, we labelled our unsupervised time-varying model by employing the supervised time-varying models mentioned in Section~\ref{sec:sup_model}. This labelling approach reduces the probability of making a labelling error and as such it enables us to ascertain the intrinsic classification capability of the constructed time-varying model. At each time-step $t$ we 
 determined whether the sum of the euclidean distance between the mean of our first GMM component and the mean of the density belonging to our settlement model and the euclidean distance 
 between the mean of our second GMM component and the mean of the density belonging to our vegetation model; was smaller than the sum of the euclidean distance between the mean of our first GMM coponent and the mean of the density 
 belonging to our vegetation model and the euclidean distance between the mean of our second GMM component and the mean of the density of our settlement model. If this was the case then our first GMM component 
-was labelled as belonging to the settlement class and the second component was labbelled as belonging to the vegetation class. If this was not the case then 
+was labelled as belonging to the settlement class and the second component was labeled as belonging to the vegetation class. If this was not the case then 
 the reverse labels were assigned. The supervised and the unsupervised time-varying models which were constructed using $\mathbf{b}=\{1,2\}$ (at time step 11, 22, 33 and 44) are depicted in Figure~\ref{fig:time_vary_model}.
 
 % density contained in the vegetation model well as our v than to the density 
@@ -196,51 +200,48 @@ for band 1 and band 2). The details of exactly how these models were constructed
 \end{figure}
 
 \section{Results}
-In this section we present the performance results of the supervised and the unsupervised sequential classification algorithms we presented in Section~\ref{sec:sprt} when used to cluster $\mathbf{X}$.
-Note, that the same data was used to build the time-varying models discussed in Section~\ref{sec:sprt} and to test the 
-performance of the SPRT algorithm. Furhtermore, we restricted our analysis to two band combinations. We also compare the aforementioned sequential approaches with two other more conventional clustering approaches, which entails clustering $\mathbf{X}$ using $k$-means and GMM. The results are depicted in Figure~\ref{fig:results}. The average classification accuracy of the supervised and the unsupervised sequential classification aproaches are 94\% and 80\%, repspectively. Which is 
-as expected; a supervised approach will outperform an unsupervised approach. When we use the $k$-means and the GMM algorithm to cluster $\mathbf{X}$ we obtain 
+In this section we present the performance results of the supervised and the unsupervised sequential classification algorithms we presented in Section~\ref{sec:sprt} when we employ them to classify (or cluster) $\mathbf{X}$.
+%Note, the data which was used to build the time-varying models discussed in Section~\ref{sec:sprt} and to test the performance of the SPRT algorithm was the same. 
+Note, we restricted our analysis to two band combinations. We also compare the aforementioned sequential approaches with two other more conventional clustering approaches: we also clustered $\mathbf{X}$ using $k$-means and GMM. The results are depicted in Figure~\ref{fig:results}. The average classification accuracy of the supervised and the unsupervised sequential classification approaches are 94\% and 80\%, respectively. Which is as expected; a supervised approach will outperform an unsupervised approach. When we use the $k$-means and the GMM algorithm to cluster $\mathbf{X}$ we obtain 
 an average classification accuracy of 60\% and 51\%. The $k$-means algorithm, therefore, outperforms the GMM approach. Note, that the sequential unsupervised approach which uses 
 GMMs to construct its underlying time-varying model, however, outperforms conventional $k$-means. 
 
 \begin{figure*}[h] 
-  \begin{subfigure}[b]{0.49\linewidth}
+  \begin{subfigure}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=0.85\linewidth]{sup-crop.pdf} 
+    \includegraphics[width=0.89\linewidth]{sup-crop.pdf} 
     \caption{Supervised SPRT} 
     \label{fig7:a} 
     %\vspace{4ex}
   \end{subfigure}%% 
-  \begin{subfigure}[b]{0.49\linewidth}
+  \begin{subfigure}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=0.85\textwidth]{un-crop.pdf} 
+    \includegraphics[width=0.89\textwidth]{un-crop.pdf} 
     \caption{Unsupervised SPRT} 
     \label{fig7:b} 
     %\vspace{13ex}
     \end{subfigure} 
-  \begin{subfigure}[b]{0.49\linewidth}
+  \begin{subfigure}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=0.85\textwidth]{kmeans-crop.pdf} 
+    \includegraphics[width=0.89\textwidth]{kmeans-crop.pdf} 
     \caption{$k$-means} 
     \label{fig7:c} 
   \end{subfigure}%%
-  \begin{subfigure}[b]{0.49\linewidth}
+  \begin{subfigure}[b]{0.5\linewidth}
     \centering
-    \includegraphics[width=0.85\textwidth]{gmm-crop.pdf} 
+    \includegraphics[width=0.89\textwidth]{gmm-crop.pdf} 
     \caption{GMM} 
     \label{fig7:d} 
   \end{subfigure} 
   \caption{c}
   \label{fig7} 
-  \caption{The classification accuracy results of the supervised (top left) and the unsupervised (top right) sequential classification approach presented in Section~\ref{sec:sprt} to the dataset presented in Section~\ref{sec:data}. The classification accuracy results obtained by applying $k$-means (bottom left) and GMM (bottom-right) to the the dataset presented in Section~\ref{sec:data} are also depicted. The supervised approach outperforms the 
-  unsupervised approach as is expected. Note, the unsupervised sequential approach, however, outperforms traditional $k$-means.}
+  \caption{The classification accuracy (\%) results obtained if we employ the supervised (top left) and the unsupervised (top right) sequential classification approaches presented in Section~\ref{sec:sprt} to classify (cluster) the dataset presented in Section~\ref{sec:data}. The classification accuracy results obtained by applying $k$-means (bottom left) and GMM (bottom-right) to the the dataset presented in Section~\ref{sec:data} are also presented. The supervised approach outperforms the unsupervised approach as is expected. Note, the unsupervised sequential approach, however, outperforms traditional $k$-means.}
   \label{fig:results}
 \end{figure*}
 
 \section{Conclusion}
 \label{sec:ref}
-We presented a hypertemporal label agnostic sequential classification algorithm. For the case study presented in this paper, the proposed algorithm 
-outperforms traditional $k$-means (it on average performed 1.33 times better than conventional $k$-means). 
+We presented a hypertemporal label agnostic sequential classification algorithm. We  demonstrated its usefulness via a case study. We also compared it with conventional $k$-means (among other algorithms). For the case study presented in this paper, the proposed algorithm outperforms $k$-means (it performed 1.33 times better on average than conventional $k$-means). 
 
 %List and number all bibliographical references at the end of the paper.  The references can be numbered in alphabetic order or in order of appearance in the document.  When referring to them in the text, type the corresponding reference number in square brackets as shown at the end of this sentence \cite{C2}.
 
@@ -249,6 +250,35 @@ outperforms traditional $k$-means (it on average performed 1.33 times better tha
 % style file from IEEE produces unsorted bibliography list.
 % -------------------------------------------------------------------------
 \bibliographystyle{IEEEbib}
-\bibliography{strings,refs}
+%\bibliography{strings,refs}
+\begin{thebibliography}{1}
 
+\bibitem{viovy2000}
+N.~Viovy, ``{Automatic classification of time series (ACTS): a new clustering
+  method for remote sensing time series,}'' {\em International Journal of Remote Sensing}, vol. 6--7, pp. 1537--1560, 2000.
+
+\bibitem{skakun2017}
+S. Skakun, B. Franch, E. Vermote, J. Roger, I.
+  Becker-Reshef, C. Justice, and N. Kussul, ``Early season large-area winter crop mapping using MODIS NDVI data,growing degree days information and a Gaussian mixture model,'' {\em Remote Sensing of Environment}, vol. 195, pp. 244--258, 2017.
+  
+\bibitem{grobler2012t}
+T.~L. Grobler, ``Sequential and non-sequential hypertemporal classification and change detection of MODIS time-series'', Ph.D. thesis, University of Pretoria, 2012.
+
+\bibitem{ackermann2011t}
+E.~R. Ackermann, ``Sequential land cover classification,'', M.S. thesis, University of Pretoria, 2011.
+
+\bibitem{grobler2012c}
+T.~L. Grobler, E.~R. Ackermann, A.~J. van Zyl, W. Kleynhans,
+  B.~P. Salmon, and J.~C. Olivier,
+\newblock ,''
+\newblock in {\em {2012 IEEE International Geoscience and Remote Sensing
+  Symposium" }}, pp. 6236-6239.
+
+\bibitem{scikitlearn}
+F.~Pedregosa et~al.,
+\newblock ``{Scikit-learn: Machine Learning in {P}ython},''
+\newblock {\em Journal of Machine Learning Research}, vol. 12, pp. 2825--2830,
+  2011.
+
+\end{thebibliography}
 \end{document}
