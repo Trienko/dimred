@@ -49,8 +49,8 @@ Hobart, TAS 7001, Australia}
 \maketitle
 %
 \begin{abstract}
-In this paper we present a novel hypertemporal unsupervised sequential classification algorithm. We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a Moderate Resolution Imaging Spectroradiometer dataset containing two land cover classes, namely natural vegetation and settlement. For the 
-case study we considered in this paper, the proposed sequential classification approach perfomred on average 1.33 times better than conventional $k$-means.
+In this paper we present a novel hypertemporal unsupervised sequential classification algorithm. We illustrate the usefulness of this algorithm at the hand of a case study. For our case study, we consider a Moderate Resolution Imaging Spectroradiometer dataset containing two prominent South Afrcian land cover classes, namely natural vegetation and settlement. Being able to discern between the aformentioned classes is especially important as settlement expansion is one of the most pervasive forms of landcover change in South Africa. For the 
+case study we considered in this paper, the proposed sequential classification approach performed on average 1.33 times better than conventional $k$-means.
 \end{abstract}
 %
 \begin{keywords}
@@ -74,7 +74,7 @@ We start the paper by introducing the dataset we used to test the efficacy of ou
 Section~\ref{sec:sprt}, respectively. We end our paper with some results and a conclusion.
 \section{Data Description}
 \label{sec:data}
-The dataset that we use contains eight years worht of MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
+The dataset that we use contains eight years worth of MODIS MCD43A4 BRDF (Bidirectional Reflectance Distribution Function) corrected 500 m land surface
 data (925 MODIS pixels which correspond to approximately 230 km$^2$) \cite{grobler2012t}. The study area from which this data was obtained is the Gauteng province of South Africa. The dataset contain seven time-series which correspond to the 
 MODIS land bands. Each time-series consist of 368 observations. The temporal cadence of the data is 45 observations per year. We considered only two landcover classes, settlement and vegetation. 
 Vegetation MODIS pixels (592) contain more than 90\% vegetation, while settlement pixels (333) consist of more than 50\% buildings. We selected MODIS pixels that according to Système Probatoire d’Observation de la Terre (SPOT) images had the appropriate percentage land cover type in a MODIS pixel and did not change from 2000 to 2008. The above data can be stored in a datamatrix $\mathbf{X}$ having the following dimensions ($925\times8$,45,7) (if we discard the last eight observations). The first dimension of $\mathbf{X}$ indicates the number of pixels we have, the second dimension represents the number of time-steps that we have (45 in one year), and the final dimension tells us the number of spectral bands we are considering.
@@ -233,7 +233,6 @@ GMMs to construct its underlying time-varying model, however, outperforms conven
     \caption{GMM} 
     \label{fig7:d} 
   \end{subfigure} 
-  \caption{c}
   \label{fig7} 
   \caption{The classification accuracy (\%) results obtained if we employ the supervised (top left) and the unsupervised (top right) sequential classification approaches presented in Section~\ref{sec:sprt} to classify (cluster) the dataset presented in Section~\ref{sec:data}. The classification accuracy results obtained by applying $k$-means (bottom left) and GMM (bottom-right) to the the dataset presented in Section~\ref{sec:data} are also presented. The supervised approach outperforms the unsupervised approach as is expected. Note, the unsupervised sequential approach, however, outperforms traditional $k$-means.}
   \label{fig:results}
