@@ -7,7 +7,10 @@ import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
 from matplotlib.patches import Ellipse
 from termcolor import colored
-
+import itertools
+from sklearn.metrics import confusion_matrix
+from sklearn.linear_model import LogisticRegression
+      
 import math
 
 from sklearn import mixture
@@ -362,7 +365,95 @@ class RedClass():
        #plt.yticks(np.arange(0, 81, 10))
        plt.legend((p1[0], p2[0],p3[0]), ('FFT', 'PCA', 'PCA-FFT'))
        plt.savefig('HD.pdf')
-       plt.show()      
+       plt.show() 
+
+  def do_PCA_experiment(self,X,y):
+      print colored('FIRST METHOD: PCA','red')
+      cm_PCA = np.zeros((X.shape[2],2,2),dtype=float)
+      for b in range(X.shape[2]):
+          print colored('Band '+str(b),'red')
+          pca = PCA(n_components=X.shape[1],whiten=False)
+          X_PCA = pca.fit(X[:,:,b]).transform(X[:,:,b])
+          X_PCA = X_PCA[:,:2]
+          
+          idx = np.random.randint(2, size=X.shape[0])
+          X_PCA_train = X_PCA[idx==1,:]
+          y_train = y[idx==1]
+
+          X_PCA_test = X_PCA[idx==0,:]
+          y_test = y[idx==0]
+
+          clf = LogisticRegression(random_state=0).fit(X_PCA_train, y_train)
+          y_pred = clf.predict(X_PCA_test)
+
+          cm_PCA[b,:,:] = confusion_matrix(y_test,y_pred)
+          print colored('CM'+str(cm_PCA[b,:,:]),'red')
+      return cm_PCA
+
+  def do_GAF_experiment(self,X,y):
+      print colored('SECOND METHOD: GAF','blue')
+      cm_GAF = np.zeros((X.shape[2],2,2),dtype=float)
+      for b in range(X.shape[2]):
+          print colored('Band '+str(b),'blue')
+	  GAF_matrix = np.zeros((X.shape[0],X.shape[1]*X.shape[1]),dtype=float)
+          #GAF loop
+          for k in range(X.shape[0]):
+          #print(k)
+              if (b < 7):
+                 GAF_matrix[k,:] = self.transform(X[k,:,b],no_scaling=False)[0].flatten()
+              else:
+                 GAF_matrix[k,:] = self.transform(X[k,:,b],no_scaling=True)[0].flatten()
+
+          idx = np.random.randint(2, size=X.shape[0])
+          X_GAF_train = GAF_matrix[idx==1,:]
+          y_train = y[idx==1]
+
+          X_GAF_test = GAF_matrix[idx==0,:]
+          y_test = y[idx==0]
+
+          clf = LogisticRegression(random_state=0).fit(X_GAF_train, y_train)
+          y_pred = clf.predict(X_GAF_test)
+
+          cm_GAF[b,:,:] = confusion_matrix(y_test,y_pred)
+          print colored('CM'+str(cm_GAF[b,:,:]),'blue')
+      return cm_GAF
+
+  def plot_confusion_matrix(self,cm, classes,
+                          normalize=True,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+      """
+      This function prints and plots the confusion matrix.
+      Normalization can be applied by setting `normalize=True`.
+      """
+      if normalize:
+          cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+          print("Normalized confusion matrix")
+      else:
+         print('Confusion matrix, without normalization')
+
+      print(cm)
+
+      plt.imshow(cm, interpolation='nearest', cmap=cmap)
+      plt.title(title)
+      plt.colorbar()
+      tick_marks = np.arange(len(classes))
+      plt.xticks(tick_marks, classes, rotation=45)
+      plt.yticks(tick_marks, classes)
+
+      fmt = '.2f' if normalize else 'd'
+      thresh = cm.max() / 2.
+      for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+         plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+      plt.tight_layout()
+      plt.ylabel('True label')
+      plt.xlabel('Predicted label')
+
+
+     
        
 if __name__ == "__main__":
       
@@ -378,6 +469,10 @@ if __name__ == "__main__":
       #CONCAT_DATASETS
       X,y = red_object.concatDataSets(veg,bwt)
       #print(X.shape)
+
+      cm_PCA = red_object.do_PCA_experiment(X,y)
+
+      cm_GAF = red_object.do_GAF_experiment(X,y)
 
       '''
       print colored('FIRST METHOD: PCA','red')
@@ -430,12 +525,12 @@ if __name__ == "__main__":
       #    plt.plot(np.cumsum(np.ones((var_ratio.shape[0],))),np.cumsum(var_ratio[:,k]))
 
       #plt.show()
-
+      '''
       gaf_cube = np.zeros((X.shape[0],X.shape[1],X.shape[1]),dtype=float)
      
       for k in range(X.shape[0]):
           print(k)
-          gaf_cube[k,:,:] = red_object.transform(X[k,:,6],no_scaling=False)[0]
+          gaf_cube[k,:,:] = red_object.transform(X[k,:,0],no_scaling=False)[0]
 
 
       #t = red_object.transform(X[0,:,7])
@@ -479,8 +574,31 @@ if __name__ == "__main__":
       clf = LogisticRegression(random_state=0).fit(X_train, y_train)
       y_pred = clf.predict(X_test)
 
+      from sklearn.metrics import confusion_matrix
+      cm = confusion_matrix(y_test,y_pred)
+      c = np.array(["s","v"])
+      red_object.plot_confusion_matrix(cm,c)
+      plt.show()
+      print(cm) 
+
       print(y_test)
       print(y_pred-y_test)
+
+      X_train = X[idx==1,:,0]
+      y_train = y[idx==1] 
+
+      X_test = X[idx==0,:,0]
+      y_test = y[idx==0] 
+
+      clf = LogisticRegression(random_state=0).fit(X_train, y_train)
+      y_pred = clf.predict(X_test)
+
+      from sklearn.metrics import confusion_matrix
+      cm = confusion_matrix(y_test,y_pred)
+      c = np.array(["s","v"])
+      red_object.plot_confusion_matrix(cm,c)
+      plt.show()
+      print(cm) 
 
       pca = PCA(n_components=new_X.shape[0],whiten=False)
       X_PCA = pca.fit(new_X).transform(new_X)
@@ -516,4 +634,4 @@ if __name__ == "__main__":
 
       plt.title("SETTLEMENT") 
       plt.show()
-      
+      '''
