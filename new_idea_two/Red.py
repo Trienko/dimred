@@ -117,14 +117,15 @@ class RedClass():
       #plt.plot(c_train[199,:])
       #plt.show()
       c_test = self.create_change_data(veg_c_test,bwt_c_test,200)
+      
       return veg_train,veg_test,c_train,c_test
 
-  def compute_z_score(self,veg_train,veg_test,c_train,c_test):
+  def compute_z_score(self,veg_train,veg_test,c_train,c_test,c=1.2):
 
       z_train = np.zeros((veg_train.shape[0]+c_train.shape[0],),dtype = float)
       z_test = np.zeros((veg_test.shape[0]+c_test.shape[0],),dtype = float)
       y_train = np.zeros(z_train.shape,dtype = int)
-      y_test = np.zeros(z_train.shape,dtype = int)
+      y_test = np.zeros(z_test.shape,dtype = int)
 
 
       d_train = np.zeros((veg_train.shape[0]+c_train.shape[0],7),dtype = float)
@@ -135,9 +136,9 @@ class RedClass():
              #Step 1: Lunetta --- filter time-series
              t = veg_train[k,:]
              f = np.fft.fft(t)
-             f[10:-10] = 0
+             f[2:] = 0
              #f[10:]=0
-             t = np.fft.ifft(f)
+             t = np.real(np.fft.ifft(f))
 
              #Step 2: Sum years:
              y8 = np.zeros((8,),dtype=float)
@@ -155,9 +156,9 @@ class RedClass():
              #Step 1: Lunetta --- filter time-series
              t = c_train[k-veg_train.shape[0],:]
              f = np.fft.fft(t)
-             f[10:-10] = 0
+             f[2:] = 0
              #f[10:]=0
-             t = np.fft.ifft(f)
+             t = np.real(np.fft.ifft(f))
 
              #Step 2: Sum years:
              y8 = np.zeros((8,),dtype=float)
@@ -176,9 +177,9 @@ class RedClass():
              #Step 1: Lunetta --- filter time-series
              t = veg_test[k,:]
              f = np.fft.fft(t)
-             f[10:-10] = 0
+             f[2:] = 0
              #f[10:]=0
-             t = np.fft.ifft(f)
+             t = np.real(np.fft.ifft(f))
 
              #Step 2: Sum years:
              y8 = np.zeros((8,),dtype=float)
@@ -196,9 +197,9 @@ class RedClass():
              #Step 1: Lunetta --- filter time-series
              t = c_test[k-veg_test.shape[0],:]
              f = np.fft.fft(t)
-             f[10:-10] = 0
+             f[2:] = 0
              #f[10:]=0
-             t = np.fft.ifft(f)
+             t = np.real(np.fft.ifft(f))
 
              #Step 2: Sum years:
              y8 = np.zeros((8,),dtype=float)
@@ -212,7 +213,7 @@ class RedClass():
 
              d_test[k,:] = y7
 
-      print(d_test)
+      #print(d_test)
       
 
       m_train = np.mean(d_train,axis=0)
@@ -221,8 +222,8 @@ class RedClass():
       s_train = np.std(d_train,axis=0)
       s_test = np.std(d_test,axis=0)
 
-      print(m_test)
-      print(s_test)
+      #print(m_test)
+      #print(s_test)
 
       for k in range(len(z_train)):
           z_train[k] = np.max(np.absolute((d_train[k,:]-m_train)/s_train))
@@ -230,32 +231,28 @@ class RedClass():
       for k in range(len(z_test)):
           z_test[k] = np.max(np.absolute((d_test[k,:]-m_test)/s_test))
 
-      plt.plot(z_train)
-      plt.plot(z_test)
+      #plt.plot(z_train)
+      #plt.plot(z_test)
 
-      plt.show()
+      #plt.show()
 
 
-      y_predict = np.zeros(y_train.shape,dtype = int)
-      y_predict[z_train>1.4] = 1
+      y_predict1 = np.zeros(y_train.shape,dtype = int)
+      y_predict1[z_train>c] = 1
 
-      plt.plot(y_predict)
-      plt.plot(y_train)
-      plt.show()
-     
-      print(confusion_matrix(y_train,y_predict)/200.0)
+      y_predict2 = np.zeros(y_test.shape,dtype = int)
+      y_predict2[z_test>c] = 1
+      
 
-      y_predict = np.zeros(y_test.shape,dtype = int)
-      y_predict[z_test>1.43] = 1
-            
-      print(confusion_matrix(y_train,y_predict)/200.0)
+      return confusion_matrix(y_train,y_predict1),confusion_matrix(y_test,y_predict2)     
 
+      
   def do_GAF_change_experiment(self,veg,bwt):
       print colored('FIRST METHOD: Change GAF','blue')
       cm_GAF = np.zeros((2,2),dtype=float)
       
       veg_train, veg_test, c_train, c_test = self.create_train_test(veg,bwt)  
-
+      c_test = red_object.load_NDVI_change()
       GAF_matrix_train = np.zeros((veg_train.shape[0]+c_train.shape[0],veg_train.shape[1]*veg_train.shape[1]),dtype=float)
       y_train = np.zeros((veg_train.shape[0]+c_train.shape[0],),dtype=int)
 
@@ -267,14 +264,15 @@ class RedClass():
              GAF_matrix_train[k,:] = self.transform(veg_train[k,:],no_scaling=True)[0].flatten()
           else:
              GAF_matrix_train[k,:] = self.transform(c_train[k-veg_train.shape[0],:],no_scaling=True)[0].flatten()
-             y_train[k-veg_train.shape[0]] = 1
+             #y_train[k-veg_train.shape[0]] = 1
+             y_train[k] = 1 
 
       for k in range(GAF_matrix_test.shape[0]):
           if k < veg_test.shape[0]:
              GAF_matrix_test[k,:] = self.transform(veg_test[k,:],no_scaling=True)[0].flatten()
           else:
              GAF_matrix_test[k,:] = self.transform(c_test[k-veg_test.shape[0],:],no_scaling=True)[0].flatten()
-             y_test[k-veg_test.shape[0]] = 1
+             y_test[k] = 1
 
       clf = LogisticRegression(random_state=0).fit(GAF_matrix_train, y_train)
       y_pred = clf.predict(GAF_matrix_test)
@@ -699,27 +697,70 @@ class RedClass():
       plt.ylabel('True label')
       plt.xlabel('Predicted label')
 
+  def load_NDVI_change(self,name="Gauteng.mat"):
+      mat = scipy.io.loadmat("Gauteng.mat")
 
-     
+      band1 = mat["change_band0_valid"]
+      band2 = mat["change_band1_valid"]
+
+      NDVI = (band2-band1)/(band1+band2)
+
+      return NDVI[:,0:368]
+        
        
 if __name__ == "__main__":
-      
+      red_object = RedClass()
+      veg,bwt = red_object.loadDataSet()
+
+
+      red_object.do_GAF_change_experiment(veg,bwt)
+
+      '''
       red_object = RedClass()
       
-
       veg,bwt = red_object.loadDataSet()
 
       veg_train,veg_test,c_train,c_test = red_object.create_train_test(veg,bwt)
+      veg_test = veg[:,:,7].T  
+      c_test = red_object.load_NDVI_change()
+
+      #cf1,cf2 =red_object.compute_z_score(veg_train,veg_test,c_train,c_test,c=1.2)
+
+      #print(cf2)
         
-      red_object.compute_z_score(veg_train,veg_test,c_train,c_test)
-      
-      #red_object.do_GAF_change_experiment(veg,bwt)
+      cv = np.linspace(1.0,2.0,1000)
+      AE1 = np.zeros(cv.shape,dtype=float)
+      PD2 = np.zeros(cv.shape,dtype=float)
+      PFA2 = np.zeros(cv.shape,dtype=float) 
+      AE2 = np.zeros(cv.shape,dtype=float)
+      for k in range(len(cv)):
+          print(k)
+          cf1,cf2 =red_object.compute_z_score(veg_train,veg_test,c_train,c_test,c=cv[k])
+          AE1[k] = (cf1[0,1]/200.0 + cf1[1,0]/200.0)/2.0
+          AE2[k] = (cf2[0,1]/592.0 + cf2[1,0]/180.0)/2.0 
+          PD2[k]= cf2[1,1]/180.0
+          PFA2[k] = cf2[0,1]/592.0
+          
+         
+      idx = np.argmin(AE2)
+      cf1,cf2 =red_object.compute_z_score(veg_train,veg_test,c_train,c_test,c=cv[idx])
+      print(cf2) 
+      plt.plot(cv,AE1)
+      plt.plot(cv,AE2)
+      plt.show()
+      plt.plot(cv,PFA2)
+      plt.plot(cv,PD2)
+      plt.show()
+
+      #
       
       
       #print colored('hello', 'red'), colored('world', 'green') 
-      
-      #IMPORTANT EXPERIMENT FOR PAPER
       '''
+
+      '''
+      #IMPORTANT EXPERIMENT FOR PAPER
+      
       red_object = RedClass() 
      
       #LOADING DATASET
