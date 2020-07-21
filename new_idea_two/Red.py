@@ -58,6 +58,232 @@ class RedClass():
  
       return X_concat,y
 
+  def create_change_data(self,veg,bwt,N):
+
+      data = np.zeros((N,veg.shape[1]),dtype = float)
+
+      alpha = np.linspace(0,1,22)
+            
+      for k in range(N):
+	  veg_pixel = np.random.randint(veg.shape[0])          
+          bwt_pixel = np.random.randint(bwt.shape[0]) 
+          cp = np.random.randint(299)+1
+
+          temp_data = (1-alpha)*veg[veg_pixel,cp:cp+22]+alpha*bwt[bwt_pixel,cp:cp+22]
+          data[k,:] = np.concatenate([veg[veg_pixel,:cp],temp_data,bwt[bwt_pixel,cp+22:]])
+      
+      return data
+          
+   
+  def create_train_test(self,veg,bwt):
+      #print(veg.shape)
+
+      arr = np.arange(veg.shape[1])
+      np.random.shuffle(arr)
+      print(arr)
+      veg = veg[:,arr,:]
+ 
+      arr = np.arange(bwt.shape[1])
+      np.random.shuffle(arr)
+      print(arr)
+      bwt = bwt[:,arr,:]
+ 
+
+      veg_temp = veg[:,:400,7].T
+      print(veg_temp.shape)
+
+      veg_train = veg_temp[:200,:]
+      veg_test = veg_temp[200:,:]
+      print(veg_train.shape)
+      print(veg_test.shape)
+
+
+      veg_temp = veg[:,400:,7].T
+
+      veg_c_train = veg_temp[:96,:]
+      veg_c_test = veg_temp[96:,:]
+      print(veg_c_train.shape)
+      print(veg_c_test.shape)
+      
+      bwt_temp = bwt[:,:,7].T
+ 
+      bwt_c_train = bwt_temp[:166,:]
+      bwt_c_test = bwt_temp[166:,:]
+      print(bwt_c_train.shape)
+      print(bwt_c_test.shape)
+
+      c_train = self.create_change_data(veg_c_train,bwt_c_train,200)
+      #print(c_train.shape)
+      #plt.plot(c_train[199,:])
+      #plt.show()
+      c_test = self.create_change_data(veg_c_test,bwt_c_test,200)
+      return veg_train,veg_test,c_train,c_test
+
+  def compute_z_score(self,veg_train,veg_test,c_train,c_test):
+
+      z_train = np.zeros((veg_train.shape[0]+c_train.shape[0],),dtype = float)
+      z_test = np.zeros((veg_test.shape[0]+c_test.shape[0],),dtype = float)
+      y_train = np.zeros(z_train.shape,dtype = int)
+      y_test = np.zeros(z_train.shape,dtype = int)
+
+
+      d_train = np.zeros((veg_train.shape[0]+c_train.shape[0],7),dtype = float)
+      d_test = np.zeros((veg_test.shape[0]+c_test.shape[0],7),dtype = float)
+
+      for k in range(len(z_train)):
+          if (k < veg_train.shape[0]):
+             #Step 1: Lunetta --- filter time-series
+             t = veg_train[k,:]
+             f = np.fft.fft(t)
+             f[10:-10] = 0
+             #f[10:]=0
+             t = np.fft.ifft(f)
+
+             #Step 2: Sum years:
+             y8 = np.zeros((8,),dtype=float)
+             y7 = np.zeros((7,),dtype=float)
+
+             for i in range(8):
+                 y8[i] = np.sum(t[45*i:45*i+45])
+             
+             for i in range(1,8):
+                 y7[i-1] = y8[i]-y8[i-1]
+
+             d_train[k,:] = y7
+          else:
+             y_train[k] = 1
+             #Step 1: Lunetta --- filter time-series
+             t = c_train[k-veg_train.shape[0],:]
+             f = np.fft.fft(t)
+             f[10:-10] = 0
+             #f[10:]=0
+             t = np.fft.ifft(f)
+
+             #Step 2: Sum years:
+             y8 = np.zeros((8,),dtype=float)
+             y7 = np.zeros((7,),dtype=float)
+
+             for i in range(8):
+                 y8[i] = np.sum(t[45*i:45*i+45])
+             
+             for i in range(1,8):
+                 y7[i-1] = y8[i]-y8[i-1]
+
+             d_train[k,:] = y7
+
+      for k in range(len(z_test)):
+          if (k < veg_test.shape[0]):
+             #Step 1: Lunetta --- filter time-series
+             t = veg_test[k,:]
+             f = np.fft.fft(t)
+             f[10:-10] = 0
+             #f[10:]=0
+             t = np.fft.ifft(f)
+
+             #Step 2: Sum years:
+             y8 = np.zeros((8,),dtype=float)
+             y7 = np.zeros((7,),dtype=float)
+
+             for i in range(8):
+                 y8[i] = np.sum(t[45*i:45*i+45])
+             
+             for i in range(1,8):
+                 y7[i-1] = y8[i]-y8[i-1]
+
+             d_test[k,:] = y7
+          else:
+             y_test[k] = 1
+             #Step 1: Lunetta --- filter time-series
+             t = c_test[k-veg_test.shape[0],:]
+             f = np.fft.fft(t)
+             f[10:-10] = 0
+             #f[10:]=0
+             t = np.fft.ifft(f)
+
+             #Step 2: Sum years:
+             y8 = np.zeros((8,),dtype=float)
+             y7 = np.zeros((7,),dtype=float)
+
+             for i in range(8):
+                 y8[i] = np.sum(t[45*i:45*i+45])
+             
+             for i in range(1,8):
+                 y7[i-1] = y8[i]-y8[i-1]
+
+             d_test[k,:] = y7
+
+      print(d_test)
+      
+
+      m_train = np.mean(d_train,axis=0)
+      m_test = np.mean(d_test,axis=0)
+
+      s_train = np.std(d_train,axis=0)
+      s_test = np.std(d_test,axis=0)
+
+      print(m_test)
+      print(s_test)
+
+      for k in range(len(z_train)):
+          z_train[k] = np.max(np.absolute((d_train[k,:]-m_train)/s_train))
+
+      for k in range(len(z_test)):
+          z_test[k] = np.max(np.absolute((d_test[k,:]-m_test)/s_test))
+
+      plt.plot(z_train)
+      plt.plot(z_test)
+
+      plt.show()
+
+
+      y_predict = np.zeros(y_train.shape,dtype = int)
+      y_predict[z_train>1.4] = 1
+
+      plt.plot(y_predict)
+      plt.plot(y_train)
+      plt.show()
+     
+      print(confusion_matrix(y_train,y_predict)/200.0)
+
+      y_predict = np.zeros(y_test.shape,dtype = int)
+      y_predict[z_test>1.43] = 1
+            
+      print(confusion_matrix(y_train,y_predict)/200.0)
+
+  def do_GAF_change_experiment(self,veg,bwt):
+      print colored('FIRST METHOD: Change GAF','blue')
+      cm_GAF = np.zeros((2,2),dtype=float)
+      
+      veg_train, veg_test, c_train, c_test = self.create_train_test(veg,bwt)  
+
+      GAF_matrix_train = np.zeros((veg_train.shape[0]+c_train.shape[0],veg_train.shape[1]*veg_train.shape[1]),dtype=float)
+      y_train = np.zeros((veg_train.shape[0]+c_train.shape[0],),dtype=int)
+
+      GAF_matrix_test = np.zeros((veg_test.shape[0]+c_test.shape[0],veg_test.shape[1]*veg_test.shape[1]),dtype=float)
+      y_test = np.zeros((veg_test.shape[0]+c_test.shape[0],),dtype=int)
+
+      for k in range(GAF_matrix_train.shape[0]):
+          if k < veg_train.shape[0]:
+             GAF_matrix_train[k,:] = self.transform(veg_train[k,:],no_scaling=True)[0].flatten()
+          else:
+             GAF_matrix_train[k,:] = self.transform(c_train[k-veg_train.shape[0],:],no_scaling=True)[0].flatten()
+             y_train[k-veg_train.shape[0]] = 1
+
+      for k in range(GAF_matrix_test.shape[0]):
+          if k < veg_test.shape[0]:
+             GAF_matrix_test[k,:] = self.transform(veg_test[k,:],no_scaling=True)[0].flatten()
+          else:
+             GAF_matrix_test[k,:] = self.transform(c_test[k-veg_test.shape[0],:],no_scaling=True)[0].flatten()
+             y_test[k-veg_test.shape[0]] = 1
+
+      clf = LogisticRegression(random_state=0).fit(GAF_matrix_train, y_train)
+      y_pred = clf.predict(GAF_matrix_test)
+      cm_GAF[:,:] = confusion_matrix(y_test,y_pred)
+      print colored('CM'+str(cm_GAF[:,:]),'blue')
+
+      return cm_GAF
+
+
   def tabulate(self,x, y, f):
       """Return a table of f(x, y). Useful for the Gram-like operations."""
       return np.vectorize(f)(*np.meshgrid(x, y, sparse=True))
@@ -390,6 +616,27 @@ class RedClass():
           print colored('CM'+str(cm_PCA[b,:,:]),'red')
       return cm_PCA
 
+  def do_time_experiment(self,X,y):
+      print colored('Third METHOD: Time','green')
+      cm_T = np.zeros((X.shape[2],2,2),dtype=float)
+      for b in range(X.shape[2]):
+          print colored('Band '+str(b),'green')
+                    
+          idx = np.random.randint(2, size=X.shape[0])
+          X_train = X[idx==1,:,b]
+          y_train = y[idx==1]
+
+          X_test = X[idx==0,:,b]
+          y_test = y[idx==0]
+
+          clf = LogisticRegression(random_state=0).fit(X_train, y_train)
+          y_pred = clf.predict(X_test)
+
+          cm_T[b,:,:] = confusion_matrix(y_test,y_pred)
+          print colored('CM'+str(cm_T[b,:,:]),'green')
+      return cm_T
+
+
   def do_GAF_experiment(self,X,y):
       print colored('SECOND METHOD: GAF','blue')
       cm_GAF = np.zeros((X.shape[2],2,2),dtype=float)
@@ -457,9 +704,22 @@ class RedClass():
        
 if __name__ == "__main__":
       
+      red_object = RedClass()
+      
 
+      veg,bwt = red_object.loadDataSet()
+
+      veg_train,veg_test,c_train,c_test = red_object.create_train_test(veg,bwt)
+        
+      red_object.compute_z_score(veg_train,veg_test,c_train,c_test)
+      
+      #red_object.do_GAF_change_experiment(veg,bwt)
+      
+      
       #print colored('hello', 'red'), colored('world', 'green') 
-     
+      
+      #IMPORTANT EXPERIMENT FOR PAPER
+      '''
       red_object = RedClass() 
      
       #LOADING DATASET
@@ -472,8 +732,11 @@ if __name__ == "__main__":
 
       cm_PCA = red_object.do_PCA_experiment(X,y)
 
+      cm_time =  red_object.do_time_experiment(X,y)
+      
       cm_GAF = red_object.do_GAF_experiment(X,y)
 
+      '''
       '''
       print colored('FIRST METHOD: PCA','red')
 
