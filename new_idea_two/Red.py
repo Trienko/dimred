@@ -80,37 +80,37 @@ class RedClass():
 
       arr = np.arange(veg.shape[1])
       np.random.shuffle(arr)
-      print(arr)
+      #print(arr)
       veg = veg[:,arr,:]
  
       arr = np.arange(bwt.shape[1])
       np.random.shuffle(arr)
-      print(arr)
+      #print(arr)
       bwt = bwt[:,arr,:]
  
 
       veg_temp = veg[:,:400,7].T
-      print(veg_temp.shape)
+      #print(veg_temp.shape)
 
       veg_train = veg_temp[:200,:]
       veg_test = veg_temp[200:,:]
-      print(veg_train.shape)
-      print(veg_test.shape)
+      #print(veg_train.shape)
+      #print(veg_test.shape)
 
 
       veg_temp = veg[:,400:,7].T
 
       veg_c_train = veg_temp[:96,:]
       veg_c_test = veg_temp[96:,:]
-      print(veg_c_train.shape)
-      print(veg_c_test.shape)
+      #print(veg_c_train.shape)
+      #print(veg_c_test.shape)
       
       bwt_temp = bwt[:,:,7].T
  
       bwt_c_train = bwt_temp[:166,:]
       bwt_c_test = bwt_temp[166:,:]
-      print(bwt_c_train.shape)
-      print(bwt_c_test.shape)
+      #print(bwt_c_train.shape)
+      #print(bwt_c_test.shape)
 
       c_train = self.create_change_data(veg_c_train,bwt_c_train,200)
       #print(c_train.shape)
@@ -248,7 +248,7 @@ class RedClass():
 
       
   def do_GAF_change_experiment(self,veg,bwt):
-      print colored('FIRST METHOD: Change GAF','blue')
+      print colored('FIRST METHOD: Change GAF','cyan')
       cm_GAF = np.zeros((2,2),dtype=float)
       
       veg_train, veg_test, c_train, c_test = self.create_train_test(veg,bwt)  
@@ -279,7 +279,42 @@ class RedClass():
       cm_GAF[:,:] = confusion_matrix(y_test,y_pred)
       print colored('CM'+str(cm_GAF[:,:]),'blue')
 
+      return cm_GAF, GAF_matrix_train, GAF_matrix_test
+
+  def do_time_series_change_experiment(self,veg,bwt):
+      print colored('SECOND METHOD: Change time-series','red')
+      cm_GAF = np.zeros((2,2),dtype=float)
+      
+      veg_train, veg_test, c_train, c_test = self.create_train_test(veg,bwt)  
+      c_test = red_object.load_NDVI_change()
+      GAF_matrix_train = np.zeros((veg_train.shape[0]+c_train.shape[0],veg_train.shape[1]),dtype=float)
+      y_train = np.zeros((veg_train.shape[0]+c_train.shape[0],),dtype=int)
+
+      GAF_matrix_test = np.zeros((veg_test.shape[0]+c_test.shape[0],veg_test.shape[1]),dtype=float)
+      y_test = np.zeros((veg_test.shape[0]+c_test.shape[0],),dtype=int)
+
+      for k in range(GAF_matrix_train.shape[0]):
+          if k < veg_train.shape[0]:
+             GAF_matrix_train[k,:] = veg_train[k,:]#self.transform(veg_train[k,:],no_scaling=True)[0].flatten()
+          else:
+             GAF_matrix_train[k,:] = c_train[k-veg_train.shape[0],:]#self.transform(c_train[k-veg_train.shape[0],:],no_scaling=True)[0].flatten()
+             #y_train[k-veg_train.shape[0]] = 1
+             y_train[k] = 1 
+
+      for k in range(GAF_matrix_test.shape[0]):
+          if k < veg_test.shape[0]:
+             GAF_matrix_test[k,:] = veg_test[k,:]#self.transform(veg_test[k,:],no_scaling=True)[0].flatten()
+          else:
+             GAF_matrix_test[k,:] = c_test[k-veg_test.shape[0],:] #self.transform(c_test[k-veg_test.shape[0],:],no_scaling=True)[0].flatten()
+             y_test[k] = 1
+
+      clf = LogisticRegression(random_state=0).fit(GAF_matrix_train, y_train)
+      y_pred = clf.predict(GAF_matrix_test)
+      cm_GAF[:,:] = confusion_matrix(y_test,y_pred)
+      print colored('CM'+str(cm_GAF[:,:]),'blue')
+
       return cm_GAF
+
 
 
   def tabulate(self,x, y, f):
@@ -594,7 +629,7 @@ class RedClass():
   def do_PCA_experiment(self,X,y):
       print colored('FIRST METHOD: PCA','red')
       cm_PCA = np.zeros((X.shape[2],2,2),dtype=float)
-      for b in range(X.shape[2]):
+      for b in range(7,8):
           print colored('Band '+str(b),'red')
           pca = PCA(n_components=X.shape[1],whiten=False)
           X_PCA = pca.fit(X[:,:,b]).transform(X[:,:,b])
@@ -611,8 +646,8 @@ class RedClass():
           y_pred = clf.predict(X_PCA_test)
 
           cm_PCA[b,:,:] = confusion_matrix(y_test,y_pred)
-          print colored('CM'+str(cm_PCA[b,:,:]),'red')
-      return cm_PCA
+      print colored('CM'+str(cm_PCA[7,:,:]),'red')
+      return cm_PCA[7,:,:]
 
   def do_time_experiment(self,X,y):
       print colored('Third METHOD: Time','green')
@@ -638,7 +673,7 @@ class RedClass():
   def do_GAF_experiment(self,X,y):
       print colored('SECOND METHOD: GAF','blue')
       cm_GAF = np.zeros((X.shape[2],2,2),dtype=float)
-      for b in range(X.shape[2]):
+      for b in range(7,8):
           print colored('Band '+str(b),'blue')
 	  GAF_matrix = np.zeros((X.shape[0],X.shape[1]*X.shape[1]),dtype=float)
           #GAF loop
@@ -660,8 +695,8 @@ class RedClass():
           y_pred = clf.predict(X_GAF_test)
 
           cm_GAF[b,:,:] = confusion_matrix(y_test,y_pred)
-          print colored('CM'+str(cm_GAF[b,:,:]),'blue')
-      return cm_GAF
+      print colored('CM'+str(cm_GAF[7,:,:]),'blue')
+      return cm_GAF[7,:,:],GAF_matrix
 
   def plot_confusion_matrix(self,cm, classes,
                           normalize=True,
@@ -709,11 +744,101 @@ class RedClass():
         
        
 if __name__ == "__main__":
-      red_object = RedClass()
+
+      np.random.seed(30)
+            
+      #IMPORTANT EXPERIMENT FOR PAPER
+      #CLASSIFICATION EXPERIMENTS
+
+      red_object = RedClass() 
+     
+      #LOADING DATASET
       veg,bwt = red_object.loadDataSet()
+      #print(veg.shape)
 
+      #CONCAT_DATASETS
+      X,y = red_object.concatDataSets(veg,bwt)
+      #print(X.shape)
+      print "Classification experiments"
+      #PCA
+      cm_PCA_10 = np.zeros((2,2,10),dtype=float)
 
-      red_object.do_GAF_change_experiment(veg,bwt)
+      for k in range(10):
+          print(k) 
+          cm_PCA = red_object.do_PCA_experiment(X,y)
+          cm_PCA[0,:] = cm_PCA[0,:]/sum(cm_PCA[0,:])*100 #settlement
+          cm_PCA[1,:] = cm_PCA[1,:]/sum(cm_PCA[1,:])*100 #vegetation
+          cm_PCA_10[:,:,k] = cm_PCA
+
+      print(np.mean(cm_PCA_10,axis=2))
+      print(np.std(cm_PCA_10,axis=2))
+
+      #cm_time =  red_object.do_time_experiment(X,y)
+      #GAF
+      #cm_GAF_10 = np.zeros((2,2,10),dtype=float)
+
+      #for k in range(10):
+      #    print(k) 
+      #    cm_GAF,m1 = red_object.do_GAF_experiment(X,y)
+          #print(cm_GAF)
+      #    cm_GAF[0,:] = cm_GAF[0,:]/sum(cm_GAF[0,:])*100 #settlement
+      #    cm_GAF[1,:] = cm_GAF[1,:]/sum(cm_GAF[1,:])*100 #vegetation
+      #    cm_GAF_10[:,:,k] = cm_GAF
+
+      #print(np.mean(cm_GAF_10,axis=2))
+      #print(np.std(cm_GAF_10,axis=2))
+      
+      #plt.imshow(m1[0,:].reshape((368,368)))
+      #plt.show()
+
+      #CHANGE DETECTION EXPERIMENTS
+      print "Change detection experiments"
+      cm_GAF_c_10 = np.zeros((2,2,10),dtype=float)
+
+      #GAF
+      for k in range(10):
+          cm_GAF_c,mc1,mc2 = red_object.do_GAF_change_experiment(veg,bwt)
+          cm_GAF_c[0,:] = cm_GAF_c[0,:]/sum(cm_GAF_c[0,:])*100 #no change
+          cm_GAF_c[1,:] = cm_GAF_c[1,:]/sum(cm_GAF_c[1,:])*100 #change
+          cm_GAF_c_10[:,:,k] = cm_GAF_c
+
+      print(np.mean(cm_GAF_c_10,axis=2))
+      print(np.std(cm_GAF_c_10,axis=2))
+          
+          #red_object.do_time_series_change_experiment(veg,bwt)
+
+      #veg,bwt = red_object.loadDataSet()
+
+      #BAND DIFFERENCING EXPERIMENT
+      print colored('SECOND METHOD: DIFF', 'yellow')
+      veg_train,veg_test,c_train,c_test = red_object.create_train_test(veg,bwt)
+      veg_test = veg[:,:,7].T  
+      c_test = red_object.load_NDVI_change()
+
+      #cf1,cf2 =red_object.compute_z_score(veg_train,veg_test,c_train,c_test,c=1.2)
+
+      #print(cf2)
+        
+      cv = np.linspace(1.0,2.0,1000)
+      AE1 = np.zeros(cv.shape,dtype=float)
+      PD2 = np.zeros(cv.shape,dtype=float)
+      PFA2 = np.zeros(cv.shape,dtype=float) 
+      AE2 = np.zeros(cv.shape,dtype=float)
+      for k in range(len(cv)):
+          #print(k)
+          cf1,cf2 =red_object.compute_z_score(veg_train,veg_test,c_train,c_test,c=cv[k])
+          AE1[k] = (cf1[0,1]/200.0 + cf1[1,0]/200.0)/2.0
+          AE2[k] = (cf2[0,1]/592.0 + cf2[1,0]/180.0)/2.0 
+          PD2[k]= cf2[1,1]/180.0
+          PFA2[k] = cf2[0,1]/592.0
+          
+         
+      idx = np.argmin(AE2)
+      cf1,cf2 =red_object.compute_z_score(veg_train,veg_test,c_train,c_test,c=1.2)
+      print colored(cf2,'yellow')
+      cf2[0,:] = cf2[0,:]/sum(cf2[0,:])*100
+      cf2[1,:] = cf2[1,:]/sum(cf2[1,:])*100
+     
 
       '''
       red_object = RedClass()
