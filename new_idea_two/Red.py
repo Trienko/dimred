@@ -278,7 +278,7 @@ class RedClass():
       clf = LogisticRegression(random_state=0).fit(GAF_matrix_train, y_train)
       y_pred = clf.predict(GAF_matrix_test)
       cm_GAF[:,:] = confusion_matrix(y_test,y_pred)
-      print colored('CM'+str(cm_GAF[:,:]),'blue')
+      print colored('CM'+str(cm_GAF[:,:]),'cyan')
 
       return cm_GAF, GAF_matrix_train, GAF_matrix_test
 
@@ -813,6 +813,7 @@ if __name__ == "__main__":
 
       #GAF
       for k in range(10):
+          print(k)
           cm_GAF_c,mc1,mc2 = red_object.do_GAF_change_experiment(veg,bwt)
           cm_GAF_c[0,:] = cm_GAF_c[0,:]/sum(cm_GAF_c[0,:])*100 #no change
           cm_GAF_c[1,:] = cm_GAF_c[1,:]/sum(cm_GAF_c[1,:])*100 #change
@@ -858,6 +859,7 @@ if __name__ == "__main__":
       print colored(cf2,'yellow')
       cf2[0,:] = cf2[0,:]/sum(cf2[0,:])*100
       cf2[1,:] = cf2[1,:]/sum(cf2[1,:])*100
+      print(cf2)
       pickle.dump(cf2,outfile)
       outfile.close()
 
