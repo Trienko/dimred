@@ -745,8 +745,8 @@ class RedClass():
         
        
 if __name__ == "__main__":
-
-      
+   exp=False
+   if exp:   
 
 
       filename = 'results.pkl'
@@ -862,7 +862,18 @@ if __name__ == "__main__":
       print(cf2)
       pickle.dump(cf2,outfile)
       outfile.close()
+   else:
 
+      infile = open("results.pkl",'rb')
+      cmPCA = pickle.load(infile)
+      cmGAF = pickle.load(infile)
+      veg_GAF = pickle.load(infile)
+      set_GAF = pickle.load(infile)
+      cmGAF_c = pickle.load(infile)
+      sim_c_GAF = pickle.load(infile)
+      real_c_GAF = pickle.load(infile)
+      cmB = pickle.load(infile)
+      infile.close()
       '''
       red_object = RedClass()
       
