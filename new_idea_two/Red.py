@@ -10,6 +10,7 @@ from termcolor import colored
 import itertools
 from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
+import pickle
       
 import math
 
@@ -745,10 +746,19 @@ class RedClass():
        
 if __name__ == "__main__":
 
+      
+
+
+      filename = 'results.pkl'
+      outfile = open(filename,'wb')
       np.random.seed(30)
             
       #IMPORTANT EXPERIMENT FOR PAPER
       #CLASSIFICATION EXPERIMENTS
+
+      #cf2[0,:] = cf2[0,:]/sum(cf2[0,:])*100
+
+
 
       red_object = RedClass() 
      
@@ -769,21 +779,27 @@ if __name__ == "__main__":
           cm_PCA[0,:] = cm_PCA[0,:]/sum(cm_PCA[0,:])*100 #settlement
           cm_PCA[1,:] = cm_PCA[1,:]/sum(cm_PCA[1,:])*100 #vegetation
           cm_PCA_10[:,:,k] = cm_PCA
+      
+      pickle.dump(cm_PCA_10,outfile)
 
       print(np.mean(cm_PCA_10,axis=2))
       print(np.std(cm_PCA_10,axis=2))
 
       #cm_time =  red_object.do_time_experiment(X,y)
       #GAF
-      #cm_GAF_10 = np.zeros((2,2,10),dtype=float)
+      cm_GAF_10 = np.zeros((2,2,10),dtype=float)
 
-      #for k in range(10):
-      #    print(k) 
-      #    cm_GAF,m1 = red_object.do_GAF_experiment(X,y)
+      for k in range(10):
+          print(k) 
+          cm_GAF,m1 = red_object.do_GAF_experiment(X,y)
           #print(cm_GAF)
-      #    cm_GAF[0,:] = cm_GAF[0,:]/sum(cm_GAF[0,:])*100 #settlement
-      #    cm_GAF[1,:] = cm_GAF[1,:]/sum(cm_GAF[1,:])*100 #vegetation
-      #    cm_GAF_10[:,:,k] = cm_GAF
+          cm_GAF[0,:] = cm_GAF[0,:]/sum(cm_GAF[0,:])*100 #settlement
+          cm_GAF[1,:] = cm_GAF[1,:]/sum(cm_GAF[1,:])*100 #vegetation
+          cm_GAF_10[:,:,k] = cm_GAF
+
+      pickle.dump(cm_GAF_10,outfile)
+      pickle.dump(m1[0,:].reshape((368,368)),outfile)#vegetation
+      pickle.dump(m1[-1,:].reshape((368,368)),outfile)#settlement
 
       #print(np.mean(cm_GAF_10,axis=2))
       #print(np.std(cm_GAF_10,axis=2))
@@ -801,6 +817,10 @@ if __name__ == "__main__":
           cm_GAF_c[0,:] = cm_GAF_c[0,:]/sum(cm_GAF_c[0,:])*100 #no change
           cm_GAF_c[1,:] = cm_GAF_c[1,:]/sum(cm_GAF_c[1,:])*100 #change
           cm_GAF_c_10[:,:,k] = cm_GAF_c
+      
+      pickle.dump(cm_GAF_c_10,outfile)
+      pickle.dump(mc1[-1,:].reshape((368,368)),outfile)#sim_change
+      pickle.dump(mc2[-1,:].reshape((368,368)),outfile)#real change
 
       print(np.mean(cm_GAF_c_10,axis=2))
       print(np.std(cm_GAF_c_10,axis=2))
@@ -838,7 +858,8 @@ if __name__ == "__main__":
       print colored(cf2,'yellow')
       cf2[0,:] = cf2[0,:]/sum(cf2[0,:])*100
       cf2[1,:] = cf2[1,:]/sum(cf2[1,:])*100
-     
+      pickle.dump(cf2,outfile)
+      outfile.close()
 
       '''
       red_object = RedClass()
