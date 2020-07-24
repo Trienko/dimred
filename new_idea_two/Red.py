@@ -879,7 +879,23 @@ if __name__ == "__main__":
 
       infile = open("results.pkl",'rb')
       cmPCA = pickle.load(infile)
+      print(np.mean(cmPCA,axis=2))
+      print(np.std(cmPCA,axis=2))
+      
+      PCA_mean = np.mean((cmPCA[0,1,:]+cmPCA[1,0,:])/2)
+      PCA_std = np.std((cmPCA[0,1,:]+cmPCA[1,0,:])/2)  
+      print(PCA_mean)
+      print(PCA_std)
+   
       cmGAF = pickle.load(infile)
+      print(np.mean(cmGAF,axis=2))
+      print(np.std(cmGAF,axis=2))
+      GAF_mean = np.mean((cmGAF[0,1,:]+cmGAF[1,0,:])/2)
+      GAF_std = np.std((cmGAF[0,1,:]+cmGAF[1,0,:])/2)  
+      print(GAF_mean)
+      print(GAF_std)
+         
+
       veg_GAF = pickle.load(infile)
       plt.xticks([])
       plt.yticks([])
@@ -896,6 +912,13 @@ if __name__ == "__main__":
       plt.show()
       
       cmGAF_c = pickle.load(infile)
+      print(np.mean(cmGAF_c,axis=2))
+      print(np.std(cmGAF_c,axis=2))
+      GAFc_mean = np.mean((cmGAF_c[0,1,:]+cmGAF_c[1,0,:])/2)
+      GAFc_std = np.std((cmGAF_c[0,1,:]+cmGAF_c[1,0,:])/2)  
+      print(GAFc_mean)
+      print(GAFc_std)
+      
       sim_c_GAF = pickle.load(infile)
       plt.imshow(sim_c_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
       plt.xticks([])
@@ -913,7 +936,34 @@ if __name__ == "__main__":
       plt.show()
       
       cmB = pickle.load(infile)
+      print(cmB)
+      cmB_mean = (cmB[1,0]+cmB[0,1])/2
+      print(cmB_mean)
       infile.close()
+
+      N = 5
+      classification = (PCA_mean, GAF_mean,cmB_mean,GAFc_mean)
+      #change_detection = (cmB_mean,GAFc_mean)
+      clStd = (PCA_std, GAF_std,0, GAFc_mean)
+      #cStd = (0, GAFc_mean)
+      ind = np.arange(4)    # the x locations for the groups
+      width = 0.35       # the width of the bars: can also be len(x) sequence
+
+      p1 = plt.bar(ind,classification,width,yerr=clStd,color=['red', 'blue', 'green', 'cyan'])
+      #p1 = plt.bar((ind[0]), (classification[0]), width, yerr=(clStd[0]))
+      #p2 = plt.bar((ind[]), (classification[1]), width, yerr=(clStd[1]),bottom=(classification[0]))
+      #p2 = plt.bar(ind, womenMeans, width,
+      #       bottom=menMeans, yerr=womenStd)
+
+      plt.ylabel('Average Error %')
+      #plt.title('Scores by group and gender')
+      plt.xticks(ind, ('PCA', 'GAF', 'Diff', 'GAF'))
+      #plt.yticks(np.arange(0, 81, 10))
+      #plt.legend((p1[0], p2[0]), ('Men', 'Women'))
+
+      plt.show()
+
+
       '''
       red_object = RedClass()
       
