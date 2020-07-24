@@ -5,7 +5,7 @@
 \documentclass{article}
 \usepackage{spconf,amsmath,epsfig}
 \usepackage{subcaption}
-
+\usepackage{multirow}
 % Example definitions.
 % --------------------
 \def\x{{\mathbf x}}
@@ -13,7 +13,7 @@
 
 % Title.
 % ------
-\title{AUTHOR GUIDELINES  fff FOR IGARSS 2020 MANUSCRIPTS}
+\title{USING THE GAF T RANSFORM TO PERFORM LANDCOVER CLASSIFICATION AND CHANGE DETECTION}
 %
 % Single address.
 % ---------------
@@ -166,6 +166,43 @@ this \cite{Lamp86}.
 % uncomment the preceding line ``\centerline...'' and replace ``imageX.ps''
 % with a suitable PostScript file name.
 % -------------------------------------------------------------------------
+\begin{table}
+\begin{tabular}{ |l|c c c| }
+\hline
+%\multicolumn{3}{ |c| }{Team sheet} \\
+& & v & s\\
+\hline
+\multirow{2}{*}{PCA} & \emph{v} & 93.63$\pm$1.58&6.37\\
+& \emph{s}& 0.6& 99.41\%$\pm$0.39\\
+\hline
+\multirow{2}{*}{GAF} & \emph{v} & 99.42$\pm$0.58&0.58\\
+& \emph{s}& 0.77& 99.23\%$\pm$0.64\\
+\hline
+\hline
+& & nc & c\\
+\hline
+\multirow{2}{*}{Differencing} & \emph{nc} & 85.47 & 14.53\\
+& \emph{c}& 16.11 & 83.89\\
+\multirow{2}{*}{GAF} & \emph{nc} & 99.2$\pm$0.71 & 0.8\\
+& \emph{c}& 0.01 & 99.9$\pm$0.17\\
+%Goalkeeper & GK & Paul Robinson \\ \hline
+%\multirow{4}{*}{Defenders} & LB & Lucas Radebe \\
+% & DC & Michael Duburry \\
+% & DC & Dominic Matteo \\
+% & RB & Didier Domi \\ \hline
+%\multirow{3}{*}{Midfielders} & MC & David Batty \\
+% & MC & Eirik Bakke \\
+% & MC & Jody Morris \\ \hline
+%Forward & FW & Jamie McMaster \\ \hline
+%\multirow{2}{*}{Strikers} & ST & Alan Smith \\
+% & ST & Mark Viduka \\
+\hline
+\end{tabular}
+\caption{xxx}
+\label{tab:cm}
+\end{table}
+
+
 \begin{figure}[htb]
 
 \begin{minipage}[b]{1.0\linewidth}
@@ -193,6 +230,13 @@ this \cite{Lamp86}.
 \label{fig:res}
 %
 \end{figure}
+
+\begin{figure}
+ \includegraphics[width=0.48\textwidth]{results-crop.pdf}
+ \label{fig:results}
+ \caption{Test}
+\end{figure}
+
 
 \begin{figure*}[h] 
   \begin{subfigure}[b]{0.5\linewidth}
@@ -226,6 +270,10 @@ this \cite{Lamp86}.
   \caption{The classification accuracy (\%) results obtained if we employ the supervised (top left) and the unsupervised (top right) sequential classification approaches presented in Section~\ref{sec:sprt} to classify (cluster) the dataset presented in Section~\ref{sec:data}. The classification accuracy results obtained by applying $k$-means (bottom left) and GMM (bottom-right) to the the dataset presented in Section~\ref{sec:data} are also presented. The supervised approach outperforms the unsupervised approach as is expected. Note, the unsupervised sequential approach, however, outperforms traditional $k$-means.}
   \label{fig:results}
 \end{figure*}
+
+
+
+
 
 
 % To start a new column (but not a new page) and help balance the last-page
