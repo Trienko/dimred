@@ -821,7 +821,7 @@ if __name__ == "__main__":
       
       pickle.dump(cm_GAF_c_10,outfile)
       pickle.dump(mc1[-1,:].reshape((368,368)),outfile)#sim_change
-      pickle.dump(mc2[-1,:].reshape((368,368)),outfile)#real change
+      pickle.dump(mc2[201,:].reshape((368,368)),outfile)#real change
 
       print(np.mean(cm_GAF_c_10,axis=2))
       print(np.std(cm_GAF_c_10,axis=2))
@@ -857,21 +857,61 @@ if __name__ == "__main__":
       idx = np.argmin(AE2)
       cf1,cf2 =red_object.compute_z_score(veg_train,veg_test,c_train,c_test,c=1.2)
       print colored(cf2,'yellow')
-      cf2[0,:] = cf2[0,:]/sum(cf2[0,:])*100
-      cf2[1,:] = cf2[1,:]/sum(cf2[1,:])*100
+      cf2 = cf2.astype(np.float)
+      cf2[0,:] = cf2[0,:]/sum(1.0*cf2[0,:])*100
+      cf2[1,:] = cf2[1,:]/sum(1.0*cf2[1,:])*100
       print(cf2)
       pickle.dump(cf2,outfile)
       outfile.close()
    else:
+      
+      #cm_GAF_c,mc1,mc2 = red_object.do_GAF_change_experiment(veg,bwt)
+
+      #red_object = RedClass() 
+     
+      #LOADING DATASET
+      #veg,bwt = red_object.loadDataSet()
+      #cm_GAF_c,mc1,mc2 = red_object.do_GAF_change_experiment(veg,bwt)
+      #plt.imshow(mc2[201,:].reshape((368,368)))
+      #plt.show()
+
+       
 
       infile = open("results.pkl",'rb')
       cmPCA = pickle.load(infile)
       cmGAF = pickle.load(infile)
       veg_GAF = pickle.load(infile)
+      plt.xticks([])
+      plt.yticks([])
+      plt.imshow(veg_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      print(np.max(veg_GAF))
+      print(np.min(veg_GAF))
+      plt.show()
       set_GAF = pickle.load(infile)
+      plt.xticks([])
+      plt.yticks([])
+      plt.imshow(set_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      print(np.max(set_GAF))
+      print(np.min(set_GAF))
+      plt.show()
+      
       cmGAF_c = pickle.load(infile)
       sim_c_GAF = pickle.load(infile)
+      plt.imshow(sim_c_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      plt.xticks([])
+      plt.yticks([])
+      print(np.max(sim_c_GAF))
+      print(np.min(sim_c_GAF))
+      plt.show()
+      
       real_c_GAF = pickle.load(infile)
+      plt.imshow(real_c_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      plt.xticks([])
+      plt.yticks([])
+      print(np.max(real_c_GAF))
+      print(np.min(real_c_GAF))
+      plt.show()
+      
       cmB = pickle.load(infile)
       infile.close()
       '''
