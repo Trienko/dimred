@@ -71,7 +71,16 @@ In this paper we make use of a dataset composed of MODIS NDVI (Natural Differenc
 
 \section{Gramian Angular Field}
 \label{sec:GAF}
-
+The GAF transform makes it possible to encode time-series as images. The resulting images can then be classified using image based deep learning methods. Assume that $\mathbf{x} = \{x_1,x_2,\cdots,x_N\}$ is a rescaled time series between -1 and 1 consisting of $N$ points. The GAF of $\mathbf{x}$ is then defined as: 
+\begin{equation}
+\mathbf{G} = \begin{pmatrix}
+\cos(\phi_1+\phi_1) & \cdots & \cos(\phi_1+\phi_N)\\
+\vdots& \ddots &\vdots\\
+\cos(\phi_N+\phi1)&\cdots&\cos(\phi_N+\phi_N)
+\end{pmatrix},\nonumber
+\end{equation}
+where $\phi_j = \arccos(x_j)$.
+  
 \section{Experimental Setup}
 \label{sec:exp}
 
