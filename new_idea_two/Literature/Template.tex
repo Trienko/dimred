@@ -60,7 +60,26 @@ One, two, three, four, five
 %
 \section{Introduction}
 \label{sec:intro}
-The field of computer vision has changed dramatically over the last few years due to the success of Convolutional Neural Networks (CNNs) and deep learning. Recently, it was proposed to encode time-series as images so that the capability of CNNs to perform image classification could also be applied to the problem of time-series classification. One possible time-series encoding scheme is the GAF transform. GAF images are formed using polar coordinates and ultimately take the form of a Gramian matrix, whose entries are the trigonometric sum of observations recorded at different time indices. This encoding scheme has already been applied within the remote sensing field. Dias et al used the GAF transform, MODIS time-series and existing CNN models to succesfully detect eucalyptus plantations. Their approach outperformed conventional approaches to the same problem.       
+The field of computer vision has changed dramatically over the last few years due to the success of Convolutional Neural Networks (CNNs) and deep learning. Recently, it was proposed to encode time-series as images so that the capability of CNNs to perform image classification could also be applied to the problem of time-series classification. One possible time-series encoding scheme is the Gramian Angular Field (GAF) transform. GAF images are formed using polar coordinates and ultimately take the form of a Gramian matrix, whose entries are the trigonometric sum of observations recorded at different time indices. This encoding scheme has succesfully been applied within the remote sensing field. Dias et al used the GAF transform (and other transforms), Moderate Resolution Imaging Spectroradiometer (MODIS) time-series and existing CNN models to succesfully detect eucalyptus plantations. Their CNN based solution outperformed the conventional approaches they compared against. In this paper we will investigate whether MODIS time-series and the GAF transfrom can be utilized for detecting settlement expansion. Settlement expansion is one of the most pervasive forms of landcover change in sub saharan Africa. It is, therefore, of the utmost importance to find strategies and algorithms that will allow us to effectively monitor the growth of settlements in Africa. In this paper, however, we will restrict ourselves to a case study in the Gauteng province of South Africa. It is also woth pointing out that in this paper we alse  
+
+%Given this background, let us list the  contributions that we make in this paper: 
+%\begin{itemize}
+% \item Our indepenent study corroborates the study made by Dias et al, i.e. we have confirmed that the GAF transform is a usefull encoding scheme that can be used for pixel-based land cover classification. 
+% \item We show that the GAF transform can be utilized for detecting settlement expasion.
+% \item We show that the GAF transform can not only be used for pixel based land cover classification, but also for detecting land cover change.
+% \item We show that is the classification problem at hand is seperable enough
+%\end{itemize}
+
+
+
+In addition to investigating wheter the GAF transform can be utilized for detecting settlement expansion, the current paper also makes the following unique contributions:
+
+we also Let us now expand on the unique contributions of the current paper in a bit Expanding on the , the unique contributions of the current paper are:
+\begin{itemize}
+ \item 
+\end{itemize}
+
+
 
 
 GAF images are rep-resented as a Gramian matrix where each element is thetrigonometric sum (i.e., superposition of directions) be-tween different time intervals
