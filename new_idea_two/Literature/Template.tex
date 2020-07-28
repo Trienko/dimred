@@ -17,8 +17,12 @@
 %
 % Single address.
 % ---------------
-\name{Author(s) Name(s)\thanks{Thanks to XYZ agency for funding.}}
-\address{Author Affiliation(s)}
+\name{T.L. Grobler$^{\dagger}$, W. Kleynhans$^{\star}$ and B.P. Salmon$^{\ddagger}$}
+\address{$\dagger$Dept of Mathematical Sciences, Computer Science Division, Stellenbosch University,\\ Private Bag X1, 7602 Matieland, South Africa\\
+$\star$Department of Electrical, Electronic and Computer Engineering University of Pretoria,\\
+Pretoria 0002, South Africa\\
+${\ddagger}$School of Engineering, University of Tasmania,
+Hobart, TAS 7001, Australia}
 %
 % For example:
 % ------------
@@ -55,12 +59,31 @@ in black ink.
 \end{abstract}
 %
 \begin{keywords}
-One, two, three, four, five
+Moderate Resolution Imaging Spetroradiometer, Gramian Angular Fields, landcover classification and change detection, settlement expansion
 \end{keywords}
 %
 \section{Introduction}
 \label{sec:intro}
-The field of computer vision has changed dramatically over the last few years due to the success of Convolutional Neural Networks (CNNs) and deep learning. Recently, it was proposed to encode time-series as images so that the capability of CNNs to perform image classification could also be applied to the problem of time-series classification. One possible time-series encoding scheme is the Gramian Angular Field (GAF) transform. GAF images are formed using polar coordinates and ultimately take the form of a Gramian matrix, whose entries are the trigonometric sum of observations recorded at different time indices. This encoding scheme has succesfully been applied within the remote sensing field. Dias et al used the GAF transform (and other transforms), Moderate Resolution Imaging Spectroradiometer (MODIS) time-series and existing CNN models to succesfully detect eucalyptus plantations. Their CNN based solution outperformed the conventional approaches they compared against. In this paper we will investigate whether MODIS time-series and the GAF transfrom can be utilized for detecting settlement expansion. Settlement expansion is one of the most pervasive forms of landcover change in sub saharan Africa. It is, therefore, of the utmost importance to find strategies and algorithms that will allow us to effectively monitor the growth of settlements in Africa. In this paper, however, we will restrict ourselves to a case study in the Gauteng province of South Africa. It is also woth pointing out that in this paper we alse  
+The field of computer vision has changed dramatically over the last few years due to the success of Convolutional Neural Networks (CNNs) and deep learning. Recently, it was proposed to encode time-series as images so that the capability of CNNs to perform image classification could also be applied to the problem of time-series classification. One possible time-series encoding scheme is the Gramian Angular Field (GAF) transform. GAF images are formed using polar coordinates and ultimately take the form of a Gramian matrix, whose entries are the trigonometric sum of observations recorded at different time indices. This encoding scheme has succesfully been applied within the remote sensing field. Dias et al used the GAF transform (and other transforms), Moderate Resolution Imaging Spectroradiometer (MODIS) time-series and existing CNN models to succesfully detect eucalyptus plantations. Their CNN based solution outperformed the conventional approaches they compared against. In this paper we will investigate whether MODIS time-series and the GAF transfrom can be utilized for detecting settlement expansion. Settlement expansion is one of the most pervasive forms of landcover change in sub saharan Africa. It is, therefore, of the utmost importance to find strategies and algorithms that will allow us to effectively monitor the growth of settlements in Africa. In this paper, however, we will restrict ourselves to a case study in the Gauteng province of South Africa. In addition to investigating another use case than Dias et al we also extend their work in the following way: in this paper we do not restrict ourselves to only investigating the problem of land cover classification, we also investigate whether the GAF transfrom can be utilized for detecting landcover changes.  
+
+\section{Data Description}
+In this paper we make use of a dataset composed of MODIS NDVI (Natural Difference Vegetaion Index) time-series/pixels. The NDVI time-series was constructed from band one and two of the MODIS MCD43A4 product. The study area we considered was approximately 230~km$^2$ in Gauteng, South Africa. The time-period considered was between January 2001 and March 2009. The temporal cadence of the data is every eight days (i.e. 45 observations a year). Each time-series in the dataset consists of 368 observations and its associated spatial resolution is 500~m by 500~m. The dataset contains MODIS pixels from two landcover types: vegetation ($v$) and settlement ($s$). A MODIS pixel was assigned the label $v$ if it contained more than 90\% vegetation, whereas a pixel was assigned the label $s$ if it contained more than 50\% buildings. The dataset contains 1105 MODIS pixels: 592 vegetation pixles, 333 settlement pixels, and 180 pixles that changed from vegetation to settlement. Pixels were selected by visually inspecting two high-resolution Syst\`{e}me Probatoried d'Observation de la Terra (SPOT) images from 2001 and 2009. Only pixels that according to the SPOT images did not change or changed from vegtation to settlement were selected.
+
+\section{Gramian Angular Field}
+\label{sec:GAF}
+
+\section{Experimental Setup}
+\label{sec:exp}
+
+We conducted two main experiments. We investigated whether the GAF transfrom could be effectively utilized for encoding NDVI time-series as images for the purpose of land cover classification and change detection.
+
+\subsection{Land cover classification}
+The procedure as outlined below was repeated 10 times to ensure the reliability of the resutls. The time-series of the pixels that did not change were encoded using the GAF transform. This non-changing encoded data-set was then randomly split into a training set and a test set. Fifty percent of the data was used for training and fifty persent for testing. The test set was then used to train \textsc{SCIKIT-LEARN}'s logistic regression classifier. We used used the classsifier's default settings. We did not deem it neccecarry to perform any kind of hyperparameter tuning as the deault settings produced adequate results. We then tested the accuracy of our classifier by using the test set. The results we obtained is presented in Table and Figure and is discussed further in Section       
+
+\subsection{Land cover change detection}
+The procedure as outlined below was repeated 10 times to ensure the reliability of the resutls. We start by randomly splitted our vegetation pixels into a partial training set (200 pixels), a partial testing set (200 pixles) and a temporary set (192 pixels). All of our settlement pixels were added to a temporary settlement set (333 pixels). All the real change pixels were added to a temporary real change set (180 pixels). We then created a synthetic change set (200 pixels) by linearly splicing together random pixels from our temporary vegetation set (192 pixels) and our temporary settlement set (333) over a six month period. The change points were uniformly chosen from the set [1,300]. The final training  set (400 pixels) is then constructed by lumping together the vegetation training set (200 pixels) and the synthetic change set (200 pixels). The final test set (380 pixels) is then created by lumping together the vegetation testing set (200 pixles) and the real change set (180 pixels). The time-series of the pixels are then encoded using the GAF transform. \textsc{SCIKIT-LEARN}'s logistic regression classifier. We used used the classsifier's default settings. We did not deem it neccecarry to perform any kind of hyperparameter tuning as the deault settings produced adequate results. We then tested the accuracy of our classifier by using the test set. The results we obtained is presented in Table and Figure and is discussed further in Section
+
+
 
 %Given this background, let us list the  contributions that we make in this paper: 
 %\begin{itemize}
