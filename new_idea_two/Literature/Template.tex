@@ -64,14 +64,20 @@ Moderate Resolution Imaging Spetroradiometer, Gramian Angular Fields, landcover 
 %
 \section{Introduction}
 \label{sec:intro}
-The field of computer vision has changed dramatically over the last few years due to the success of Convolutional Neural Networks (CNNs) and deep learning. Recently, it was proposed to encode time-series as images so that the capability of CNNs to perform image classification could also be applied to the problem of time-series classification. One possible time-series encoding scheme is the Gramian Angular Field (GAF) transform. GAF images are formed using polar coordinates and ultimately take the form of a Gramian matrix, whose entries are the trigonometric sum of observations recorded at different time indices. This encoding scheme has succesfully been applied within the remote sensing field. Dias et al used the GAF transform (and other transforms), Moderate Resolution Imaging Spectroradiometer (MODIS) time-series and existing CNN models to succesfully detect eucalyptus plantations. Their CNN based solution outperformed the conventional approaches they compared against. In this paper we will investigate whether MODIS time-series and the GAF transfrom can be utilized for detecting settlement expansion. Settlement expansion is one of the most pervasive forms of landcover change in sub saharan Africa. It is, therefore, of the utmost importance to find strategies and algorithms that will allow us to effectively monitor the growth of settlements in Africa. In this paper, however, we will restrict ourselves to a case study in the Gauteng province of South Africa. In addition to investigating another use case than Dias et al we also extend their work in the following way: in this paper we do not restrict ourselves to only investigating the problem of land cover classification, we also investigate whether the GAF transfrom can be utilized for detecting landcover changes.  
+The field of computer vision has changed dramatically over the last few years due to the success of Convolutional Neural Networks (CNNs) and deep learning. Recently, it was proposed to encode time-series as images so that the capability of CNNs to perform image classification could also be applied to the problem of time-series classification. One possible time-series encoding scheme is the Gramian Angular Field (GAF) transform. GAF images are formed using polar coordinates and ultimately take the form of a Gramian matrix, whose entries are the trigonometric sum of observations recorded at different time indices. This encoding scheme has also been succesfully applied within the remote sensing field. Dias et al used the GAF transform (and other transforms), Moderate Resolution Imaging Spectroradiometer (MODIS) time-series and existing CNN models to succesfully detect eucalyptus plantations. Their CNN based solution outperformed the conventional approaches they compared against. In this paper we will investigate whether MODIS time-series and the GAF transfrom can be utilized for detecting settlement expansion. Settlement expansion is one of the most pervasive forms of landcover change in sub saharan Africa. It is, therefore, of the utmost importance to find strategies and algorithms that will allow us to effectively monitor the growth of settlements in Africa. In this paper, however, we will restrict ourselves to a case study in the Gauteng province of South Africa. In addition to investigating another use case than Dias et al we also extend their work in the following ways:
+\begin{itemize}
+ \item We do not restrict ourselves to only investigating the problem of land cover classification, we also investigate whether the GAF transfrom can be utilized for detecting landcover changes.
+ \item We show that one does not necessarily require deep learning techniques when one employes the GAF transform to perform land cover classification and change detection. A conventional classifier in conjunction with the GAF transform is already capable of discerning highly separable landcover classes from one another (it can also succesfully detect pervasive land cover changes).
+\end{itemize}
+  
 
 \section{Data Description}
+\label{sec:data}
 In this paper we make use of a dataset composed of MODIS NDVI (Natural Difference Vegetaion Index) time-series/pixels. The NDVI time-series was constructed from band one and two of the MODIS MCD43A4 product. The study area we considered was approximately 230~km$^2$ in Gauteng, South Africa. The time-period considered was between January 2001 and March 2009. The temporal cadence of the data is every eight days (i.e. 45 observations a year). Each time-series in the dataset consists of 368 observations and its associated spatial resolution is 500~m by 500~m. The dataset contains MODIS pixels from two landcover types: vegetation ($v$) and settlement ($s$). A MODIS pixel was assigned the label $v$ if it contained more than 90\% vegetation, whereas a pixel was assigned the label $s$ if it contained more than 50\% buildings. The dataset contains 1105 MODIS pixels: 592 vegetation pixles, 333 settlement pixels, and 180 pixles that changed from vegetation to settlement. Pixels were selected by visually inspecting two high-resolution Syst\`{e}me Probatoried d'Observation de la Terra (SPOT) images from 2001 and 2009. Only pixels that according to the SPOT images did not change or changed from vegtation to settlement were selected.
 
 \section{Gramian Angular Field}
 \label{sec:GAF}
-The GAF transform makes it possible to encode time-series as images. The resulting images can then be classified using image based deep learning methods. Assume that $\mathbf{x} = \{x_1,x_2,\cdots,x_N\}$ is a rescaled time series between -1 and 1 consisting of $N$ points. The GAF of $\mathbf{x}$ is then defined as: 
+The GAF transform makes it possible to encode time-series as images. The resulting images can then be classified using image based deep learning methods. Let $\mathbf{x} = \{x_1,x_2,\cdots,x_N\}$ be a time series consisting of $N$ points. Rescale $\mathbf{x}$ between -1 and 1. The GAF of $\mathbf{x}$ is then defined as: 
 \begin{equation}
 \mathbf{G} = \begin{pmatrix}
 \cos(\phi_1+\phi_1) & \cdots & \cos(\phi_1+\phi_N)\\
@@ -81,18 +87,72 @@ The GAF transform makes it possible to encode time-series as images. The resulti
 \end{equation}
 where $\phi_j = \arccos(x_j)$.
   
-\section{Experimental Setup}
+\section{Methodology}
 \label{sec:exp}
 
-We conducted two main experiments. We investigated whether the GAF transfrom could be effectively utilized for encoding NDVI time-series as images for the purpose of land cover classification and change detection.
+We conducted two main experiments. We investigated whether the GAF transfrom could be effectively utilized for encoding NDVI time-series as images for the purpose of land cover classification and change detection. These two experiments are respectively discussed in Section~\ref{sec:gaf_class} and Section~\ref{sec:gaf_change}. The two benchmarking approaches we employed to compare against are described in Section~\ref{sec:pca} and Section~\ref{sec:diff}. The results obtained from the experiments below are presented in Table~\ref{tab:cm} and Fig.~\ref{fig:results} and is discussed further in Section~\ref{sec:results}        
+ %We benchmarked our classification results against a well documented approach within literature.
 
-\subsection{Land cover classification}
-The procedure as outlined below was repeated 10 times to ensure the reliability of the resutls. The time-series of the pixels that did not change were encoded using the GAF transform. This non-changing encoded data-set was then randomly split into a training set and a test set. Fifty percent of the data was used for training and fifty persent for testing. The test set was then used to train \textsc{SCIKIT-LEARN}'s logistic regression classifier. We used used the classsifier's default settings. We did not deem it neccecarry to perform any kind of hyperparameter tuning as the deault settings produced adequate results. We then tested the accuracy of our classifier by using the test set. The results we obtained is presented in Table and Figure and is discussed further in Section       
+\subsection{PCA: Land cover classification}
+\label{sec:pca}
+The procedure as outlined below was repeated 10 times to ensure the reliability of the results.  We first extracted the largest two principal components from the non-chaning NDVI time-series within our dataset (see Section~\ref{sec:data}). The reduced dataset so obtained was then randomly split into a test and a training set. About 50\% of the data was used for training and 50\% for testing. We then used our training set to train \textsc{SCIKIT-LEARN}'s logistic regression classifier. We did not deem it neccecarry to perform any kind of hyperparameter tuning as the deault settings produced adequate results. The accuracy of our classifier was then tested by using the test set. 
 
-\subsection{Land cover change detection}
+\subsection{GAF: Land cover classification}
+\label{sec:gaf_class}
+The procedure as outlined below was repeated 10 times to ensure the reliability of the resutls. The time-series of the pixels in our dataset that did not change were encoded using the GAF transform (see Section~\ref{sec:GAF}). This non-changing encoded dataset was then randomly split into a training set and a test set. About 50\% of the data was used for training and 50\% for testing. The test set was then used to train \textsc{SCIKIT-LEARN}'s logistic regression classifier. We used the classsifier's default settings. We did not deem it neccecarry to perform any kind of hyperparameter tuning as the deault settings produced adequate results. We then tested the accuracy of our classifier by using the test set. 
+
+\subsection{Band differencing: Land cover change detection}
+\label{sec:diff}
+The best case performance of the band differencing algorithm was determined. We used the non-changing vegetation pixels and the real-change pixels from Section~\ref{sec:data} to conduct our experiment. The approach works by first reducing the noise contained within the data by filtering the NDVI time-series. The annual sum of each fikltered time-series is then determined. The difference between these sums are then computed. The $z$-score of each difference is then computed along the spatial axis. The maximum $z$-score associated with each time-series is then selected. If this $z$-score is larger than a predefined threshold then it is assumed that the pixel in question had changed over the observation period. Grid search was employed to obtain the best performing threshold.
+
+
+\subsection{GAF: Land cover change detection}
+\label{sec:gaf_change}
 The procedure as outlined below was repeated 10 times to ensure the reliability of the resutls. We start by randomly splitted our vegetation pixels into a partial training set (200 pixels), a partial testing set (200 pixles) and a temporary set (192 pixels). All of our settlement pixels were added to a temporary settlement set (333 pixels). All the real change pixels were added to a temporary real change set (180 pixels). We then created a synthetic change set (200 pixels) by linearly splicing together random pixels from our temporary vegetation set (192 pixels) and our temporary settlement set (333) over a six month period. The change points were uniformly chosen from the set [1,300]. The final training  set (400 pixels) is then constructed by lumping together the vegetation training set (200 pixels) and the synthetic change set (200 pixels). The final test set (380 pixels) is then created by lumping together the vegetation testing set (200 pixles) and the real change set (180 pixels). The time-series of the pixels are then encoded using the GAF transform. \textsc{SCIKIT-LEARN}'s logistic regression classifier. We used used the classsifier's default settings. We did not deem it neccecarry to perform any kind of hyperparameter tuning as the deault settings produced adequate results. We then tested the accuracy of our classifier by using the test set. The results we obtained is presented in Table and Figure and is discussed further in Section
 
+\section{Results}
+\label{sec:results}
+\begin{table}
+\begin{tabular}{ |l|c c c| }
+\hline
+%\multicolumn{3}{ |c| }{Team sheet} \\
+& & v & s\\
+\hline
+\multirow{2}{*}{PCA} & \emph{v} & 93.63$\pm$1.58&6.37\\
+& \emph{s}& 0.6& 99.41\%$\pm$0.39\\
+\hline
+\multirow{2}{*}{GAF} & \emph{v} & 99.42$\pm$0.58&0.58\\
+& \emph{s}& 0.77& 99.23\%$\pm$0.64\\
+\hline
+\hline
+& & nc & c\\
+\hline
+\multirow{2}{*}{Differencing} & \emph{nc} & 85.47 & 14.53\\
+& \emph{c}& 16.11 & 83.89\\
+\multirow{2}{*}{GAF} & \emph{nc} & 99.2$\pm$0.71 & 0.8\\
+& \emph{c}& 0.01 & 99.9$\pm$0.17\\
+%Goalkeeper & GK & Paul Robinson \\ \hline
+%\multirow{4}{*}{Defenders} & LB & Lucas Radebe \\
+% & DC & Michael Duburry \\
+% & DC & Dominic Matteo \\
+% & RB & Didier Domi \\ \hline
+%\multirow{3}{*}{Midfielders} & MC & David Batty \\
+% & MC & Eirik Bakke \\
+% & MC & Jody Morris \\ \hline
+%Forward & FW & Jamie McMaster \\ \hline
+%\multirow{2}{*}{Strikers} & ST & Alan Smith \\
+% & ST & Mark Viduka \\
+\hline
+\end{tabular}
+\caption{xxx}
+\label{tab:cm}
+\end{table}
 
+\begin{figure}
+ \includegraphics[width=0.48\textwidth]{results-crop.pdf}
+ \label{fig:results}
+ \caption{Test}
+\end{figure}
 
 %Given this background, let us list the  contributions that we make in this paper: 
 %\begin{itemize}
@@ -229,76 +289,6 @@ this \cite{Lamp86}.
 % uncomment the preceding line ``\centerline...'' and replace ``imageX.ps''
 % with a suitable PostScript file name.
 % -------------------------------------------------------------------------
-\begin{table}
-\begin{tabular}{ |l|c c c| }
-\hline
-%\multicolumn{3}{ |c| }{Team sheet} \\
-& & v & s\\
-\hline
-\multirow{2}{*}{PCA} & \emph{v} & 93.63$\pm$1.58&6.37\\
-& \emph{s}& 0.6& 99.41\%$\pm$0.39\\
-\hline
-\multirow{2}{*}{GAF} & \emph{v} & 99.42$\pm$0.58&0.58\\
-& \emph{s}& 0.77& 99.23\%$\pm$0.64\\
-\hline
-\hline
-& & nc & c\\
-\hline
-\multirow{2}{*}{Differencing} & \emph{nc} & 85.47 & 14.53\\
-& \emph{c}& 16.11 & 83.89\\
-\multirow{2}{*}{GAF} & \emph{nc} & 99.2$\pm$0.71 & 0.8\\
-& \emph{c}& 0.01 & 99.9$\pm$0.17\\
-%Goalkeeper & GK & Paul Robinson \\ \hline
-%\multirow{4}{*}{Defenders} & LB & Lucas Radebe \\
-% & DC & Michael Duburry \\
-% & DC & Dominic Matteo \\
-% & RB & Didier Domi \\ \hline
-%\multirow{3}{*}{Midfielders} & MC & David Batty \\
-% & MC & Eirik Bakke \\
-% & MC & Jody Morris \\ \hline
-%Forward & FW & Jamie McMaster \\ \hline
-%\multirow{2}{*}{Strikers} & ST & Alan Smith \\
-% & ST & Mark Viduka \\
-\hline
-\end{tabular}
-\caption{xxx}
-\label{tab:cm}
-\end{table}
-
-
-\begin{figure}[htb]
-
-\begin{minipage}[b]{1.0\linewidth}
-  \centering
-% \centerline{\epsfig{figure=image1.ps,width=8.5cm}}
-  \vspace{2.0cm}
-  \centerline{(a) Result 1}\medskip
-\end{minipage}
-%
-\begin{minipage}[b]{.48\linewidth}
-  \centering
-% \centerline{\epsfig{figure=image3.ps,width=4.0cm}}
-  \vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
-\end{minipage}
-\hfill
-\begin{minipage}[b]{0.48\linewidth}
-  \centering
-% \centerline{\epsfig{figure=image4.ps,width=4.0cm}}
-  \vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
-\end{minipage}
-%
-\caption{Example of placing a figure with experimental results.}
-\label{fig:res}
-%
-\end{figure}
-
-\begin{figure}
- \includegraphics[width=0.48\textwidth]{results-crop.pdf}
- \label{fig:results}
- \caption{Test}
-\end{figure}
 
 
 \begin{figure*}[h] 
