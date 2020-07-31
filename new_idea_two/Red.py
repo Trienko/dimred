@@ -329,13 +329,13 @@ class RedClass():
   def transform(self, serie,min_=0,max_=10000,no_scaling=True):
       """Compute the Gramian Angular Field of an image"""
       # Min-Max scaling
-      #min_ = np.amin(serie)
-      #max_ = np.amax(serie)
+      min_ = np.amin(serie)
+      max_ = np.amax(serie)
 
-      if not no_scaling:
-         scaled_serie = (2*serie - max_ - min_)/(max_ - min_)
-      else:
-         scaled_serie = serie+0
+      #if not no_scaling:
+      scaled_serie = (2*serie - max_ - min_)/(max_ - min_)
+      #else:
+      #   scaled_serie = serie+0
 
       # Floating point inaccuracy!
       scaled_serie = np.where(scaled_serie >= 1., 1., scaled_serie)
@@ -875,7 +875,8 @@ if __name__ == "__main__":
       #plt.imshow(mc2[201,:].reshape((368,368)))
       #plt.show()
 
-       
+      import matplotlib
+      matplotlib.rcParams.update({'font.size': 30}) 
 
       infile = open("results.pkl",'rb')
       cmPCA = pickle.load(infile)
@@ -899,14 +900,16 @@ if __name__ == "__main__":
       veg_GAF = pickle.load(infile)
       plt.xticks([])
       plt.yticks([])
-      plt.imshow(veg_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      #plt.imshow(veg_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      plt.imshow(veg_GAF,cmap="jet")
       print(np.max(veg_GAF))
       print(np.min(veg_GAF))
       plt.show()
       set_GAF = pickle.load(infile)
       plt.xticks([])
       plt.yticks([])
-      plt.imshow(set_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      #plt.imshow(set_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      plt.imshow(set_GAF,cmap="jet")
       print(np.max(set_GAF))
       print(np.min(set_GAF))
       plt.show()
@@ -920,7 +923,8 @@ if __name__ == "__main__":
       print(GAFc_std)
       
       sim_c_GAF = pickle.load(infile)
-      plt.imshow(sim_c_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      #plt.imshow(sim_c_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      plt.imshow(sim_c_GAF,cmap="jet")
       plt.xticks([])
       plt.yticks([])
       print(np.max(sim_c_GAF))
@@ -928,7 +932,8 @@ if __name__ == "__main__":
       plt.show()
       
       real_c_GAF = pickle.load(infile)
-      plt.imshow(real_c_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      #plt.imshow(real_c_GAF,vmin=-0.9339675055281245,vmax=-0.044372621358826206)
+      plt.imshow(real_c_GAF,cmap="jet")
       plt.xticks([])
       plt.yticks([])
       print(np.max(real_c_GAF))
@@ -954,7 +959,7 @@ if __name__ == "__main__":
       #p2 = plt.bar((ind[]), (classification[1]), width, yerr=(clStd[1]),bottom=(classification[0]))
       #p2 = plt.bar(ind, womenMeans, width,
       #       bottom=menMeans, yerr=womenStd)
-
+      
       plt.ylabel('Average Error %')
       #plt.title('Scores by group and gender')
       plt.xticks(ind, ('PCA', 'GAF', 'Diff', 'GAF'))
