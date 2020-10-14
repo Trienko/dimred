@@ -14,6 +14,8 @@ import pickle
 import tensorflow as tf 
 from tensorflow import keras     
 import math
+import os
+import random
 #from keras.layers import Lambda
 
 from sklearn import mixture
@@ -64,7 +66,7 @@ class RedClass():
       model = keras.models.Sequential()
       model.add(keras.layers.Flatten(input_shape=[368,7]))
       #model.add(keras.layers.Dense(368,activation="relu"))
-      model.add(keras.layers.Dense(100,activation="relu",kernel_initializer="he_normal",kernel_regularizer=keras.regularizers.l2(1e-3)))
+      model.add(keras.layers.Dense(100,activation="relu",kernel_initializer="he_normal"))
       model.add(keras.layers.Dense(1,activation="sigmoid"))
       model.summary() 
 
@@ -100,6 +102,37 @@ class RedClass():
       w,b = model.layers[0].get_weights()
       print(w[0,:,0,0])
       print(b)
+
+  def exp5(self,X_train,X_valid,y_train,y_valid):
+
+      #Adding an extra dimension to use convolution layer
+      X_train = X_train.reshape((X_train.shape[0],X_train.shape[1],X_train.shape[2],1))
+      X_valid = X_valid.reshape((X_valid.shape[0],X_valid.shape[1],X_valid.shape[2],1))
+
+      #BUILDING THE MODEL
+      model = keras.models.Sequential()
+      model.add(keras.layers.Conv2D(1,(1,7),activation="relu",input_shape=[368,7,1],padding="valid",kernel_initializer="he_normal"))
+      model.add(tf.keras.layers.Reshape((368, 1), input_shape=(368,1,1)))
+      model.add(tf.keras.layers.Conv1D(1,45,activation="relu",strides=45,padding="valid",kernel_initializer="he_normal"))
+      model.add(keras.layers.Flatten())
+      #model.add(keras.layers.Dense(368,activation="relu"))
+      model.add(keras.layers.Dense(8,activation="relu",kernel_initializer="he_normal"))
+      model.add(keras.layers.Dense(1,activation="sigmoid"))
+      model.summary() 
+      #optimizers.SGD(lr=10e-4)
+      #COMPILE
+      model.compile(loss="binary_crossentropy",optimizer=keras.optimizers.Adam(lr=1e-3),metrics=["accuracy"])
+
+      
+
+      #FIT
+      history = model.fit(X_train,y_train,epochs=10,batch_size=1,validation_data=(X_valid,y_valid))
+
+      w,b = model.layers[0].get_weights()
+      print(w[0,:,0,0])
+      print(b)
+
+
 
   def exp3(self,X_train,X_valid,y_train,y_valid):
 
@@ -137,6 +170,8 @@ class RedClass():
       print(w.shape)
       print(w[0,:,0,0])
       print(b)
+
+ 
 
   def exp4(self,X_train,X_valid,y_train,y_valid):
 
@@ -264,13 +299,45 @@ class RedClass():
                 f_temp = np.fft.fft(X[k,:,b])
                 f_temp[w:-w] = 0
                 X_new[k,:,b] = np.real(np.fft.ifft(f_temp))
-      return X_new   
+      return X_new  
+
+
+def set_seeds(seed=10):
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    random.seed(seed)
+    tf.random.set_seed(seed)
+    np.random.seed(seed)
+
+
+def set_global_determinism(seed=10, fast_n_close=False):
+    """
+        Enable 100% reproducibility on operations related to tensor and randomness.
+        Parameters:
+        seed (int): seed value for global randomness
+        fast_n_close (bool): whether to achieve efficient at the cost of determinism/reproducibility
+    """
+    set_seeds(seed=seed)
+    if fast_n_close:
+        return
+
+    #logging.warning("*******************************************************************************")
+    #logging.warning("*** set_global_determinism is called,setting full determinism, will be slow ***")
+    #logging.warning("*******************************************************************************")
+
+    os.environ['TF_DETERMINISTIC_OPS'] = '1'
+    os.environ['TF_CUDNN_DETERMINISTIC'] = '1'
+    # https://www.tensorflow.org/api_docs/python/tf/config/threading/set_inter_op_parallelism_threads
+    tf.config.threading.set_inter_op_parallelism_threads(1)
+    tf.config.threading.set_intra_op_parallelism_threads(1)
+    #from tfdeterminism import patch
+    #patch()
+ 
       
 
    
 if __name__ == "__main__":
-   np.random.seed(30)
-            
+   #np.random.seed(20)
+   set_global_determinism()         
    red_object = RedClass() 
      
    #LOADING DATASET
@@ -281,7 +348,7 @@ if __name__ == "__main__":
    X,y = red_object.concatDataSets(veg,bwt)
    plt.plot(X[0,:,0]/10000.0,"b") 
 
-   X = red_object.filter_data(X,25)
+   #X = red_object.filter_data(X,25)
 
    #print(X.shape)
    X_ndvi = X[:,:,-1]
@@ -300,10 +367,12 @@ if __name__ == "__main__":
    #print(X_valid.shape)
    
    print(tf.__version__)
-   
-   #red_object.exp1(X_train,X_valid,y_train,y_valid) 
+   for k in range(1):
+       print(k)
+       red_object.exp1(X_train,X_valid,y_train,y_valid) 
    #red_object.exp2(X_train,X_valid,y_train,y_valid) 
-   red_object.exp4(X_train,X_valid,y_train,y_valid) 
+   #red_object.exp4(X_train,X_valid,y_train,y_valid)
+       red_object.exp5(X_train,X_valid,y_train,y_valid) 
    #X_new = red_object.process_data(X,np.array([0.7249732,0.16765448,0.6030529,0.41907814,0.5606056,-0.29389688,-0.7113738]),-0.10607813)
    #X_new = red_object.process_data2(X,np.array([0.92509115,-0.31727937,0.23246963,0.24132209,-0.17650443,0.08887789,-0.35802707]),0.04901218,np.array([-0.38472643,-0.5096011,0.22391927,0.11414693,-0.14565101,0.39224625,0.01539364]),0.03469806)
    #X_new = red_object.process_data2(X,np.array([0.92509115,-0.31727937,0.23246963,0.24132209,-0.17650443,0.08887789,-0.35802707]),0.04901218,np.array([-0.38472643,-0.5096011,0.22391927,0.11414693,-0.14565101,0.39224625,0.01539364]),0.03469806)
