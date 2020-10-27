@@ -13,7 +13,7 @@
 
 % Title.
 % ------
-\title{USING THE GAF TRANSFORM AND MODIS TIME-SERIES TO PERFORM LANDCOVER CLASSIFICATION AND CHANGE DETECTION}
+\title{A PARSIMONIOUS NEURAL NETWORK FOR THE CLASSIFICATION OF MODIS TIME-SERIES}
 %
 % Single address.
 % ---------------
@@ -92,6 +92,7 @@ Architecture B makes use of convolutional filters and is depicted in the left pa
      
 
 \subsection{Training, Evaluation and Hyperparameters}
+
 We used a standard training, validation and test set split. Our training set contained 50\% of the data, our validation set contained 25\% of the data and our test set contained 25\% of the data. The experiment was repeated 100 times to investigate the stability of the results. During each run a different subset of the data was used for training, testing and validation. We used a batch size of ten. The model obtained after ten epochs was used for evaluation purposes (the validation results indicated that a good model was found after about ten epochs). The Adam optimizer was used and a learning rate of $10^{-2}$ was chosen. We used L2 regularization to avoid overfitting (our regularization constant was set to $10^{-3}$).    
 
 
@@ -100,7 +101,8 @@ We used a standard training, validation and test set split. Our training set con
 The confusion matrices associated with the experiments conducted in Section~\ref{sec:exp} are reported in Table~\ref{tab:cm}. The diagonal entries of the confusion matrix report the per class accuracy of the experiments in Section~\ref{sec:exp}. Architecture B uses roughly 19 times less parameters than Architecture A, but achieves a similar classification accuracy. We can therefore conclude that for the case study presented  convolutional filters can be used to drastically reduce the number of parameters in the feedforward network that is used the classify the dataset in Section~\ref{}. 
 
 \section{Conclusion}
-In this paper we investigated whether convolutional filters could be used to decrease the number of parameters in a feed forward neural netwrok that is used for the classification of remote sesning time-series. We presented an architecture which can succesfully exploit the seasonal nature of remote sensing time-series. If we compare the classification results of this architecture with a logistic sigmoid classifier that simply takes in all of the observations as input features we see that for the case study presented  
+In this paper we investigated whether convolutional filters could be used to decrease the number of parameters in a feed forward neural netwrok that is used for the classification of remote sesning time-series. We presented a possible architecture to acieve this (see right panel of Fig~\ref{}). This architecture
+contains a spectral convolutional filter that combines the different bands into one band and a temporal filter that is able to extract the salient information contained within every year of the data. If we compare the classification results of this architecture with a simple logistic sigmoid classifier we find that for the case study presented the two classifiers perfrom similarly. This implies that for the case study we presented it is indeed possible to reduce the number of parameters in a feedforward neural network by employing convolutional filters. Whether this generalizes to other datasets will be investigated in a future work.  
 
 \label{sec:results}
 \begin{table}
@@ -149,10 +151,16 @@ In this paper we investigated whether convolutional filters could be used to dec
 
 \begin{figure*}
 \includegraphics[width=0.9\textwidth]{Architectures.pdf} 
+\caption{The two architectures we used in this paper are presented in this figure. The benchmarking architecture is presented in the left panel and is referred to as architecture A. The novel architecture is presented in the right panel and is referred to as architecture B. Architecture A represents a basic sigmoid classifier that takes in all observaed values. Architecture B first applies a convolutional filter along the spectral domain followed by a temporal filter along the temporal domain. The output of the temporal convolutional layer is passed to a fully connected layer. The output of the dense layer is passed to a sigmoid output layer. The shorthand notation $x, y~(\textrm{V})$ used to describe the convolutional layers should be interpreted as follows: $x$ refers the number of output channels, $y$ refers to the kernal size to use (if a tuple then it implies that a multi-dimensional kernal should be used), while (V) indicates that valid padding was used. A step size of one and 45 were respectively used for the spectral and the temporal layer. The eight label in the dense layer block indicates the number of nodes it consisted of. The tanh activation function was used in all convolutional and hidden layers. The hyperparameters used to train these two architectures are discussed in Section~\ref{}. The reshape and Flatten layers get rid of any superfluous dimensions present in the data. Architecture A uses 2577 parameters, while architecture B requires only 135 parameters. The normalized weights associated with architecture B for a randomly trained model of architecture B is presented in Fig~\ref{}. The performance of the two architectures are similar even though architecture A uses roughly 19 times more parameters than architecture B (see Table~\ref{}).}
+\label{fig:ach}
+
 \end{figure*}
 
 \begin{figure*}
 \includegraphics[width=1.0\textwidth]{weights-crop.pdf} 
+\caption{The normalized weights associated with a randomly trained model of architecture B. Normalization was performed per layer. There are seven spectral weights and 45 temporal weights associated with the spectral and temporal convolutional layers. The dense layer contains 64 weights and the output layer contains eight weights.}
+\label{fig:weights}
+
 \end{figure*}
 
 % \begin{figure*}[h] 
