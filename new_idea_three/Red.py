@@ -151,6 +151,21 @@ class RedClass():
       #print(w[0,:,0,0])
       #print(b)
 
+      '''
+      Model: "sequential_99"
+      _________________________________________________________________
+      Layer (type)                 Output Shape              Param #   
+      =================================================================
+      flatten_99 (Flatten)         (None, 2576)              0         
+      _________________________________________________________________
+      dense_149 (Dense)            (None, 1)                 2577      
+      =================================================================
+      Total params: 2,577
+      Trainable params: 2,577
+      Non-trainable params: 0
+      _________________________________________________________________
+      '''
+
   def denseModel(self,X_train,X_valid,y_train,y_valid,lr=1e-2,r=1e-3,e=10,bs=10):
 
       #CREATE TEST SET
@@ -181,10 +196,34 @@ class RedClass():
       y_pred = np.zeros(y_test.shape,dtype=int)
       y_pred[model.predict(X_test).flatten()>=0.5]=1
       cm=confusion_matrix(y_test,y_pred)
+      cm[0,:] = cm[0,:]/sum(cm[0,:])*100 #settlement
+      cm[1,:] = cm[1,:]/sum(cm[1,:])*100 #vegetation
+      cm = cm.astype(float)
       print(cm)
 
       return cm 
+      '''
+      _________________________________________________________________
+      Layer (type)                 Output Shape              Param #   
+      =================================================================
+      conv2d_49 (Conv2D)           (None, 368, 1, 1)         8         
+      _________________________________________________________________
+      reshape_49 (Reshape)         (None, 368, 1)            0         
+      _________________________________________________________________
+      conv1d_49 (Conv1D)           (None, 8, 1)              46        
+      _________________________________________________________________
+      flatten_98 (Flatten)         (None, 8)                 0          
+      _________________________________________________________________
+      dense_147 (Dense)            (None, 8)                 72        
+      _________________________________________________________________
+      dense_148 (Dense)            (None, 1)                 9         
+      =================================================================
+      Total params: 135
+      Trainable params: 135
+      Non-trainable params: 0
+      _________________________________________________________________
 
+      '''  
   def parsimonuous_TCN(self,X_train,X_valid,y_train,y_valid,lr=1e-2,r=1e-3,e=10,bs=10):
       
       #CREATE TEST SET
@@ -212,7 +251,7 @@ class RedClass():
       model.add(keras.layers.Flatten())
       model.add(keras.layers.Dense(8,activation="tanh",kernel_initializer="glorot_normal",kernel_regularizer=keras.regularizers.l2(r)))
       model.add(keras.layers.Dense(1,activation="sigmoid"))
-      #model.summary() 
+      model.summary() 
       #################    
       
 
@@ -225,6 +264,12 @@ class RedClass():
       y_pred = np.zeros(y_test.shape,dtype=int)
       y_pred[model.predict(X_test).flatten()>=0.5]=1
       cm=confusion_matrix(y_test,y_pred)
+      cm = cm.astype(float)
+      
+      #print(cm.shape)
+      cm[0,:] = cm[0,:]/sum(cm[0,:])*100 #settlement
+      cm[1,:] = cm[1,:]/sum(cm[1,:])*100 #vegetation
+
       print(cm) 
 
       #SAVING THE WEIGHTS
@@ -452,45 +497,111 @@ def set_global_determinism(seed=10, fast_n_close=False):
 if __name__ == "__main__":
    
    seed = 10
-   ex = 50
+   ex = -1
 
-   set_global_determinism(seed)         
-   red_object = RedClass() 
-   filename = 'results'+str(seed)+".pkl"
-   outfile = open(filename,'wb')
+   if ex != -1:
+
+      set_global_determinism(seed)         
+      red_object = RedClass() 
+      filename = 'results'+str(seed)+".pkl"
+      outfile = open(filename,'wb')
      
-   #LOADING DATASET
-   veg,bwt = red_object.loadDataSet()
-   #print(veg.shape)
+      #LOADING DATASET
+      veg,bwt = red_object.loadDataSet()
+      #print(veg.shape)
 
-   #CONCAT_DATASETS
-   X,y = red_object.concatDataSets(veg,bwt)
-   plt.plot(X[0,:,0]/10000.0,"b") 
+      #CONCAT_DATASETS
+      X,y = red_object.concatDataSets(veg,bwt)
+      plt.plot(X[0,:,0]/10000.0,"b") 
 
-   #REMOVE NDVI AND RESCALE
-   X_ndvi = X[:,:,-1]
-   X = X[:,:,:-1]/10000.0
+      #REMOVE NDVI AND RESCALE
+      X_ndvi = X[:,:,-1]
+      X = X[:,:,:-1]/10000.0
 
-   tcn_weights = np.zeros((ex,11,45),dtype=float)
-   tcn_cm = np.zeros((ex,2,2),dtype=int)
-   dense_cm = np.zeros((ex,2,2),dtype=int)
+      tcn_weights = np.zeros((ex,11,45),dtype=float)
+      tcn_cm = np.zeros((ex,2,2),dtype=int)
+      dense_cm = np.zeros((ex,2,2),dtype=int)
 
-   for e in range(ex):
+      for e in range(ex):
   
-       #CONSTRUCT TRAINING/VALIDATION SET   
-       idx = np.random.randint(2,size=X.shape[0])
-       X_train, X_valid, y_train, y_valid = X[idx==0,:,:],X[idx==1,:,:],y[idx==0],y[idx==1]
+         #CONSTRUCT TRAINING/VALIDATION SET   
+         idx = np.random.randint(2,size=X.shape[0])
+         X_train, X_valid, y_train, y_valid = X[idx==0,:,:],X[idx==1,:,:],y[idx==0],y[idx==1]
 
-       #TCN EXPERIMENT
-       print("TCN: "+str(e))
-       tcn_cm[e,:,:],tcn_weights[e,:,:] = red_object.parsimonuous_TCN(X_train,X_valid,y_train,y_valid)
-       print("DENSE: "+str(e))
-       dense_cm[e,:,:] = red_object.denseModel(X_train,X_valid,y_train,y_valid)  
+         #TCN EXPERIMENT
+         print("TCN: "+str(e))
+         tcn_cm[e,:,:],tcn_weights[e,:,:] = red_object.parsimonuous_TCN(X_train,X_valid,y_train,y_valid)
+         print("DENSE: "+str(e))
+         dense_cm[e,:,:] = red_object.denseModel(X_train,X_valid,y_train,y_valid)  
 
-   pickle.dump(tcn_cm,outfile)
-   pickle.dump(tcn_weights,outfile)
-   pickle.dump(dense_cm,outfile)
-   outfile.close() 
+      pickle.dump(tcn_cm,outfile)
+      pickle.dump(tcn_weights,outfile)
+      pickle.dump(dense_cm,outfile)
+      outfile.close()
+   else:
+      red_object = RedClass() 
+      import matplotlib
+      matplotlib.rcParams.update({'font.size': 30})  
+      #LOADING DATASET
+      veg,bwt = red_object.loadDataSet()
+      #print(veg.shape)
+
+      #CONCAT_DATASETS
+      X,y = red_object.concatDataSets(veg,bwt)
+      X = X[:,:,:-1]/10000.0
+
+      fig, ax = plt.subplots(nrows=1, ncols=1)
+      ax.plot(X[0,:,:],lw=3)
+     
+      fig.patches.extend([plt.Rectangle((0.16,0.11),0.11,0.75,
+                                  fill=True, color='g', alpha=0.5, zorder=1000,
+                                   transform=fig.transFigure,figure=fig)])
+      fig.patches.extend([plt.Rectangle((0.65,0.11),0.01,0.75,
+                                  fill=True, color='r', alpha=0.5, zorder=1000,
+                                   transform=fig.transFigure,figure=fig)])
+      ax.text(70,0.13, 'Temporal convolution (45)', style='italic', bbox={'facecolor': 'green', 'alpha': 0.5, 'pad': 10})
+      ax.text(270,0.13, 'Spectral convolution (7)', style='italic', bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+      ax.axes.xaxis.set_visible(False)
+      ax.axes.yaxis.set_visible(False)
+
+      plt.show()
+      
+      filename = 'results'+str(seed)+".pkl"
+      infile = open(filename,'rb')
+      tcn_cm = pickle.load(infile) 
+      tcn_weights = pickle.load(infile) 
+      dense_cm = pickle.load(infile)  
+
+      print(np.mean(tcn_cm,axis=0))
+      print(np.std(tcn_cm,axis=0))
+
+      print(np.mean(dense_cm,axis=0))
+      print(np.std(dense_cm,axis=0))
+
+      plt.close(fig)
+      matplotlib.rcParams.update({'font.size': 17}) 
+      fig = plt.figure()
+      ax = fig.add_subplot(1, 1, 1)
+      
+      #plt.clf()
+      #plt.cla()
+      
+      #ax.plot(X[0,:,:],lw=2.2)
+      im = ax.imshow(tcn_weights[0,:,:])
+      plt.colorbar(im,orientation='horizontal')
+
+      #ax = plt.gca()
+      ax.axes.xaxis.set_visible(False)
+      ax.axes.yaxis.set_visible(False)
+      ax.text(-7.5,0.1, 'Spectral weights', style='italic', bbox={'facecolor': 'green', 'alpha': 0.5, 'pad': 5})
+      ax.text(-7.5,1.1, 'Temporal weights', style='italic', bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 5})
+      ax.text(-7.5,6.1,'Dense weights', style='italic', bbox={'facecolor': 'blue', 'alpha': 0.5, 'pad': 5})
+      #ax.text(-4,6.1,'{', size=200,alpha=0.5)
+      ax.annotate("", xy=(0, 1.5), xytext=(0, 9.5), arrowprops=dict(arrowstyle="<->"))
+      ax.text(-7.5,10.1, 'Sigmoid weights', style='italic', bbox={'facecolor': 'yellow', 'alpha': 0.5, 'pad': 5})
+
+      plt.show()
+      infile.close()
 
    #print(X_train.shape)
    #print(X_valid.shape)
